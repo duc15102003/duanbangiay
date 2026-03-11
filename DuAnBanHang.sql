@@ -12,17 +12,14 @@ CREATE TABLE Role(
 )
 
 -----------------------
--- USER
+-- USER (TÀI KHOẢN LOGIN)
 -----------------------
 CREATE TABLE [User](
     id INT IDENTITY(1,1) PRIMARY KEY,
-    userName NVARCHAR(50) NOT NULL UNIQUE,
+    username NVARCHAR(50) NOT NULL UNIQUE,
     password NVARCHAR(255) NOT NULL,
-    fullName NVARCHAR(100) NOT NULL,
-    phoneNumber NVARCHAR(20),
     createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME,
-    deletedAt DATETIME
+    status TINYINT DEFAULT 1
 )
 
 -----------------------
@@ -37,6 +34,37 @@ CREATE TABLE UserRole(
 
     FOREIGN KEY (userId) REFERENCES [User](id),
     FOREIGN KEY (roleId) REFERENCES Role(id)
+)
+
+-----------------------
+-- EMPLOYEE (NHÂN VIÊN)
+-----------------------
+CREATE TABLE Employee(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    fullName NVARCHAR(100) NOT NULL,
+    phoneNumber NVARCHAR(20),
+    email NVARCHAR(100),
+    address NVARCHAR(200),
+    idUser INT UNIQUE,
+
+    createdAt DATETIME DEFAULT GETDATE(),
+    updatedAt DATETIME,
+    deletedAt DATETIME,
+
+    FOREIGN KEY (idUser) REFERENCES [User](id)
+)
+
+-----------------------
+-- CUSTOMER (KHÁCH HÀNG)
+-----------------------
+CREATE TABLE Customer(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    fullName NVARCHAR(100) NOT NULL,
+    phoneNumber NVARCHAR(20),
+    email NVARCHAR(100),
+    address NVARCHAR(200),
+
+    createdAt DATETIME DEFAULT GETDATE()
 )
 
 -----------------------
@@ -56,6 +84,14 @@ CREATE TABLE Brand(
 )
 
 -----------------------
+-- MATERIAL
+-----------------------
+CREATE TABLE Material(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100) NOT NULL UNIQUE
+)
+
+-----------------------
 -- PRODUCT
 -----------------------
 CREATE TABLE Product(
@@ -66,6 +102,7 @@ CREATE TABLE Product(
 
     idCategory INT NOT NULL,
     idBrand INT NOT NULL,
+    idMaterial INT,
 
     status TINYINT DEFAULT 1
     CHECK (status IN (0,1,2)),
@@ -75,7 +112,8 @@ CREATE TABLE Product(
     deletedAt DATETIME,
 
     FOREIGN KEY (idCategory) REFERENCES Category(id),
-    FOREIGN KEY (idBrand) REFERENCES Brand(id)
+    FOREIGN KEY (idBrand) REFERENCES Brand(id),
+    FOREIGN KEY (idMaterial) REFERENCES Material(id)
 )
 
 -----------------------
@@ -150,14 +188,16 @@ CREATE TABLE Invoice(
     code NVARCHAR(50) NOT NULL UNIQUE,
     date DATETIME DEFAULT GETDATE(),
 
-    idUser INT NOT NULL,
+    idEmployee INT NOT NULL,
+    idCustomer INT NULL,
     idPaymentMethod INT NOT NULL,
     idVoucher INT NULL,
 
     totalMoney DECIMAL(18,2) DEFAULT 0
     CHECK (totalMoney >= 0),
 
-    FOREIGN KEY (idUser) REFERENCES [User](id),
+    FOREIGN KEY (idEmployee) REFERENCES Employee(id),
+    FOREIGN KEY (idCustomer) REFERENCES Customer(id),
     FOREIGN KEY (idPaymentMethod) REFERENCES PaymentMethod(id),
     FOREIGN KEY (idVoucher) REFERENCES Voucher(id)
 )
@@ -177,45 +217,4 @@ CREATE TABLE InvoiceDetails(
     price DECIMAL(18,2) NOT NULL
     CHECK (price >= 0),
 
-    FOREIGN KEY (idInvoice) REFERENCES Invoice(id),
-    FOREIGN KEY (idProductVariant) REFERENCES ProductVariant(id)
-)
-
---------------------------------------------------
--- DATA MẪU
---------------------------------------------------
-
-INSERT INTO Role(name)
-VALUES
-('Admin'),
-('NhanVien')
-
-INSERT INTO PaymentMethod(name)
-VALUES
-(N'Tiền mặt'),
-(N'Chuyển khoản'),
-(N'Momo')
-
-INSERT INTO Category(name)
-VALUES
-(N'Giày thể thao'),
-(N'Giày chạy bộ')
-
-INSERT INTO Brand(name)
-VALUES
-(N'Nike'),
-(N'Adidas')
-
-INSERT INTO Color(code,name)
-VALUES
-('DEN',N'Đen'),
-('TRANG',N'Trắng')
-
-INSERT INTO Size(size)
-VALUES
-(38),(39),(40),(41),(42)
-
-INSERT INTO Voucher(maVoucher,discountPercent,startDate,endDate,quantity)
-VALUES
-('SALE10',10,'2026-01-01','2026-12-31',100),
-('SALE50K',NULL,'2026-01-01','2026-06-30',50)
+    FOREIGN KEY (idInvoice) REFERENC
