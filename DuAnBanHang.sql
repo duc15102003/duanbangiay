@@ -8,79 +8,38 @@ GO
 -----------------------
 CREATE TABLE Role(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(50) NOT NULL UNIQUE
+    name NVARCHAR(50)
 )
 
 -----------------------
--- USER (TÀI KHOẢN LOGIN)
------------------------
-CREATE TABLE [User](
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    username NVARCHAR(50) NOT NULL UNIQUE,
-    password NVARCHAR(255) NOT NULL,
-    createdAt DATETIME DEFAULT GETDATE(),
-    status TINYINT DEFAULT 1
-)
-
------------------------
--- USER ROLE
------------------------
-CREATE TABLE UserRole(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    userId INT NOT NULL,
-    roleId INT NOT NULL,
-
-    CONSTRAINT UQ_UserRole UNIQUE(userId,roleId),
-
-    FOREIGN KEY (userId) REFERENCES [User](id),
-    FOREIGN KEY (roleId) REFERENCES Role(id)
-)
-
------------------------
--- EMPLOYEE (NHÂN VIÊN)
+-- EMPLOYEE
 -----------------------
 CREATE TABLE Employee(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    fullName NVARCHAR(100) NOT NULL,
-    phoneNumber NVARCHAR(20),
-    email NVARCHAR(100),
-    address NVARCHAR(200),
-    idUser INT UNIQUE,
+    username NVARCHAR(50),
+    password NVARCHAR(255),
+    full_name NVARCHAR(100),
+    phone_number NVARCHAR(20),
+    role_id INT,
 
-    createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME,
-    deletedAt DATETIME,
+    created_at DATETIME DEFAULT GETDATE(),
+    update_at DATETIME,
+    deleted_at DATETIME,
 
-    FOREIGN KEY (idUser) REFERENCES [User](id)
+    FOREIGN KEY (role_id) REFERENCES Role(id)
 )
 
 -----------------------
--- CUSTOMER (KHÁCH HÀNG)
+-- CUSTOMER
 -----------------------
 CREATE TABLE Customer(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    fullName NVARCHAR(100) NOT NULL,
-    phoneNumber NVARCHAR(20),
-    email NVARCHAR(100),
-    address NVARCHAR(200),
+    full_name NVARCHAR(100),
+    phone_number NVARCHAR(20),
 
-    createdAt DATETIME DEFAULT GETDATE()
-)
-
------------------------
--- CATEGORY
------------------------
-CREATE TABLE Category(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL UNIQUE
-)
-
------------------------
--- BRAND
------------------------
-CREATE TABLE Brand(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL UNIQUE
+    created_at DATETIME DEFAULT GETDATE(),
+    update_at DATETIME,
+    deleted_at DATETIME
 )
 
 -----------------------
@@ -88,32 +47,24 @@ CREATE TABLE Brand(
 -----------------------
 CREATE TABLE Material(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL UNIQUE
+    name NVARCHAR(100),
+    description NVARCHAR(255)
 )
 
 -----------------------
--- PRODUCT
+-- BRAND
 -----------------------
-CREATE TABLE Product(
+CREATE TABLE Brand(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    code NVARCHAR(50) NOT NULL UNIQUE,
-    name NVARCHAR(100) NOT NULL,
-    description NVARCHAR(500),
+    name NVARCHAR(100)
+)
 
-    idCategory INT NOT NULL,
-    idBrand INT NOT NULL,
-    idMaterial INT,
-
-    status TINYINT DEFAULT 1
-    CHECK (status IN (0,1,2)),
-
-    createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME,
-    deletedAt DATETIME,
-
-    FOREIGN KEY (idCategory) REFERENCES Category(id),
-    FOREIGN KEY (idBrand) REFERENCES Brand(id),
-    FOREIGN KEY (idMaterial) REFERENCES Material(id)
+-----------------------
+-- CATEGORY
+-----------------------
+CREATE TABLE Categories(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100)
 )
 
 -----------------------
@@ -121,8 +72,8 @@ CREATE TABLE Product(
 -----------------------
 CREATE TABLE Color(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    code NVARCHAR(50) NOT NULL UNIQUE,
-    name NVARCHAR(50) NOT NULL
+    code NVARCHAR(50),
+    name NVARCHAR(50)
 )
 
 -----------------------
@@ -130,7 +81,28 @@ CREATE TABLE Color(
 -----------------------
 CREATE TABLE Size(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    size INT NOT NULL UNIQUE
+    size INT
+)
+
+-----------------------
+-- PRODUCT
+-----------------------
+CREATE TABLE Product(
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    code NVARCHAR(50),
+    name NVARCHAR(100),
+    description NVARCHAR(255),
+
+    brand_id INT,
+    category_id INT,
+    material_id INT,
+
+    status TINYINT,
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (brand_id) REFERENCES Brand(id),
+    FOREIGN KEY (category_id) REFERENCES Categories(id),
+    FOREIGN KEY (material_id) REFERENCES Material(id)
 )
 
 -----------------------
@@ -139,45 +111,34 @@ CREATE TABLE Size(
 CREATE TABLE ProductVariant(
     id INT IDENTITY(1,1) PRIMARY KEY,
 
-    idProduct INT NOT NULL,
-    idColor INT NOT NULL,
-    idSize INT NOT NULL,
+    product_id INT,
+    color_id INT,
+    size_id INT,
 
-    price DECIMAL(18,2) NOT NULL
-    CHECK (price >= 0),
+    sku NVARCHAR(50),
+    price DECIMAL(18,2),
 
-    quantity INT DEFAULT 0
-    CHECK (quantity >= 0),
+    stock_quantity INT,
+    product_image NVARCHAR(255),
 
-    image NVARCHAR(500),
+    status TINYINT,
 
-    CONSTRAINT UQ_Variant UNIQUE(idProduct,idColor,idSize),
-
-    FOREIGN KEY (idProduct) REFERENCES Product(id),
-    FOREIGN KEY (idColor) REFERENCES Color(id),
-    FOREIGN KEY (idSize) REFERENCES Size(id)
-)
-
------------------------
--- PAYMENT METHOD
------------------------
-CREATE TABLE PaymentMethod(
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL UNIQUE
+    FOREIGN KEY (product_id) REFERENCES Product(id),
+    FOREIGN KEY (color_id) REFERENCES Color(id),
+    FOREIGN KEY (size_id) REFERENCES Size(id)
 )
 
 -----------------------
 -- VOUCHER
 -----------------------
-CREATE TABLE Voucher(
+CREATE TABLE Vouchers(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    maVoucher NVARCHAR(50) NOT NULL UNIQUE,
-    discountPercent INT,
-    discountAmount DECIMAL(18,2),
-    startDate DATETIME NOT NULL,
-    endDate DATETIME NOT NULL,
-    quantity INT DEFAULT 0,
-    status TINYINT DEFAULT 1
+    code NVARCHAR(50),
+    percentage INT,
+    min_order_value DECIMAL(18,2),
+    quantity INT,
+    start_date DATETIME,
+    expiration_date DATETIME
 )
 
 -----------------------
@@ -185,21 +146,27 @@ CREATE TABLE Voucher(
 -----------------------
 CREATE TABLE Invoice(
     id INT IDENTITY(1,1) PRIMARY KEY,
-    code NVARCHAR(50) NOT NULL UNIQUE,
-    date DATETIME DEFAULT GETDATE(),
+    code NVARCHAR(50),
 
-    idEmployee INT NOT NULL,
-    idCustomer INT NULL,
-    idPaymentMethod INT NOT NULL,
-    idVoucher INT NULL,
+    user_id INT,
+    voucher_id INT,
+    customer_id INT,
 
-    totalMoney DECIMAL(18,2) DEFAULT 0
-    CHECK (totalMoney >= 0),
+    status TINYINT,
 
-    FOREIGN KEY (idEmployee) REFERENCES Employee(id),
-    FOREIGN KEY (idCustomer) REFERENCES Customer(id),
-    FOREIGN KEY (idPaymentMethod) REFERENCES PaymentMethod(id),
-    FOREIGN KEY (idVoucher) REFERENCES Voucher(id)
+    sub_total DECIMAL(18,2),
+    total_money DECIMAL(18,2),
+
+    payment_method NVARCHAR(50),
+
+    created_at DATETIME DEFAULT GETDATE(),
+
+    full_name NVARCHAR(100),
+    phone_number NVARCHAR(20),
+
+    FOREIGN KEY (user_id) REFERENCES Employee(id),
+    FOREIGN KEY (voucher_id) REFERENCES Vouchers(id),
+    FOREIGN KEY (customer_id) REFERENCES Customer(id)
 )
 
 -----------------------
@@ -208,13 +175,12 @@ CREATE TABLE Invoice(
 CREATE TABLE InvoiceDetails(
     id INT IDENTITY(1,1) PRIMARY KEY,
 
-    idInvoice INT NOT NULL,
-    idProductVariant INT NOT NULL,
+    invoice_id INT,
+    product_variant_id INT,
 
-    quantity INT NOT NULL
-    CHECK (quantity > 0),
+    quantity INT,
+    unit_price DECIMAL(18,2),
 
-    price DECIMAL(18,2) NOT NULL
-    CHECK (price >= 0),
-
-    FOREIGN KEY (idInvoice) REFERENC
+    FOREIGN KEY (invoice_id) REFERENCES Invoice(id),
+    FOREIGN KEY (product_variant_id) REFERENCES ProductVariant(id)
+)
