@@ -1,0 +1,358 @@
+    package ui;
+
+import java.awt.CardLayout;
+import javax.swing.JOptionPane;
+import service.BrandService;
+import service.CategoryService;
+import service.ColorService;
+import service.DiscountService;
+import service.SizeService;
+
+public class MainUI extends javax.swing.JFrame {
+
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainUI.class.getName());
+    
+    private DashboardUI dashboardUI;
+    private ProductVariantUI productVariantUI;
+    private CustomerUI customerUI;
+    private EmployeeUI employeeUI;
+    private InvoiceUI invoiceUI;
+    private DiscountUI discountUI;
+    
+    private BrandService brandService = new BrandService();
+    private CategoryService categoryService = new CategoryService();
+    private SizeService sizeService = new SizeService();
+    private ColorService colorService = new ColorService();
+    private DiscountService discountService = new DiscountService();
+
+    public MainUI() {
+        this(null);
+    }
+
+    public MainUI(String name) {
+        initComponents();
+        setLocationRelativeTo(null);
+
+        if (name != null) {
+            lbName.setText(name);
+        }
+
+        initView();
+    }
+
+    private void initView() {
+
+        dashboardUI = new DashboardUI();
+        productVariantUI = new ProductVariantUI();
+        customerUI = new CustomerUI();
+        employeeUI = new EmployeeUI();
+        invoiceUI = new InvoiceUI();
+        discountUI = new DiscountUI();
+
+        pnContent.add(dashboardUI, "dashboard");
+        pnContent.add(productVariantUI, "product_variant");
+        pnContent.add(customerUI, "customer");
+        pnContent.add(employeeUI, "employee");
+        pnContent.add(invoiceUI, "invoice");
+        pnContent.add(discountUI, "discount");
+        
+        showDashboard();
+    }
+
+    private void showDashboard() {
+        //dashboardUI.reloadData();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "dashboard");
+    }
+
+    private void showProduct() {
+        productVariantUI.reloadData();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "product_variant");
+    }
+    
+    private void showCustomer(){
+        customerUI.resetForm();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "customer");
+    }
+    
+    private void showEmployee(){
+        employeeUI.resetForm();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "employee");
+    }
+    
+    private void showInvoice(){
+
+        invoiceUI.loadFilterData(
+            brandService.findAll(null),
+            categoryService.findAll(null),
+            sizeService.findAll(null),
+            colorService.findAll(null)
+        );
+
+        invoiceUI.resetForm();
+
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "invoice");
+    }
+    
+    private void showDiscount(){
+        discountUI.refreshForm();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "discount");
+    }
+
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        pnMenu = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        lbDashboard = new javax.swing.JLabel();
+        ldProduct = new javax.swing.JLabel();
+        lbEmployee = new javax.swing.JLabel();
+        lbCustomer = new javax.swing.JLabel();
+        lbInvoice = new javax.swing.JLabel();
+        lbName = new javax.swing.JLabel();
+        lbLogout = new javax.swing.JLabel();
+        lbInvoice1 = new javax.swing.JLabel();
+        pnContent = new javax.swing.JPanel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        pnMenu.setBackground(new java.awt.Color(4, 4, 31));
+        pnMenu.setForeground(new java.awt.Color(102, 102, 102));
+
+        jLabel1.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1.setFont(new java.awt.Font("SimSun", 1, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Xin chào");
+
+        lbDashboard.setBackground(new java.awt.Color(255, 255, 255));
+        lbDashboard.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbDashboard.setForeground(new java.awt.Color(255, 255, 255));
+        lbDashboard.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbDashboard.setText("Dashboard");
+        lbDashboard.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbDashboardMouseClicked(evt);
+            }
+        });
+
+        ldProduct.setBackground(new java.awt.Color(255, 255, 255));
+        ldProduct.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        ldProduct.setForeground(new java.awt.Color(255, 255, 255));
+        ldProduct.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        ldProduct.setText("Sản phẩm");
+        ldProduct.setToolTipText("");
+        ldProduct.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ldProductMouseClicked(evt);
+            }
+        });
+
+        lbEmployee.setBackground(new java.awt.Color(255, 255, 255));
+        lbEmployee.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbEmployee.setForeground(new java.awt.Color(255, 255, 255));
+        lbEmployee.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbEmployee.setText("Nhân  viên");
+        lbEmployee.setToolTipText("");
+        lbEmployee.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbEmployeeMouseClicked(evt);
+            }
+        });
+
+        lbCustomer.setBackground(new java.awt.Color(255, 255, 255));
+        lbCustomer.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbCustomer.setForeground(new java.awt.Color(255, 255, 255));
+        lbCustomer.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbCustomer.setText("Khách hàng");
+        lbCustomer.setToolTipText("");
+        lbCustomer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbCustomerMouseClicked(evt);
+            }
+        });
+
+        lbInvoice.setBackground(new java.awt.Color(255, 255, 255));
+        lbInvoice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbInvoice.setForeground(new java.awt.Color(255, 255, 255));
+        lbInvoice.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbInvoice.setText("Hoá đơn");
+        lbInvoice.setToolTipText("");
+        lbInvoice.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbInvoiceMouseClicked(evt);
+            }
+        });
+
+        lbName.setBackground(new java.awt.Color(255, 255, 255));
+        lbName.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        lbName.setForeground(new java.awt.Color(255, 255, 255));
+        lbName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbName.setText("Name");
+
+        lbLogout.setBackground(new java.awt.Color(255, 102, 102));
+        lbLogout.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lbLogout.setForeground(new java.awt.Color(255, 102, 102));
+        lbLogout.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbLogout.setText("Đăng xuất");
+        lbLogout.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbLogoutMouseClicked(evt);
+            }
+        });
+
+        lbInvoice1.setBackground(new java.awt.Color(255, 255, 255));
+        lbInvoice1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbInvoice1.setForeground(new java.awt.Color(255, 255, 255));
+        lbInvoice1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbInvoice1.setText("Giảm giá");
+        lbInvoice1.setToolTipText("");
+        lbInvoice1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbInvoice1MouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnMenuLayout = new javax.swing.GroupLayout(pnMenu);
+        pnMenu.setLayout(pnMenuLayout);
+        pnMenuLayout.setHorizontalGroup(
+            pnMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lbName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(pnMenuLayout.createSequentialGroup()
+                .addGap(100, 100, 100)
+                .addGroup(pnMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(ldProduct, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbDashboard, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbEmployee, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbCustomer, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbInvoice, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbInvoice1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(100, Short.MAX_VALUE))
+            .addComponent(lbLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        pnMenuLayout.setVerticalGroup(
+            pnMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnMenuLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addComponent(lbName)
+                .addGap(97, 97, 97)
+                .addComponent(lbDashboard)
+                .addGap(60, 60, 60)
+                .addComponent(ldProduct)
+                .addGap(60, 60, 60)
+                .addComponent(lbEmployee)
+                .addGap(60, 60, 60)
+                .addComponent(lbCustomer)
+                .addGap(60, 60, 60)
+                .addComponent(lbInvoice1)
+                .addGap(60, 60, 60)
+                .addComponent(lbInvoice)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 135, Short.MAX_VALUE)
+                .addComponent(lbLogout)
+                .addGap(23, 23, 23))
+        );
+
+        pnContent.setLayout(new java.awt.CardLayout());
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(pnMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnContent, javax.swing.GroupLayout.DEFAULT_SIZE, 1107, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(pnMenu, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pnContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void lbDashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbDashboardMouseClicked
+        showDashboard();
+    }//GEN-LAST:event_lbDashboardMouseClicked
+
+    private void ldProductMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ldProductMouseClicked
+        showProduct();
+    }//GEN-LAST:event_ldProductMouseClicked
+
+    private void lbEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbEmployeeMouseClicked
+        showEmployee();
+    }//GEN-LAST:event_lbEmployeeMouseClicked
+
+    private void lbCustomerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbCustomerMouseClicked
+        showCustomer();
+    }//GEN-LAST:event_lbCustomerMouseClicked
+
+    private void lbInvoiceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbInvoiceMouseClicked
+        showInvoice();
+    }//GEN-LAST:event_lbInvoiceMouseClicked
+
+    private void lbLogoutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbLogoutMouseClicked
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có muốn đăng xuất không?",
+            "Xác nhận",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm == javax.swing.JOptionPane.YES_OPTION){
+            new ui.auth.LoginUI().setVisible(true);
+            this.dispose();
+        }
+    }//GEN-LAST:event_lbLogoutMouseClicked
+
+    private void lbInvoice1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbInvoice1MouseClicked
+        showDiscount();
+    }//GEN-LAST:event_lbInvoice1MouseClicked
+
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> new MainUI().setVisible(true));
+    }
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lbCustomer;
+    private javax.swing.JLabel lbDashboard;
+    private javax.swing.JLabel lbEmployee;
+    private javax.swing.JLabel lbInvoice;
+    private javax.swing.JLabel lbInvoice1;
+    private javax.swing.JLabel lbLogout;
+    private javax.swing.JLabel lbName;
+    private javax.swing.JLabel ldProduct;
+    private javax.swing.JPanel pnContent;
+    private javax.swing.JPanel pnMenu;
+    // End of variables declaration//GEN-END:variables
+
+}
