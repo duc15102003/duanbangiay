@@ -18,11 +18,10 @@ public class InvoiceDAO {
             INSERT INTO invoice (
                 code,
                 employee_id,
-                customer_id,
                 total_amount,
                 status
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?)
         """;
 
         try (
@@ -35,9 +34,9 @@ public class InvoiceDAO {
 
             ps.setString(1, code);
             ps.setInt(2, invoice.getEmployeeId());
-            ps.setInt(3, invoice.getCustomerId());
-            ps.setFloat(4, invoice.getTotalAmount());
-            ps.setInt(5, invoice.getStatus().getValue());
+            //ps.setInt(3, invoice.getCustomerId());
+            ps.setFloat(3, invoice.getTotalAmount());
+            ps.setInt(4, invoice.getStatus().getValue());
 
             return ps.executeUpdate() > 0;
 
