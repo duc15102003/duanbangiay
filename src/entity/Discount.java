@@ -11,7 +11,7 @@ public class Discount extends BaseEntity{
     
     private int discountValue; 
     
-    private int maximumDiscount;
+    private Integer maximumDiscount;
     
     private LocalDateTime startedAt;
     
@@ -22,7 +22,7 @@ public class Discount extends BaseEntity{
     public Discount() {
     }
 
-    public Discount(String code, String discountType, int discountValue, int maximumDiscount, LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status) {
+    public Discount(String code, String discountType, int discountValue, Integer maximumDiscount, LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status) {
         this.code = code;
         this.discountType = discountType;
         this.discountValue = discountValue;
@@ -32,7 +32,7 @@ public class Discount extends BaseEntity{
         this.status = status;
     }
 
-    public Discount(String code, String discountType, int discountValue, int maximumDiscount, LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status, Integer id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+    public Discount(String code, String discountType, int discountValue, Integer maximumDiscount, LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status, Integer id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
         super(id, createdAt, updatedAt, deletedAt);
         this.code = code;
         this.discountType = discountType;
@@ -67,11 +67,11 @@ public class Discount extends BaseEntity{
         this.discountValue = discountValue;
     }
 
-    public int getMaximumDiscount() {
+    public Integer getMaximumDiscount() {
         return maximumDiscount;
     }
 
-    public void setMaximumDiscount(int maximumDiscount) {
+    public void setMaximumDiscount(Integer maximumDiscount) {
         this.maximumDiscount = maximumDiscount;
     }
 

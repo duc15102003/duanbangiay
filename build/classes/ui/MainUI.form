@@ -26,14 +26,14 @@
           <Group type="102" alignment="0" attributes="0">
               <Component id="pnMenu" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="pnContent" pref="1107" max="32767" attributes="0"/>
+              <Component id="pnContent" pref="1054" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="pnMenu" alignment="1" max="32767" attributes="0"/>
-          <Component id="pnContent" alignment="0" max="32767" attributes="0"/>
+          <Component id="pnContent" min="-2" pref="759" max="-2" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -87,7 +87,7 @@
                   <Component id="lbInvoice1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="60" max="-2" attributes="0"/>
                   <Component id="lbInvoice" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="135" max="32767" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Component id="lbLogout" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
               </Group>

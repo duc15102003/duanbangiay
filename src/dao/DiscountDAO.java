@@ -123,22 +123,28 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
             VALUES (?, ?, ?, ?, ?, ?, ?, GETDATE())
         """;
 
-        try(
+        try (
             Connection conn = dbConfig.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-        ){
+        ) {
 
             ps.setString(1, request.getCode());
             ps.setString(2, request.getDiscountType());
             ps.setInt(3, request.getDiscountValue());
-            ps.setInt(4, request.getMaximumDiscount());
+
+            if (request.getMaximumDiscount() != null) {
+                ps.setInt(4, request.getMaximumDiscount());
+            } else {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            }
+
             ps.setTimestamp(5, Timestamp.valueOf(request.getStartedAt()));
             ps.setTimestamp(6, Timestamp.valueOf(request.getEndedAt()));
             ps.setInt(7, request.getStatus().getValue());
 
             return ps.executeUpdate() > 0;
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -162,15 +168,21 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
             WHERE id = ?
         """;
 
-        try(
+        try (
             Connection conn = dbConfig.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-        ){
+        ) {
 
             ps.setString(1, request.getCode());
             ps.setString(2, request.getDiscountType());
             ps.setInt(3, request.getDiscountValue());
-            ps.setInt(4, request.getMaximumDiscount());
+
+            if (request.getMaximumDiscount() != null) {
+                ps.setInt(4, request.getMaximumDiscount());
+            } else {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            }
+
             ps.setTimestamp(5, Timestamp.valueOf(request.getStartedAt()));
             ps.setTimestamp(6, Timestamp.valueOf(request.getEndedAt()));
             ps.setInt(7, request.getStatus().getValue());
@@ -178,7 +190,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
 
             return ps.executeUpdate() > 0;
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
