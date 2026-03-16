@@ -249,15 +249,15 @@ public class MainUI extends javax.swing.JFrame {
                 .addComponent(lbName)
                 .addGap(97, 97, 97)
                 .addComponent(lbDashboard)
-                .addGap(60, 60, 60)
+                .addGap(40, 40, 40)
                 .addComponent(ldProduct)
-                .addGap(60, 60, 60)
+                .addGap(40, 40, 40)
                 .addComponent(lbEmployee)
-                .addGap(60, 60, 60)
+                .addGap(40, 40, 40)
                 .addComponent(lbCustomer)
-                .addGap(60, 60, 60)
+                .addGap(40, 40, 40)
                 .addComponent(lbInvoice1)
-                .addGap(60, 60, 60)
+                .addGap(40, 40, 40)
                 .addComponent(lbInvoice)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lbLogout)
@@ -278,7 +278,9 @@ public class MainUI extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(pnMenu, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(pnContent, javax.swing.GroupLayout.PREFERRED_SIZE, 759, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(pnContent, javax.swing.GroupLayout.PREFERRED_SIZE, 703, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pack();
