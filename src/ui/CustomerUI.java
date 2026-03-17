@@ -38,6 +38,8 @@ public class CustomerUI extends javax.swing.JPanel {
         this.selectMode = selectMode;
 
         btnSelectCustomer.setVisible(selectMode);
+        btnDelete.setVisible(!selectMode);
+        btnUpdate.setVisible(!selectMode);
 
         initCustomer();
     }
