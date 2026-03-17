@@ -140,10 +140,10 @@ public class InvoiceUI extends javax.swing.JPanel {
 
         filter.setSearch(txtSearchInvoice.getText().trim());
 
-        List<Invoice> list = cartDAO.findAll(filter);
+        List<Invoice> list = cartDAO.findAll(filter, null);
 
         invoices = list.stream()
-                .filter(i -> i.getStatus() != enums.OrderStatusEnum.DRAFT)
+                .filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
                 .toList();
 
         DefaultTableModel model = (DefaultTableModel) tblInvoice.getModel();

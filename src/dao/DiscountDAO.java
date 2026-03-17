@@ -221,6 +221,40 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
 
         return false;
     }
+    
+    public Discount checkDiscount(String code) {
+
+        if (code == null || code.trim().isEmpty()) {
+            return null;
+        }
+
+        String sql = """
+            SELECT *
+            FROM Discount
+            WHERE LOWER(code) = LOWER(?)
+              AND status = ?
+              AND (started_at IS NULL OR started_at <= GETDATE())
+              AND (ended_at IS NULL OR ended_at >= GETDATE())
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code.trim());
+            ps.setInt(2, DiscountStatusEnum.ACTIVE.getValue());
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapRow(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     private Discount mapRow(ResultSet rs) throws Exception{
 

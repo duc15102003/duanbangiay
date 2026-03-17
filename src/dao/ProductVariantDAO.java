@@ -257,4 +257,57 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
 
         return pv;
     }
+    
+    public void updateStockAfterPayment(int invoiceId) {
+
+        String sql = """
+            UPDATE pv
+            SET pv.quantity = pv.quantity - ii.quantity
+            FROM product_variant pv
+            JOIN invoice_item ii ON pv.id = ii.product_variant_id
+            WHERE ii.invoice_id = ?
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, invoiceId);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public boolean checkStockBeforePayment(int invoiceId) {
+
+        String sql = """
+            SELECT pv.quantity AS stock, ii.quantity AS ordered
+            FROM product_variant pv
+            JOIN invoice_item ii ON pv.id = ii.product_variant_id
+            WHERE ii.invoice_id = ?
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, invoiceId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int stock = rs.getInt("stock");
+                int ordered = rs.getInt("ordered");
+
+                if (ordered > stock) {
+                    return false;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
 }

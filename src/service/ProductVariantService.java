@@ -34,4 +34,12 @@ public class ProductVariantService {
     public boolean delete(int id) {
         return productVariantDAO.delete(id);
     }
+    
+    public void updateStockAfterPayment(int invoiceId) {
+        productVariantDAO.updateStockAfterPayment(invoiceId);
+    }
+    
+    public boolean checkStockBeforePayment(int invoiceId) {
+        return productVariantDAO.checkStockBeforePayment(invoiceId);
+    }
 }

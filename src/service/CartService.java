@@ -10,8 +10,8 @@ public class CartService {
     
     private CartDAO cartDAO = new CartDAO();
     
-    public List<Invoice> findAll(InvoiceFilter filter){
-        return cartDAO.findAll(filter);
+    public List<Invoice> findAll(InvoiceFilter filter, Integer employeeId){
+        return cartDAO.findAll(filter, employeeId);
     }
     
     public List<InvoiceItem> findByInvoiceId(int invoiceId, String search) {

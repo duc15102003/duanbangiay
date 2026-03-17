@@ -17,7 +17,7 @@ public class CartDAO {
 
     private DBConfig dbConfig = new DBConfig();
     
-    public List<Invoice> findAll(InvoiceFilter filter) {
+    public List<Invoice> findAll(InvoiceFilter filter, Integer employeeId) {
 
         List<Invoice> list = new ArrayList<>();
         List<Object> params = new ArrayList<>();
@@ -27,6 +27,11 @@ public class CartDAO {
             FROM invoice
             WHERE 1=1
         """);
+
+        if (employeeId != null) {
+            sql.append(" AND employee_id = ?");
+            params.add(employeeId);
+        }
 
         if (filter != null) {
 
@@ -42,12 +47,12 @@ public class CartDAO {
                 params.add(filter.getStatus().getValue());
             }
 
-            if(filter.getFromCreatedDate() != null){
+            if (filter.getFromCreatedDate() != null) {
                 sql.append(" AND created_at >= ?");
                 params.add(Timestamp.valueOf(filter.getFromCreatedDate()));
             }
 
-            if(filter.getToCreatedDate() != null){
+            if (filter.getToCreatedDate() != null) {
                 sql.append(" AND created_at <= ?");
                 params.add(Timestamp.valueOf(filter.getToCreatedDate()));
             }
@@ -72,6 +77,7 @@ public class CartDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi hệ thống!");
         }
 
         return list;
