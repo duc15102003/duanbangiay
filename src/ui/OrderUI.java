@@ -1,5 +1,6 @@
 package ui;
 
+import com.itextpdf.text.pdf.BaseFont;
 import entity.Brand;
 import entity.Category;
 import entity.Color;
@@ -23,7 +24,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -37,7 +37,6 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -55,6 +54,25 @@ import service.InvoiceService;
 import service.ProductVariantService;
 import service.SizeService;
 import ui.auth.LoginUI;
+
+// ===== iText =====
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
+
+// ===== Swing =====
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+// ===== IO =====
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+// ===== Utils =====
+import java.util.List;
 
 public class OrderUI extends JFrame {
     
@@ -1865,10 +1883,14 @@ public class OrderUI extends JFrame {
         dialog.add(scrollPane, BorderLayout.CENTER);
 
         // ===== BUTTON =====
+        JButton btnExport = new JButton("Xuất PDF");
+        btnExport.addActionListener(e -> exportInvoiceToPDF(invoiceId));
+
         JButton btnClose = new JButton("Đóng");
         btnClose.addActionListener(e -> dialog.dispose());
 
         JPanel bottom = new JPanel();
+        bottom.add(btnExport);
         bottom.add(btnClose);
 
         dialog.add(bottom, BorderLayout.SOUTH);
@@ -1881,6 +1903,139 @@ public class OrderUI extends JFrame {
         label.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         label.setHorizontalAlignment(JLabel.CENTER);
         return label;
+    }
+    
+    //Xuất PDF hoá đơn
+    private void exportInvoiceToPDF(int invoiceId) {
+        try {
+            // ===== LẤY DATA =====
+            List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+            float total = invoiceService.getTotalAmount(invoiceId);
+
+            Discount discount = discountMap.get(invoiceId);
+            float discountAmount = 0;
+
+            if (discount != null) {
+                discountAmount = "%".equals(discount.getDiscountType())
+                        ? total * discount.getDiscountValue() / 100f
+                        : discount.getDiscountValue();
+            }
+
+            float finalAmount = total - discountAmount;
+
+            Invoice invoice = invoiceService.findById(invoiceId);
+
+            String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
+
+            java.time.format.DateTimeFormatter formatter =
+                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            String createdAt = (invoice != null && invoice.getCreatedAt() != null)
+                    ? invoice.getCreatedAt().format(formatter)
+                    : "N/A";
+
+            Employee emp = employeeService.findById(employeeId);
+
+            String employeeName = (emp != null && emp.getName() != null) ? emp.getName() : "N/A";
+            String employeeCode = (emp != null && emp.getCode() != null) ? emp.getCode() : "N/A";
+
+            String customerName = jLabel4.getText().isEmpty() ? "Khách lẻ" : jLabel4.getText();
+
+            // ===== CHỌN FILE =====
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setSelectedFile(new File("invoice_" + invoiceCode + ".pdf"));
+
+            if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+            // ===== LOAD FONT =====
+            InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
+
+            if (is == null) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
+                return;
+            }
+
+            byte[] fontBytes = is.readAllBytes();
+
+            BaseFont bf = BaseFont.createFont(
+                    "Roboto-Regular.ttf",
+                    BaseFont.IDENTITY_H,
+                    BaseFont.EMBEDDED,
+                    true,
+                    fontBytes,
+                    null
+            );
+
+            com.itextpdf.text.Font titleFont =
+                    new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD);
+
+            com.itextpdf.text.Font normalFont =
+                    new com.itextpdf.text.Font(bf, 12);
+
+            com.itextpdf.text.Font boldFont =
+                    new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
+
+            // ===== TẠO PDF =====
+            Document document = new Document();
+            PdfWriter.getInstance(document, new FileOutputStream(filePath));
+
+            document.open();
+
+            // ===== HEADER =====
+            Paragraph title = new Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+
+            addLine(document, normalFont);
+
+            // ===== INVOICE =====
+            document.add(new Paragraph("Mã HĐ: " + invoiceCode, normalFont));
+            document.add(new Paragraph("Ngày: " + createdAt, normalFont));
+
+            addLine(document, normalFont);
+
+            // ===== SELLER =====
+            document.add(new Paragraph("Nhân viên: " + employeeCode + " - " + employeeName, normalFont));
+
+            addLine(document, normalFont);
+
+            // ===== CUSTOMER =====
+            document.add(new Paragraph("Khách: " + customerName, normalFont));
+            document.add(new Paragraph("SĐT: " + jLabel5.getText(), normalFont));
+            document.add(new Paragraph("Địa chỉ: " + lbAddress.getText(), normalFont));
+
+            addLine(document, normalFont);
+
+            // ===== ITEMS =====
+            for (InvoiceItem item : items) {
+                String line = item.getProductName()
+                        + " | SL: " + item.getQuantity()
+                        + " | " + moneyFormat.format(item.getPrice());
+
+                document.add(new Paragraph(line, normalFont));
+            }
+
+            addLine(document, normalFont);
+
+            // ===== TOTAL =====
+            document.add(new Paragraph("Tổng: " + moneyFormat.format(total), normalFont));
+            document.add(new Paragraph("Giảm giá: - " + moneyFormat.format(discountAmount), normalFont));
+            document.add(new Paragraph("Thanh toán: " + moneyFormat.format(finalAmount), boldFont));
+
+            document.close();
+
+            JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
+        }
+    }
+    
+    private void addLine(Document document, com.itextpdf.text.Font font) throws Exception {
+        document.add(new Paragraph("----------------------------------", font));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
