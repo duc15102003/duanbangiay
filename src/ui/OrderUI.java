@@ -684,6 +684,11 @@ public class OrderUI extends JFrame {
 
         dialog.setVisible(true);
         initProduct();
+        selectedCustomerId = null;
+
+        jLabel4.setText(""); 
+        jLabel5.setText("");   
+        lbAddress.setText("");       
     }
     
     @SuppressWarnings("unchecked")
@@ -1262,23 +1267,27 @@ public class OrderUI extends JFrame {
                     jLabel5.setText("");
                     lbAddress.setText("");
 
-                JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-                showInvoiceDialog(invoiceId);   
-                initCart();
-                initProduct();
+                    JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                    showInvoiceDialog(invoiceId);   
+                    initCart();
+                    initProduct();
+                    
+                    selectedCustomerId = null;
 
-
+                    jLabel4.setText(""); 
+                    jLabel5.setText("");   
+                    lbAddress.setText("");
             } else {
                 JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
             }
         }
     }
 
-    // ===== CHUYỂN KHOẢN =====
-    else if (choice == 1) {
+        // ===== CHUYỂN KHOẢN =====
+        else if (choice == 1) {
 
-        showQRDialog(invoiceId); // lúc này DB đã có total đúng
-    }
+            showQRDialog(invoiceId);
+        }
     }//GEN-LAST:event_btnPaymentActionPerformed
 
     private void btnSelectCustomerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectCustomerActionPerformed
