@@ -9,8 +9,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
 
@@ -225,6 +227,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
     public Discount checkDiscount(String code) {
 
         if (code == null || code.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Vui lòng nhập mã giảm giá!");
             return null;
         }
 
@@ -232,25 +235,48 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
             SELECT *
             FROM Discount
             WHERE LOWER(code) = LOWER(?)
-              AND status = ?
-              AND (started_at IS NULL OR started_at <= GETDATE())
-              AND (ended_at IS NULL OR ended_at >= GETDATE())
         """;
 
         try (Connection conn = DBConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, code.trim());
-            ps.setInt(2, DiscountStatusEnum.ACTIVE.getValue());
 
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return mapRow(rs);
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(null, "Mã giảm giá không tồn tại!");
+                return null;
             }
+
+            Discount discount = mapRow(rs);
+
+            if (discount.getStatus() != DiscountStatusEnum.ACTIVE) {
+                JOptionPane.showMessageDialog(null, "Mã giảm giá không ở trạng thái hoạt động!");
+                return null;
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+
+            if (discount.getStartedAt() != null &&
+                discount.getStartedAt().isAfter(now)) {
+
+                JOptionPane.showMessageDialog(null, "Mã giảm giá chưa đến thời gian sử dụng!");
+                return null;
+            }
+
+            if (discount.getEndedAt() != null &&
+                discount.getEndedAt().isBefore(now)) {
+
+                JOptionPane.showMessageDialog(null, "Mã giảm giá đã hết hạn!");
+                return null;
+            }
+
+            return discount;
 
         } catch (Exception e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Có lỗi xảy ra khi kiểm tra mã giảm giá!");
         }
 
         return null;
