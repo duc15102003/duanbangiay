@@ -65,7 +65,7 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         String sql = """
             SELECT *
             FROM employee
-            WHERE id = ? AND deleted_at IS NULL
+            WHERE id = ?
         """;
 
         try (Connection conn = dbConfig.getConnection();

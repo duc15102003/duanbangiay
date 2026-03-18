@@ -135,5 +135,9 @@ public class Employee extends BaseEntity {
     public void setGender(Boolean gender) {
         this.gender = gender;
     }
-    
+
+    @Override
+    public String toString() {
+        return "Employee{" + "code=" + code + ", name=" + name + '}';
+    }    
 }

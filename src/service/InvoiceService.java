@@ -8,6 +8,10 @@ public class InvoiceService {
     
     private InvoiceDAO invoiceDAO = new InvoiceDAO();
     
+    public Invoice findById(int id){
+        return invoiceDAO.findById(id);
+    }
+    
     public boolean insert(Invoice invoice){
         return invoiceDAO.insert(invoice);
     }

@@ -4,6 +4,7 @@ import entity.Brand;
 import entity.Category;
 import entity.Color;
 import entity.Discount;
+import entity.Employee;
 import entity.Invoice;
 import entity.InvoiceItem;
 import entity.ProductVariant;
@@ -29,7 +30,9 @@ import javax.swing.ImageIcon;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import javax.swing.BoxLayout;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -47,6 +50,7 @@ import service.CartService;
 import service.CategoryService;
 import service.ColorService;
 import service.DiscountService;
+import service.EmployeeService;
 import service.InvoiceService;
 import service.ProductVariantService;
 import service.SizeService;
@@ -65,6 +69,7 @@ public class OrderUI extends JFrame {
     private InvoiceService invoiceService = new InvoiceService();
     private CartService cartService = new CartService();
     private DiscountService discountService = new DiscountService();
+    private EmployeeService employeeService = new EmployeeService();
 
     // ================= UI SUPPORT =================
     private JDialog imagePreviewDialog;
@@ -648,6 +653,7 @@ public class OrderUI extends JFrame {
             if (success) {
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                 dialog.dispose();
+                showInvoiceDialog(invoiceId);
                 initCart();
             } else {
                 JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
@@ -1239,6 +1245,7 @@ public class OrderUI extends JFrame {
                     lbAddress.setText("");
 
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                showInvoiceDialog(invoiceId);   
                 initCart();
                 initProduct();
 
@@ -1760,6 +1767,120 @@ public class OrderUI extends JFrame {
         }
 
         return total;
+    }
+    
+    private void showInvoiceDialog(int invoiceId) {
+
+        JDialog dialog = new JDialog(this, "Hóa đơn", true);
+        dialog.setSize(500, 600);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        // ===== LẤY DATA =====
+        List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+        float total = invoiceService.getTotalAmount(invoiceId);
+
+        Discount discount = discountMap.get(invoiceId);
+        float discountAmount = 0;
+
+        if (discount != null) {
+            if ("%".equals(discount.getDiscountType())) {
+                discountAmount = total * discount.getDiscountValue() / 100f;
+            } else {
+                discountAmount = discount.getDiscountValue();
+            }
+        }
+
+        float finalAmount = total - discountAmount;
+
+        // ===== INVOICE =====
+        Invoice invoice = invoiceService.findById(invoiceId);
+
+        String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
+
+        java.time.format.DateTimeFormatter formatter =
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        String createdAt = (invoice != null && invoice.getCreatedAt() != null)
+                ? invoice.getCreatedAt().format(formatter)
+                : "N/A";
+
+        // ===== EMPLOYEE =====
+        Employee emp = employeeService.findById(employeeId);
+
+        String employeeName = (emp != null && emp.getName() != null)
+                ? emp.getName() : "N/A";
+
+        String employeeCode = (emp != null && emp.getCode() != null)
+                ? emp.getCode() : "N/A";
+
+        // ===== HEADER =====
+        JLabel lblTitle = centerLabel("HÓA ĐƠN THANH TOÁN");
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
+
+        panel.add(lblTitle);
+        panel.add(centerLabel("------------------------------"));
+
+        // ===== INVOICE INFO =====
+        panel.add(centerLabel("Mã HĐ: " + invoiceCode));
+        panel.add(centerLabel("Ngày: " + createdAt));
+
+        panel.add(centerLabel("------------------------------"));
+
+        // ===== SELLER =====
+        panel.add(centerLabel("Nhân viên: " + employeeCode + " - " + employeeName));
+
+        panel.add(centerLabel("------------------------------"));
+
+        // ===== CUSTOMER =====
+        String customerName = jLabel4.getText().isEmpty() ? "Khách lẻ" : jLabel4.getText();
+
+        panel.add(centerLabel("Khách: " + customerName));
+        panel.add(centerLabel("SĐT: " + jLabel5.getText()));
+        panel.add(centerLabel("Địa chỉ: " + lbAddress.getText()));
+
+        panel.add(centerLabel("------------------------------"));
+
+        // ===== ITEMS =====
+        for (InvoiceItem item : items) {
+            String line = item.getProductName()
+                    + " | SL: " + item.getQuantity()
+                    + " | " + moneyFormat.format(item.getPrice());
+
+            panel.add(centerLabel(line));
+        }
+
+        panel.add(centerLabel("------------------------------"));
+
+        // ===== TOTAL =====
+        panel.add(centerLabel("Tổng: " + moneyFormat.format(total)));
+        panel.add(centerLabel("Giảm giá: - " + moneyFormat.format(discountAmount)));
+        panel.add(centerLabel("Thanh toán: " + moneyFormat.format(finalAmount)));
+
+        // ===== SCROLL =====
+        JScrollPane scrollPane = new JScrollPane(panel);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        // ===== BUTTON =====
+        JButton btnClose = new JButton("Đóng");
+        btnClose.addActionListener(e -> dialog.dispose());
+
+        JPanel bottom = new JPanel();
+        bottom.add(btnClose);
+
+        dialog.add(bottom, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+    }
+    
+    private JLabel centerLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        label.setHorizontalAlignment(JLabel.CENTER);
+        return label;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
