@@ -600,16 +600,13 @@ public class OrderUI extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout(10, 10));
 
-        // ===== PANEL CHÍNH =====
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        // ===== TIÊU ĐỀ =====
         JLabel lblTitle = new JLabel("Quét QR để thanh toán");
         lblTitle.setHorizontalAlignment(JLabel.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 16));
         panel.add(lblTitle, BorderLayout.NORTH);
 
-        // ===== QR =====
         JLabel lblQR = new JLabel();
         lblQR.setHorizontalAlignment(JLabel.CENTER);
 
@@ -630,17 +627,18 @@ public class OrderUI extends JFrame {
 
         panel.add(lblQR, BorderLayout.CENTER);
 
-        // ===== THÔNG TIN THANH TOÁN =====
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new javax.swing.BoxLayout(infoPanel, javax.swing.BoxLayout.Y_AXIS));
+        // ===== DÙNG FINAL AMOUNT =====
+        float totalAmount = getFinalAmount(invoiceId);
 
-        float totalAmount = invoiceService.getTotalAmount(invoiceId);
         String invoiceCode = listInvoice
                 .stream()
                 .filter(i -> i.getId() == invoiceId)
                 .findFirst()
                 .map(Invoice::getCode)
                 .orElse("N/A");
+
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
         JLabel lblAmount = new JLabel("Số tiền: " + moneyFormat.format(totalAmount) + " VND");
         lblAmount.setFont(new Font("Arial", Font.BOLD, 15));
@@ -656,11 +654,9 @@ public class OrderUI extends JFrame {
 
         dialog.add(panel, BorderLayout.CENTER);
 
-        // ===== BUTTON =====
         JPanel bottomPanel = new JPanel();
 
-        javax.swing.JButton btnConfirm = new javax.swing.JButton("Xác nhận đã thanh toán");
-
+        JButton btnConfirm = new JButton("Xác nhận đã thanh toán");
         btnConfirm.setFont(new Font("Arial", Font.BOLD, 13));
 
         btnConfirm.addActionListener(e -> {
@@ -673,6 +669,14 @@ public class OrderUI extends JFrame {
                 dialog.dispose();
                 showInvoiceDialog(invoiceId);
                 initCart();
+                initProduct();
+
+                // RESET CUSTOMER
+                selectedCustomerId = null;
+                jLabel4.setText("");
+                jLabel5.setText("");
+                lbAddress.setText("");
+
             } else {
                 JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
             }
@@ -683,12 +687,48 @@ public class OrderUI extends JFrame {
         dialog.add(bottomPanel, BorderLayout.SOUTH);
 
         dialog.setVisible(true);
-        initProduct();
-        selectedCustomerId = null;
+    }
+    
+    private float getFinalAmount(int invoiceId) {
 
-        jLabel4.setText(""); 
-        jLabel5.setText("");   
-        lbAddress.setText("");       
+        List<InvoiceItem> items = cartData.get(invoiceId);
+
+        float total = 0;
+
+        if (items != null) {
+            for (InvoiceItem item : items) {
+                total += item.getQuantity() * item.getPrice();
+            }
+        }
+
+        Discount discount = discountMap.get(invoiceId);
+
+        float discountAmount = 0;
+
+        if (discount != null) {
+
+            String type = discount.getDiscountType() != null
+                    ? discount.getDiscountType().trim()
+                    : "";
+
+            if ("%".equals(type)) {
+
+                discountAmount = total * discount.getDiscountValue() / 100f;
+
+                if (discount.getMaximumDiscount() != null) {
+                    discountAmount = Math.min(discountAmount, discount.getMaximumDiscount());
+                }
+
+            } else if ("Tiền mặt".equalsIgnoreCase(type)) {
+                discountAmount = discount.getDiscountValue();
+            }
+
+            if (discountAmount > total) {
+                discountAmount = total;
+            }
+        }
+
+        return total - discountAmount;
     }
     
     @SuppressWarnings("unchecked")
@@ -1198,8 +1238,8 @@ public class OrderUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Giỏ hàng đang trống!");
             return;
         }
-        
-        // ===== CHECK TỒN KHO TRƯỚC KHI THANH TOÁN =====
+
+        // ===== CHECK TỒN KHO =====
         boolean isValidStock = productVariantService.checkStockBeforePayment(invoiceId);
 
         if (!isValidStock) {
@@ -1207,19 +1247,11 @@ public class OrderUI extends JFrame {
             return;
         }
 
-        // ===== TÍNH TOTAL TỪ TABLE =====
-        float totalAmount = 0;
+        // ===== LẤY FINAL AMOUNT (ĐÃ TRỪ DISCOUNT) =====
+        float finalAmount = getFinalAmount(invoiceId);
 
-        for (int i = 0; i < table.getRowCount(); i++) {
-
-            String value = table.getValueAt(i, 8).toString(); // cột "Thành tiền"
-
-            value = value.replace(".", "").replace(",", "");
-
-            totalAmount += Float.parseFloat(value);
-        }
-
-        boolean updated = invoiceService.updateTotalAmount(invoiceId, totalAmount);
+        // ===== UPDATE DB =====
+        boolean updated = invoiceService.updateTotalAmount(invoiceId, finalAmount);
 
         if (!updated) {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật tổng tiền!");
@@ -1248,7 +1280,7 @@ public class OrderUI extends JFrame {
             int confirm = JOptionPane.showConfirmDialog(
                     this,
                     "Xác nhận thanh toán tiền mặt?\nSố tiền: " 
-                    + moneyFormat.format(totalAmount) + " VND",
+                    + moneyFormat.format(finalAmount) + " VND",
                     "Xác nhận",
                     JOptionPane.YES_NO_OPTION
             );
@@ -1259,9 +1291,9 @@ public class OrderUI extends JFrame {
 
                 if (success) {
 
-                    // ===== TRỪ SỐ LƯỢNG SẢN PHẨM =====
                     productVariantService.updateStockAfterPayment(invoiceId);
-                    // ===== RESET CUSTOMER =====
+
+                    // RESET CUSTOMER
                     selectedCustomerId = null;
                     jLabel4.setText("");
                     jLabel5.setText("");
@@ -1271,21 +1303,15 @@ public class OrderUI extends JFrame {
                     showInvoiceDialog(invoiceId);   
                     initCart();
                     initProduct();
-                    
-                    selectedCustomerId = null;
 
-                    jLabel4.setText(""); 
-                    jLabel5.setText("");   
-                    lbAddress.setText("");
-            } else {
-                JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+                }
             }
         }
-    }
 
         // ===== CHUYỂN KHOẢN =====
         else if (choice == 1) {
-
             showQRDialog(invoiceId);
         }
     }//GEN-LAST:event_btnPaymentActionPerformed

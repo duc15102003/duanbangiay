@@ -3,8 +3,7 @@ package enums;
 public enum OrderStatusEnum {
     
     PENDING_PAYMENT(1, "Chờ thanh toán"),
-    PAID(2, "Đã thanh toán"),
-    CANCELLED(3, "Đã hủy");
+    PAID(2, "Đã thanh toán");
 
     private final int value;
     private final String label;

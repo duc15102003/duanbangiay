@@ -95,6 +95,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         cbbCategory.addActionListener(e -> reloadInvoiceItems());
         cbbSize.addActionListener(e -> reloadInvoiceItems());
         cbbColor.addActionListener(e -> reloadInvoiceItems());
+        initStatusComboBox();
     }
 
     public void resetForm(){
@@ -142,9 +143,20 @@ public class InvoiceUI extends javax.swing.JPanel {
 
         List<Invoice> list = cartDAO.findAll(filter, null);
 
+        String selectedStatus = (String) cbbStatus.getSelectedItem();
+
         invoices = list.stream()
-                .filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
-                .toList();
+            // bỏ pending nếu bạn vẫn muốn
+            .filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
+
+            // ===== FILTER STATUS =====
+            .filter(i -> {
+                if (selectedStatus == null || selectedStatus.equals("Tất cả")) {
+                    return true;
+                }
+                return i.getStatus().getLabel().equals(selectedStatus);
+            })
+            .toList();
 
         DefaultTableModel model = (DefaultTableModel) tblInvoice.getModel();
         model.setRowCount(0);
@@ -241,6 +253,20 @@ public class InvoiceUI extends javax.swing.JPanel {
             cbbSize.addItem("Tất cả");
             cbbColor.addItem("Tất cả");
         }
+    
+    private void initStatusComboBox() {
+
+        cbbStatus.removeAllItems();
+
+        cbbStatus.addItem("Tất cả");
+
+        for (enums.OrderStatusEnum status : enums.OrderStatusEnum.values()) {
+            cbbStatus.addItem(status.getLabel());
+        }
+
+        // ===== EVENT FILTER =====
+        cbbStatus.addActionListener(e -> loadInvoiceTable());
+    }
 
         public void loadFilterData(
             java.util.List<entity.Brand> brands,
@@ -503,6 +529,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         cbbCategory = new javax.swing.JComboBox<>();
         cbbBrand = new javax.swing.JComboBox<>();
         txtSearchInvoiceItem = new javax.swing.JTextField();
+        cbbStatus = new javax.swing.JComboBox<>();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -595,6 +622,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                         .addComponent(txtSearchInvoiceItem, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
                         .addComponent(jLabel3)
                         .addGap(18, 18, 18)
                         .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -619,7 +648,9 @@ public class InvoiceUI extends javax.swing.JPanel {
                             .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)))
                     .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -668,6 +699,7 @@ public class InvoiceUI extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cbbCategory;
     private javax.swing.JComboBox<String> cbbColor;
     private javax.swing.JComboBox<String> cbbSize;
+    private javax.swing.JComboBox<String> cbbStatus;
     private com.toedter.calendar.JDateChooser dcFrom;
     private com.toedter.calendar.JDateChooser dcTo;
     private javax.swing.JLabel jLabel1;
