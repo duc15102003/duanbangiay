@@ -436,6 +436,8 @@ public class DiscountUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblDiscountMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblDiscountMouseClicked
+        txtCode.enable(false);
+        
         int row = tblDiscount.getSelectedRow();
 
         if(row < 0) return;

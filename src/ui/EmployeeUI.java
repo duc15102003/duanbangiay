@@ -497,6 +497,7 @@ public class EmployeeUI extends javax.swing.JPanel {
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void tblEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblEmployeeMouseClicked
+        txtCode.enable(false);
         int row = tblEmployee.getSelectedRow();
 
         if(row != -1){

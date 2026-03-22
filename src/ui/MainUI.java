@@ -13,11 +13,12 @@ public class MainUI extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainUI.class.getName());
     
     private DashboardUI dashboardUI;
-    private ProductVariantUI productVariantUI;
+    private ProductManagerUI productManagerUI;
     private CustomerUI customerUI;
     private EmployeeUI employeeUI;
     private InvoiceUI invoiceUI;
     private DiscountUI discountUI;
+    private AttributeUI attributeUI;
     
     private BrandService brandService = new BrandService();
     private CategoryService categoryService = new CategoryService();
@@ -46,18 +47,20 @@ public class MainUI extends javax.swing.JFrame {
     private void initView() {
 
         dashboardUI = new DashboardUI();
-        productVariantUI = new ProductVariantUI();
+        productManagerUI = new ProductManagerUI();
         customerUI = new CustomerUI();
         employeeUI = new EmployeeUI();
         invoiceUI = new InvoiceUI();
         discountUI = new DiscountUI();
+        attributeUI = new AttributeUI();
 
         pnContent.add(dashboardUI, "dashboard");
-        pnContent.add(productVariantUI, "product_variant");
+        pnContent.add(productManagerUI, "product_manager");
         pnContent.add(customerUI, "customer");
         pnContent.add(employeeUI, "employee");
         pnContent.add(invoiceUI, "invoice");
         pnContent.add(discountUI, "discount");
+        pnContent.add(attributeUI, "attribute");
         
         showDashboard();
     }
@@ -69,9 +72,15 @@ public class MainUI extends javax.swing.JFrame {
     }
 
     private void showProduct() {
-        productVariantUI.reloadData();
+        //productManagerUI.reloadData();
         CardLayout card = (CardLayout) pnContent.getLayout();
-        card.show(pnContent, "product_variant");
+        card.show(pnContent, "product_manager");
+    }
+    
+    private void showAttribute() {
+        //productManagerUI.reloadData();
+        CardLayout card = (CardLayout) pnContent.getLayout();
+        card.show(pnContent, "attribute");
     }
     
     private void showCustomer(){
@@ -121,6 +130,7 @@ public class MainUI extends javax.swing.JFrame {
         lbName = new javax.swing.JLabel();
         lbLogout = new javax.swing.JLabel();
         lbInvoice1 = new javax.swing.JLabel();
+        lbDashboard1 = new javax.swing.JLabel();
         pnContent = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -222,6 +232,17 @@ public class MainUI extends javax.swing.JFrame {
             }
         });
 
+        lbDashboard1.setBackground(new java.awt.Color(255, 255, 255));
+        lbDashboard1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbDashboard1.setForeground(new java.awt.Color(255, 255, 255));
+        lbDashboard1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbDashboard1.setText("Thuộc tính");
+        lbDashboard1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbDashboard1MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnMenuLayout = new javax.swing.GroupLayout(pnMenu);
         pnMenu.setLayout(pnMenuLayout);
         pnMenuLayout.setHorizontalGroup(
@@ -236,7 +257,8 @@ public class MainUI extends javax.swing.JFrame {
                     .addComponent(lbCustomer, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lbInvoice, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lbInvoice1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lbInvoice1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbDashboard1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(100, Short.MAX_VALUE))
             .addComponent(lbLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -247,11 +269,13 @@ public class MainUI extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
                 .addComponent(lbName)
-                .addGap(97, 97, 97)
+                .addGap(55, 55, 55)
                 .addComponent(lbDashboard)
                 .addGap(40, 40, 40)
                 .addComponent(ldProduct)
                 .addGap(40, 40, 40)
+                .addComponent(lbDashboard1)
+                .addGap(39, 39, 39)
                 .addComponent(lbEmployee)
                 .addGap(40, 40, 40)
                 .addComponent(lbCustomer)
@@ -324,6 +348,10 @@ public class MainUI extends javax.swing.JFrame {
         showDashboard();
     }//GEN-LAST:event_lbDashboardMouseClicked
 
+    private void lbDashboard1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbDashboard1MouseClicked
+        showAttribute();
+    }//GEN-LAST:event_lbDashboard1MouseClicked
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -350,6 +378,7 @@ public class MainUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lbCustomer;
     private javax.swing.JLabel lbDashboard;
+    private javax.swing.JLabel lbDashboard1;
     private javax.swing.JLabel lbEmployee;
     private javax.swing.JLabel lbInvoice;
     private javax.swing.JLabel lbInvoice1;

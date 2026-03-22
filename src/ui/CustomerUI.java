@@ -487,6 +487,7 @@ public class CustomerUI extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void tblCustomerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCustomerMouseClicked
+        txtCode.enable(false);
         int row = tblCustomer.getSelectedRow();
 
         if(row != -1){

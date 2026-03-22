@@ -21,7 +21,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -213,6 +212,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     private void loadTable(ProductVariantFilter filter){
 
+        imageCache.clear();
+        
         listProductVariant = productVariantService.findAll(filter);
 
         productVariantMap.clear();
@@ -257,11 +258,13 @@ public class ProductVariantUI extends javax.swing.JPanel {
 
         if(url == null || url.isBlank()) return null;
 
+        // ===== CACHE HIT =====
         ImageIcon cached = imageCache.get(url);
         if(cached != null){
             return cached;
         }
 
+        // ===== LOAD ASYNC =====
         imageLoader.submit(() -> {
             try{
 
@@ -269,28 +272,31 @@ public class ProductVariantUI extends javax.swing.JPanel {
                 Image scaled = scaleImage(icon.getImage(), 90, 90);
                 ImageIcon finalIcon = new ImageIcon(scaled);
 
+                // lưu cache
                 imageCache.put(url, finalIcon);
 
+                // update UI
                 javax.swing.SwingUtilities.invokeLater(() -> {
 
                     for(int i = 0; i < tblProductVariant.getRowCount(); i++){
 
-                        Object value = tblProductVariant.getValueAt(i, 0);
-
-                        if(value == null){
-
-                            String code = tblProductVariant.getValueAt(i,1).toString();
-                            ProductVariant pv = productVariantMap.get(code);
+                        try{
+                            int id = (int) tblProductVariant.getValueAt(i, 11);
+                            ProductVariant pv = productVariantMap.get(id);
 
                             if(pv != null && url.equals(pv.getImage())){
                                 tblProductVariant.setValueAt(finalIcon, i, 0);
                             }
+
+                        }catch(Exception ex){
+                            ex.printStackTrace();
                         }
                     }
 
                 });
 
             }catch(Exception e){
+                e.printStackTrace();
             }
         });
 
@@ -559,6 +565,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     public void reloadData(){
         refreshForm();
+        imageCache.clear();
         loadTable(buildProductFilter());
     }
     
@@ -592,9 +599,6 @@ public class ProductVariantUI extends javax.swing.JPanel {
         txtSearch = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblProductVariant = new javax.swing.JTable();
-        btnOpenPopupProduct = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
         lbImagePreview = new javax.swing.JLabel();
         txtImage = new javax.swing.JTextField();
         cbbSearchColor = new javax.swing.JComboBox<>();
@@ -682,27 +686,6 @@ public class ProductVariantUI extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(tblProductVariant);
 
-        btnOpenPopupProduct.setText("+");
-        btnOpenPopupProduct.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnOpenPopupProductActionPerformed(evt);
-            }
-        });
-
-        jButton2.setText("+");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-
-        jButton3.setText("+");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
-
         txtImage.setMaximumSize(new java.awt.Dimension(222, 2147483647));
         txtImage.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -746,23 +729,18 @@ public class ProductVariantUI extends javax.swing.JPanel {
                                 .addGap(195, 195, 195))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel4)
                                 .addGap(18, 18, 18)
                                 .addComponent(cbbSize, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(cbbColor, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
-                                .addComponent(cbbProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnOpenPopupProduct)
-                            .addComponent(jButton2)
-                            .addComponent(jButton3))
+                                .addComponent(cbbProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cbbColor, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(96, 96, 96)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel7)
@@ -809,13 +787,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
                             .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(84, 84, 84)
-                        .addComponent(lbImagePreview, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnOpenPopupProduct)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton2)
-                        .addGap(20, 20, 20)
-                        .addComponent(jButton3)))
+                        .addComponent(lbImagePreview, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnInsert)
@@ -830,7 +802,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
                     .addComponent(cbbSearchCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbbSearchBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -951,56 +923,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
     private void txtPriceKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceKeyReleased
         formatMoneyField();
     }//GEN-LAST:event_txtPriceKeyReleased
-
-    private void btnOpenPopupProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenPopupProductActionPerformed
-        JFrame frame = new JFrame("Quản lý sản phẩm");
-
-        ProductUI productUI = new ProductUI(() -> {
-            reloadProductCombo();
-        });
-
-        frame.setContentPane(productUI);
-
-        frame.setSize(603, 684);
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        frame.setVisible(true);
-    }//GEN-LAST:event_btnOpenPopupProductActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        JFrame frame = new JFrame("Quản lý màu sắc");
-
-        ColorUI colorUI = new ColorUI(() -> {
-            reloadColorCombo();
-        });
-
-        frame.setContentPane(colorUI);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        JFrame frame = new JFrame("Quản lý kích thước");
-
-        SizeUI sizeUI = new SizeUI(() -> {
-            reloadColorCombo();
-        });
-
-        frame.setContentPane(sizeUI);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
-    }//GEN-LAST:event_jButton3ActionPerformed
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnInsert;
-    private javax.swing.JButton btnOpenPopupProduct;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnUpdate;
     private javax.swing.JComboBox<String> cbbColor;
@@ -1010,8 +937,6 @@ public class ProductVariantUI extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cbbSearchColor;
     private javax.swing.JComboBox<String> cbbSearchSize;
     private javax.swing.JComboBox<String> cbbSize;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

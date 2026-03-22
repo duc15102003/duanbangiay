@@ -50,6 +50,11 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
                 sql.append(" AND pv.size_id = ?");
                 params.add(filter.getSizeId());
             }
+            
+            if (filter.getProductId() != null) {
+                sql.append(" AND pv.product_id = ?");
+                params.add(filter.getProductId());
+            }
 
             if (filter.getColorId() != null) {
                 sql.append(" AND pv.color_id = ?");
