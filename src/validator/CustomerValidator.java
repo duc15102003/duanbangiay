@@ -14,6 +14,7 @@ public class CustomerValidator {
             return false;
         }
 
+        // ===== CODE =====
         if (c.getCode() == null || c.getCode().isBlank()) {
             JOptionPane.showMessageDialog(null, "Mã khách hàng không được để trống");
             return false;
@@ -23,31 +24,44 @@ public class CustomerValidator {
             return false;
         }
 
+        // ===== NAME =====
         if (c.getName() == null || c.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên khách hàng không được để trống");
             return false;
         }
 
-        if (c.getPhone() != null && !c.getPhone().isBlank()) {
-            if (!c.getPhone().matches("\\d+")) {
-                JOptionPane.showMessageDialog(null, "Số điện thoại không hợp lệ");
-                return false;
-            }
-            if (customerDAO.existsByPhone(c.getPhone())) {
-                JOptionPane.showMessageDialog(null, "Số điện thoại đã tồn tại");
-                return false;
-            }
+        // ===== PHONE =====
+        if (c.getPhone() == null || c.getPhone().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại không được để trống");
+            return false;
+        }
+        if (!c.getPhone().matches("0\\d{9}")) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại không hợp lệ (phải bắt đầu 0 và đủ 10 số)");
+            return false;
+        }
+        if (customerDAO.existsByPhone(c.getPhone())) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại đã tồn tại");
+            return false;
         }
 
-        if (c.getEmail() != null && !c.getEmail().isBlank()) {
-            if (!c.getEmail().matches(".+@.+\\..+")) {
-                JOptionPane.showMessageDialog(null, "Email không hợp lệ");
-                return false;
-            }
-            if (customerDAO.existsByEmail(c.getEmail())) {
-                JOptionPane.showMessageDialog(null, "Email đã tồn tại");
-                return false;
-            }
+        // ===== EMAIL =====
+        if (c.getEmail() == null || c.getEmail().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Email không được để trống");
+            return false;
+        }
+        if (!c.getEmail().matches(".+@.+\\..+")) {
+            JOptionPane.showMessageDialog(null, "Email không hợp lệ");
+            return false;
+        }
+        if (customerDAO.existsByEmail(c.getEmail())) {
+            JOptionPane.showMessageDialog(null, "Email đã tồn tại");
+            return false;
+        }
+
+        // ===== DATE OF BIRTH =====
+        if (c.getDateOfBirth() == null) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh phải được chọn");
+            return false;
         }
 
         return true;
