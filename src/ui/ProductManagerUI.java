@@ -31,14 +31,35 @@ public class ProductManagerUI extends javax.swing.JPanel {
 
     public ProductManagerUI() {
         initComponents();
-        
+
         initProductTable();
         initProductVariantTable();
-        
+
         loadProductUI();
         loadProductVariantUI();
-        
+
         loadProductTable();
+
+        jTabbedPane1.addChangeListener(e -> {
+            int selectedIndex = jTabbedPane1.getSelectedIndex();
+
+            switch(selectedIndex){
+                case 0:
+                    loadProductTable();
+                    int row = tblProduct.getSelectedRow();
+                    if(row >= 0){
+                        int productId = (int) tblProduct.getValueAt(row, 5);
+                        loadVariantByProduct(productId);
+                    }
+                    break;
+                case 1:
+                    loadProductUI();
+                    break;
+                case 2:
+                    loadProductVariantUI();
+                    break;
+            }
+        });
     }
     
     private void loadProductUI() {
@@ -59,7 +80,7 @@ public class ProductManagerUI extends javax.swing.JPanel {
         ProductVariantUI variantUI = new ProductVariantUI();
 
         pnProductDetail.setLayout(new java.awt.BorderLayout());
-        pnProductDetail.add(variantUI, java.awt.BorderLayout.CENTER);
+        pnProductDetail.add(variantUI, java.awt.BorderLayout.CENTER);   
 
         pnProductDetail.revalidate();
         pnProductDetail.repaint();
