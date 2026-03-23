@@ -570,18 +570,18 @@ public class ProductVariantUI extends javax.swing.JPanel {
     }
     
     public void selectProduct(int productId, String productName) {
-        Product found = null;
+        Integer targetId = productId;
+
+        listProduct = productService.findAll(null);      
+        loadCombo(cbbProduct, listProduct, " ");   
+
         for (int i = 0; i < cbbProduct.getItemCount(); i++) {
             Object item = cbbProduct.getItemAt(i);
-            if (item instanceof Product p && p.getId() == productId) {
-                found = p;
+            if (item instanceof Product p && p.getId() == targetId) {
+                cbbProduct.setSelectedItem(p);
                 break;
             }
         }
-
-        if (found == null) return;
-
-        cbbProduct.setSelectedItem(found);
     }
 
     @SuppressWarnings("unchecked")
