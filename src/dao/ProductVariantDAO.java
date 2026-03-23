@@ -315,4 +315,22 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
 
         return true;
     }
+    
+    public int countByProductId(int productId) {
+        String sql = "SELECT COALESCE(SUM(quantity), 0) AS total FROM product_variant WHERE product_id = ? AND deleted_at IS NULL";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
