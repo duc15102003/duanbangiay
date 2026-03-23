@@ -12,10 +12,11 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import service.DashboardService;
 
 public class DashboardUI extends javax.swing.JPanel {
-    
+
     private DashboardService dashboardService = new DashboardService();
 
     public DashboardUI() {
@@ -26,7 +27,6 @@ public class DashboardUI extends javax.swing.JPanel {
         bindDateChooserEvents();
 
         btnSearch.addActionListener(e -> reloadChart());
-
         cbbType.addActionListener(e -> {
             String type = getSelectedType();
             dcFrom.setDate(null);
@@ -35,6 +35,7 @@ public class DashboardUI extends javax.swing.JPanel {
             updateDateFormat(type);
             reloadChart();
         });
+        cbbTypeChart.addActionListener(e -> reloadChart());
 
         disablePopupIfNotDay(getSelectedType());
         reloadChart();
@@ -48,26 +49,16 @@ public class DashboardUI extends javax.swing.JPanel {
         if (fromDate != null) {
             LocalDate d = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             switch (type) {
-                case "MONTH":
-                    fromDate = Date.from(d.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    break;
-                case "YEAR":
-                    fromDate = Date.from(d.withDayOfYear(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    break;
+                case "MONTH" -> fromDate = Date.from(d.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                case "YEAR" -> fromDate = Date.from(d.withDayOfYear(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
             }
         }
 
         if (toDate != null) {
             LocalDate d = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             switch (type) {
-                case "MONTH":
-                    toDate = Date.from(d.withDayOfMonth(d.lengthOfMonth())
-                            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-                    break;
-                case "YEAR":
-                    toDate = Date.from(d.withDayOfYear(d.lengthOfYear())
-                            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-                    break;
+                case "MONTH" -> toDate = Date.from(d.withDayOfMonth(d.lengthOfMonth()).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+                case "YEAR" -> toDate = Date.from(d.withDayOfYear(d.lengthOfYear()).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
             }
         }
 
@@ -79,18 +70,33 @@ public class DashboardUI extends javax.swing.JPanel {
             return;
         }
 
-        loadChart(type, from, to);
+        if ("Biểu đồ hình tròn".equals(cbbTypeChart.getSelectedItem().toString())) {
+            loadPieChart(type, from, to);
+        } else {
+            loadBarChart(type, from, to);
+        }
+
         disablePopupIfNotDay(type);
     }
 
-    private void loadChart(String type, LocalDateTime from, LocalDateTime to) {
+    private void loadBarChart(String type, LocalDateTime from, LocalDateTime to) {
         JFreeChart chart = createBarChart(type, from, to);
         ChartPanel chartPanel = new ChartPanel(chart);
 
         pnChart.removeAll();
         pnChart.setLayout(new BorderLayout());
         pnChart.add(chartPanel, BorderLayout.CENTER);
+        pnChart.revalidate();
+        pnChart.repaint();
+    }
 
+    private void loadPieChart(String type, LocalDateTime from, LocalDateTime to) {
+        JFreeChart chart = createPieChart(type, from, to);
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        pnChart.removeAll();
+        pnChart.setLayout(new BorderLayout());
+        pnChart.add(chartPanel, BorderLayout.CENTER);
         pnChart.revalidate();
         pnChart.repaint();
     }
@@ -100,17 +106,10 @@ public class DashboardUI extends javax.swing.JPanel {
         List<RevenueDTO> data;
 
         switch (type) {
-            case "DAY":
-                data = dashboardService.getRevenueByDay(from, to);
-                break;
-            case "MONTH":
-                data = dashboardService.getRevenueByMonth(from, to);
-                break;
-            case "YEAR":
-                data = dashboardService.getRevenueByYear(from, to);
-                break;
-            default:
-                data = List.of();
+            case "DAY" -> data = dashboardService.getRevenueByDay(from, to);
+            case "MONTH" -> data = dashboardService.getRevenueByMonth(from, to);
+            case "YEAR" -> data = dashboardService.getRevenueByYear(from, to);
+            default -> data = List.of();
         }
 
         if (data == null || data.isEmpty()) {
@@ -132,6 +131,28 @@ public class DashboardUI extends javax.swing.JPanel {
                 "VNĐ",
                 dataset
         );
+    }
+
+    private JFreeChart createPieChart(String type, LocalDateTime from, LocalDateTime to) {
+        List<RevenueDTO> data;
+        switch (type) {
+            case "DAY" -> data = dashboardService.getRevenueByDay(from, to);
+            case "MONTH" -> data = dashboardService.getRevenueByMonth(from, to);
+            case "YEAR" -> data = dashboardService.getRevenueByYear(from, to);
+            default -> data = List.of();
+        }
+
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        if (data == null || data.isEmpty()) {
+            dataset.setValue("Không có dữ liệu", 1);
+        } else {
+            for (RevenueDTO r : data) {
+                String label = (r.getLabel() == null || r.getLabel().isBlank()) ? "N/A" : r.getLabel();
+                dataset.setValue(label, r.getTotal());
+            }
+        }
+
+        return ChartFactory.createPieChart("Tỷ trọng doanh thu", dataset, true, true, false);
     }
 
     private LocalDateTime toLocalDateTime(Date date, boolean endOfDay) {
@@ -168,32 +189,18 @@ public class DashboardUI extends javax.swing.JPanel {
         boolean showDay;
 
         switch (type) {
-            case "DAY":
-                pattern = "dd/MM/yyyy";
-                showDay = true;
-                break;
-            case "MONTH":
-                pattern = "MM/yyyy";
-                showDay = false;
-                break;
-            case "YEAR":
-                pattern = "yyyy";
-                showDay = false;
-                break;
-            default:
-                pattern = "dd/MM/yyyy";
-                showDay = true;
+            case "DAY" -> { pattern = "dd/MM/yyyy"; showDay = true; }
+            case "MONTH" -> { pattern = "MM/yyyy"; showDay = false; }
+            case "YEAR" -> { pattern = "yyyy"; showDay = false; }
+            default -> { pattern = "dd/MM/yyyy"; showDay = true; }
         }
 
         dcFrom.setDateFormatString(pattern);
         dcTo.setDateFormatString(pattern);
-
         dcFrom.getJCalendar().getDayChooser().setVisible(showDay);
         dcTo.getJCalendar().getDayChooser().setVisible(showDay);
-
         dcFrom.getJCalendar().setWeekOfYearVisible(false);
         dcTo.getJCalendar().setWeekOfYearVisible(false);
-
         disablePopupIfNotDay(type);
 
         LocalDate now = LocalDate.now();
@@ -201,20 +208,14 @@ public class DashboardUI extends javax.swing.JPanel {
         Date to = dcTo.getDate();
 
         switch (type) {
-            case "MONTH":
-                if (from == null)
-                    from = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                if (to == null)
-                    to = Date.from(now.withDayOfMonth(now.lengthOfMonth())
-                            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-                break;
-            case "YEAR":
-                if (from == null)
-                    from = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-                if (to == null)
-                    to = Date.from(now.withDayOfYear(now.lengthOfYear())
-                            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
-                break;
+            case "MONTH" -> {
+                if (from == null) from = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                if (to == null) to = Date.from(now.withDayOfMonth(now.lengthOfMonth()).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+            }
+            case "YEAR" -> {
+                if (from == null) from = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                if (to == null) to = Date.from(now.withDayOfYear(now.lengthOfYear()).atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant());
+            }
         }
 
         dcFrom.setDate(from);
@@ -245,12 +246,13 @@ public class DashboardUI extends javax.swing.JPanel {
         dcFrom = new com.toedter.calendar.JDateChooser();
         dcTo = new com.toedter.calendar.JDateChooser();
         btnSearch = new javax.swing.JButton();
+        cbbTypeChart = new javax.swing.JComboBox<>();
 
         javax.swing.GroupLayout pnChartLayout = new javax.swing.GroupLayout(pnChart);
         pnChart.setLayout(pnChartLayout);
         pnChartLayout.setHorizontalGroup(
             pnChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 1038, Short.MAX_VALUE)
         );
         pnChartLayout.setVerticalGroup(
             pnChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -266,21 +268,25 @@ public class DashboardUI extends javax.swing.JPanel {
             }
         });
 
+        cbbTypeChart.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Biểu đồ cột", "Biểu đồ hình tròn" }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(pnChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cbbTypeChart, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(183, Short.MAX_VALUE))
-            .addComponent(pnChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -288,7 +294,9 @@ public class DashboardUI extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cbbTypeChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnSearch))
@@ -305,6 +313,7 @@ public class DashboardUI extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox<String> cbbType;
+    private javax.swing.JComboBox<String> cbbTypeChart;
     private com.toedter.calendar.JDateChooser dcFrom;
     private com.toedter.calendar.JDateChooser dcTo;
     private javax.swing.JPanel pnChart;
