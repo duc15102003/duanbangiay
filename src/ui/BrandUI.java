@@ -253,6 +253,15 @@ public class BrandUI extends javax.swing.JPanel {
             return;
         }
 
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn thêm thương hiệu này?", 
+            "Xác nhận thêm", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
+
         if(brandService.insert(b)){
             JOptionPane.showMessageDialog(this, "Thêm thương hiệu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadBrand();
@@ -270,6 +279,15 @@ public class BrandUI extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn thương hiệu cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn cập nhật thương hiệu này?", 
+            "Xác nhận cập nhật", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         Brand b = getFormData();
         b.setId(selectedBrand.getId());

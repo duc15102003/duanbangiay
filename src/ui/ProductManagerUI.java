@@ -44,25 +44,31 @@ public class ProductManagerUI extends javax.swing.JPanel {
         loadProductTable();
 
         jTabbedPane1.addChangeListener(e -> {
-            int selectedIndex = jTabbedPane1.getSelectedIndex();
+        int selectedIndex = jTabbedPane1.getSelectedIndex();
 
-            switch(selectedIndex){
-                case 0:
-                    loadProductTable();
-                    int row = tblProduct.getSelectedRow();
-                    if(row >= 0){
-                        int productId = (int) tblProduct.getValueAt(row, 5);
-                        loadVariantByProduct(productId);
-                    }
-                    break;
-                case 1:
-                    loadProductUI();
-                    break;
-                case 2:
-                    loadProductVariantUI();
-                    break;
-            }
-        });
+        switch(selectedIndex){
+            case 0:
+                loadProductTable();
+                int row = tblProduct.getSelectedRow();
+                if(row >= 0){
+                    int productId = (int) tblProduct.getValueAt(row, 5);
+                    loadVariantByProduct(productId);
+                }
+                break;
+            case 1: // Tab ProductUI
+                loadProductUI();
+                if (productUI != null) {
+                    productUI.reloadAllData();
+                }
+                break;
+            case 2: // Tab ProductVariantUI
+                loadProductVariantUI();
+                if (productVariantUI != null) {
+                    productVariantUI.reloadAllData(); 
+                }
+                break;
+        }
+    });
     }
     
     private void loadProductUI() {

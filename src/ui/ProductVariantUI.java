@@ -583,6 +583,37 @@ public class ProductVariantUI extends javax.swing.JPanel {
             }
         }
     }
+    
+    public void reloadAllData() {
+        try {
+            listProduct  = productService.findAll(null);
+            listColor    = colorService.findAll(null);
+            listSize     = sizeService.findAll(null);
+            listBrand    = brandService.findAll(null); 
+            listCategory = categoryService.findAll(null); 
+
+            loadCombo(cbbProduct, listProduct, " ");
+            loadCombo(cbbColor,   listColor,   " ");
+            loadCombo(cbbSize,    listSize,    " ");
+
+            loadCombo(cbbSearchBrand,    listBrand,    "-- Chọn thương hiệu --");
+            loadCombo(cbbSearchCategory, listCategory, "-- Chọn danh mục --");
+            loadCombo(cbbSearchColor,    listColor,    "-- Chọn màu sắc --");
+            loadCombo(cbbSearchSize,     listSize,     "-- Chọn kích thước --");
+
+            refreshForm();
+            imageCache.clear();
+            loadTable(buildProductFilter());
+
+            if(listener != null) {
+                listener.onDataChanged();
+            }
+
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải lại dữ liệu: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

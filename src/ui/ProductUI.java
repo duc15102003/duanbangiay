@@ -36,12 +36,14 @@ public class ProductUI extends javax.swing.JPanel  {
         initComponents();
         initData();
         initFilterEvent();
+        reloadAllData();
     }
     
     public ProductUI(ProductManagerUI manager) {
         this.parentManager = manager;
         initComponents();
         initData();
+        reloadAllData();
         initFilterEvent();
     }
 
@@ -242,13 +244,52 @@ public class ProductUI extends javax.swing.JPanel  {
         cbbSearchCategory.setSelectedIndex(0);
         cbbSearchStatus.setSelectedIndex(0);
         jTextField1.setText("");
+        
+        reloadAllData();
     }
 
     private void loadProductTable(){
         filterProduct();
     }
    
+    public void reloadAllData() {
+        try {
+            categories = categoryService.findAll(null);
+            brands = brandService.findAll(null);
 
+            loadCombo(cbbCategory, categories, "");
+            loadCombo(cbbBrand, brands, "");
+            loadStatus(cbbStatus, false);
+
+            loadCombo(cbbSearchCategory, categories, "-- Chọn danh mục --");
+            loadCombo(cbbSearchBrand, brands, "-- Chọn thương hiệu --");
+            loadStatus(cbbSearchStatus, true);
+
+            loadProductTable();
+
+            txtMaSP.setText("");
+            txtTenSP.setText("");
+            txtGhiChu.setText("");
+            txtQuantity.setText("");
+            cbbCategory.setSelectedIndex(0);
+            cbbBrand.setSelectedIndex(0);
+            cbbStatus.setSelectedIndex(0);
+
+            cbbSearchBrand.setSelectedIndex(0);
+            cbbSearchCategory.setSelectedIndex(0);
+            cbbSearchStatus.setSelectedIndex(0);
+            jTextField1.setText("");
+
+            if(listener != null) {
+                listener.onDataChanged();
+            }
+
+        } catch(Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải lại dữ liệu: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

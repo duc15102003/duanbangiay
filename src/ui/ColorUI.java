@@ -239,6 +239,15 @@ public class ColorUI extends javax.swing.JPanel {
             return;
         }
 
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn thêm màu sắc này?", 
+            "Xác nhận thêm", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
+
         if(colorService.insert(c)){
             JOptionPane.showMessageDialog(this, "Thêm màu sắc thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadColor();
@@ -256,6 +265,15 @@ public class ColorUI extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn màu cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn cập nhật màu sắc này?", 
+            "Xác nhận cập nhật", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         Color c = getFormData();
         c.setId(selectedColor.getId());

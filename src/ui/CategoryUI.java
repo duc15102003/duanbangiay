@@ -220,22 +220,24 @@ public class CategoryUI extends javax.swing.JPanel {
             return;
         }
 
-        int confirm = JOptionPane.showConfirmDialog(this, 
-                        "Bạn có chắc muốn xoá danh mục này?", 
-                        "Xác nhận xoá", 
-                        JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn xoá danh mục này?", 
+            "Xác nhận xoá", 
+            JOptionPane.YES_NO_OPTION
+        );
 
-        if(confirm == JOptionPane.YES_OPTION){
-            if(categoryService.delete(selectedCategory.getId())){
-                JOptionPane.showMessageDialog(this, "Xoá thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                loadCategory();
-                clearForm();
-                if(listener != null){
-                    listener.onDataChanged();
-                }
-            } else {
-                JOptionPane.showMessageDialog(this, "Xoá thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        if(confirm != JOptionPane.YES_OPTION) return;
+
+        if(categoryService.delete(selectedCategory.getId())){
+            JOptionPane.showMessageDialog(this, "Xoá thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            loadCategory();
+            clearForm();
+            if(listener != null){
+                listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Xoá thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnDelActionPerformed
 
@@ -259,6 +261,15 @@ public class CategoryUI extends javax.swing.JPanel {
             return;
         }
 
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn cập nhật danh mục này?", 
+            "Xác nhận sửa", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
+
         Category c = getFormData();
         c.setId(selectedCategory.getId());
 
@@ -281,6 +292,15 @@ public class CategoryUI extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Bạn có chắc muốn thêm danh mục này?", 
+            "Xác nhận thêm", 
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         if(categoryService.insert(c)){
             JOptionPane.showMessageDialog(this, "Thêm danh mục thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
