@@ -68,6 +68,20 @@ public class CustomerValidator {
             JOptionPane.showMessageDialog(null, "Ngày sinh phải được chọn");
             return false;
         }
+        
+        java.util.Date today = new java.util.Date();
+        if (c.getDateOfBirth().after(today)) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh không được lớn hơn ngày hiện tại");
+            return false;
+        }
+
+        long diff = today.getTime() - c.getDateOfBirth().getTime();
+        long age = diff / (1000L * 60 * 60 * 24 * 365);
+
+        if (age < 0) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh không hợp lệ");
+            return false;
+        }
 
         return true;
     }

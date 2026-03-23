@@ -170,6 +170,29 @@ public class EmployeeUI extends javax.swing.JPanel {
 
         return filter;
     }
+    
+    private boolean validateDateFormat() {
+        String dateStr = ((javax.swing.JTextField) dcBirth.getDateEditor().getUiComponent())
+                            .getText().trim();
+
+        if (dateStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập ngày sinh");
+            return false;
+        }
+
+        java.text.SimpleDateFormat sdf = 
+            new java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.ENGLISH);
+
+        sdf.setLenient(false);
+
+        try {
+            sdf.parse(dateStr);
+            return true;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Ngày sinh phải đúng định dạng: MM dd, yyyy");
+            return false;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -418,6 +441,10 @@ public class EmployeeUI extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         try{
             Employee e = getFormData();
+            
+            if (!validateDateFormat()) {
+                return;
+            }
 
             int confirm = JOptionPane.showConfirmDialog(
                 this,
@@ -450,6 +477,10 @@ public class EmployeeUI extends javax.swing.JPanel {
         if (row == -1) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần sửa");
             return;
+        }
+        
+        if (!validateDateFormat()) {
+                return;
         }
 
         int modelRow = tblEmployee.convertRowIndexToModel(row);

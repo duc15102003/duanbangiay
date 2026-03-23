@@ -76,6 +76,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
         enableTableImageHover();
         loadCombobox();
         reloadData();
+        
+        cbbSearchBrand.addActionListener(e -> searchTable());
+        cbbSearchCategory.addActionListener(e -> searchTable());
+        cbbSearchColor.addActionListener(e -> searchTable());
+        cbbSearchSize.addActionListener(e -> searchTable());
     }
     
     public ProductVariantUI(DataChangeListener listener) {
@@ -85,6 +90,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
         enableTableImageHover();
         loadCombobox();
         reloadData();
+        
+        cbbSearchBrand.addActionListener(e -> searchTable());
+        cbbSearchCategory.addActionListener(e -> searchTable());
+        cbbSearchColor.addActionListener(e -> searchTable());
+        cbbSearchSize.addActionListener(e -> searchTable());
     }
     
    private void reloadSizeCombo(){
@@ -345,6 +355,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
         Object obj = combo.getSelectedItem();
 
         if(obj == null) return null;
+
+        if(obj instanceof String) return null;
 
         if(obj instanceof Product p) return p.getId();
         if(obj instanceof Color c) return c.getId();
@@ -987,13 +999,13 @@ public class ProductVariantUI extends javax.swing.JPanel {
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnUpdate;
-    private javax.swing.JComboBox<String> cbbColor;
-    private javax.swing.JComboBox<String> cbbProduct;
-    private javax.swing.JComboBox<String> cbbSearchBrand;
-    private javax.swing.JComboBox<String> cbbSearchCategory;
-    private javax.swing.JComboBox<String> cbbSearchColor;
-    private javax.swing.JComboBox<String> cbbSearchSize;
-    private javax.swing.JComboBox<String> cbbSize;
+    private javax.swing.JComboBox<Object> cbbColor;
+    private javax.swing.JComboBox<Object> cbbProduct;
+    private javax.swing.JComboBox<Object> cbbSearchBrand;
+    private javax.swing.JComboBox<Object> cbbSearchCategory;
+    private javax.swing.JComboBox<Object> cbbSearchColor;
+    private javax.swing.JComboBox<Object> cbbSearchSize;
+    private javax.swing.JComboBox<Object> cbbSize;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
