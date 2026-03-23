@@ -4,6 +4,7 @@ import entity.Color;
 import entity.filter.ColorFilter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import listener.DataChangeListener;
 import service.ColorService;
@@ -233,39 +234,65 @@ public class ColorUI extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Color c = getFormData();
 
+        if(c.getCode().isEmpty() || c.getName().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         if(colorService.insert(c)){
+            JOptionPane.showMessageDialog(this, "Thêm màu sắc thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadColor();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại! Kiểm tra lại dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdActionPerformed
-        if(selectedColor == null) return;
+        if(selectedColor == null){
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn màu cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         Color c = getFormData();
-
         c.setId(selectedColor.getId());
 
         if(colorService.update(c)){
+            JOptionPane.showMessageDialog(this, "Cập nhật màu sắc thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadColor();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnUpdActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
-        if(selectedColor == null) return;
+        if(selectedColor == null){
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn màu cần xoá!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        if(colorService.delete(selectedColor.getId())){
-            loadColor();
-            clearForm();
-            if(listener != null){
-                listener.onDataChanged();
+        int confirm = JOptionPane.showConfirmDialog(this, 
+                        "Bạn có chắc muốn xoá màu sắc này?", 
+                        "Xác nhận xoá", 
+                        JOptionPane.YES_NO_OPTION);
+
+        if(confirm == JOptionPane.YES_OPTION){
+            if(colorService.delete(selectedColor.getId())){
+                JOptionPane.showMessageDialog(this, "Xoá thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                loadColor();
+                clearForm();
+                if(listener != null){
+                    listener.onDataChanged();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Xoá thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnDelActionPerformed

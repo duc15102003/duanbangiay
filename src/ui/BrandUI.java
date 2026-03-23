@@ -4,6 +4,7 @@ import entity.Brand;
 import entity.filter.BrandFilter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import listener.DataChangeListener;
 import service.BrandService;
@@ -247,39 +248,65 @@ public class BrandUI extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Brand b = getFormData();
 
+        if(b.getCode().isEmpty() || b.getName().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         if(brandService.insert(b)){
+            JOptionPane.showMessageDialog(this, "Thêm thương hiệu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadBrand();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại! Kiểm tra lại dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdActionPerformed
-        if(selectedBrand == null) return;
+        if(selectedBrand == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn thương hiệu cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         Brand b = getFormData();
-
         b.setId(selectedBrand.getId());
 
         if(brandService.update(b)){
+            JOptionPane.showMessageDialog(this, "Cập nhật thương hiệu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadBrand();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnUpdActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
-        if(selectedBrand == null) return;
+        if(selectedBrand == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn thương hiệu cần xoá!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        if(brandService.delete(selectedBrand.getId())){
-            loadBrand();
-            clearForm();
-            if(listener != null){
-                listener.onDataChanged();
+        int confirm = JOptionPane.showConfirmDialog(this, 
+                        "Bạn có chắc muốn xoá thương hiệu này?", 
+                        "Xác nhận xoá", 
+                        JOptionPane.YES_NO_OPTION);
+
+        if(confirm == JOptionPane.YES_OPTION){
+            if(brandService.delete(selectedBrand.getId())){
+                JOptionPane.showMessageDialog(this, "Xoá thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                loadBrand();
+                clearForm();
+                if(listener != null){
+                    listener.onDataChanged();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Xoá thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnDelActionPerformed

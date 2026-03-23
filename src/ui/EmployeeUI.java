@@ -417,8 +417,16 @@ public class EmployeeUI extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         try{
-
             Employee e = getFormData();
+
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn thêm nhân viên này?",
+                "Xác nhận thêm",
+                JOptionPane.YES_NO_OPTION
+            );
+
+            if(confirm != JOptionPane.YES_OPTION) return;
 
             boolean result = employeeService.insert(e);
 
@@ -439,24 +447,37 @@ public class EmployeeUI extends javax.swing.JPanel {
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         int row = tblEmployee.getSelectedRow();
 
-        if(row == -1){
-            JOptionPane.showMessageDialog(this,"Vui lòng chọn nhân viên cần sửa");
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần sửa");
             return;
         }
 
         int modelRow = tblEmployee.convertRowIndexToModel(row);
-
         Employee e = getFormData();
         e.setId(listEmployee.get(modelRow).getId());
 
-        boolean result = employeeService.update(e);
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn cập nhật nhân viên này?",
+            "Xác nhận sửa",
+            JOptionPane.YES_NO_OPTION
+        );
+        if (confirm != JOptionPane.YES_OPTION) return;
 
-        if(result){
-            JOptionPane.showMessageDialog(this,"Cập nhật thành công");
-            initEmployee();
-            resetForm();
-        }else{
-            JOptionPane.showMessageDialog(this,"Cập nhật thất bại");
+        try {
+            boolean result = employeeService.update(e);
+
+            if (result) {
+                JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+                initEmployee();
+                resetForm();
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật thất bại");
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 

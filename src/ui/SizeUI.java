@@ -4,6 +4,7 @@ import entity.Size;
 import entity.filter.SizeFilter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import listener.DataChangeListener;
 import service.SizeService;
@@ -230,28 +231,51 @@ public class SizeUI extends javax.swing.JPanel {
     private void btnUpdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdActionPerformed
         if(selectedSize == null) return;
 
-        Size s = getFormData();
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn cập nhật kích thước này?",
+                "Xác nhận cập nhật",
+                JOptionPane.YES_NO_OPTION
+        );
 
+        if(confirm != JOptionPane.YES_OPTION) return;
+
+        Size s = getFormData();
         s.setId(selectedSize.getId());
 
         if(sizeService.update(s)){
+            JOptionPane.showMessageDialog(this,"Cập nhật thành công!");
             loadSize();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this,"Cập nhật thất bại!");
         }
     }//GEN-LAST:event_btnUpdActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
         if(selectedSize == null) return;
 
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn xoá kích thước này?",
+                "Xác nhận xoá",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
+
         if(sizeService.delete(selectedSize.getId())){
+            JOptionPane.showMessageDialog(this,"Xoá thành công!");
             loadSize();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this,"Xoá thất bại!");
         }
     }//GEN-LAST:event_btnDelActionPerformed
 
@@ -264,12 +288,24 @@ public class SizeUI extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Size s = getFormData();
 
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn thêm kích thước này?",
+                "Xác nhận thêm",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
+
         if(sizeService.insert(s)){
+            JOptionPane.showMessageDialog(this,"Thêm thành công!");
             loadSize();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this,"Thêm thất bại!");
         }
     }//GEN-LAST:event_btnAddActionPerformed
 

@@ -498,23 +498,31 @@ public class CustomerUI extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         try{
+            Customer c = getFormData();
 
-        Customer c = getFormData();
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn thêm khách hàng này?",
+                "Xác nhận thêm",
+                JOptionPane.YES_NO_OPTION
+            );
 
-        boolean result = customerService.insert(c);
+            if(confirm != JOptionPane.YES_OPTION) return;
 
-        if(result){
-            JOptionPane.showMessageDialog(this,"Thêm khách hàng thành công");
-            initCustomer();
-            resetForm();
-        }else{
-            JOptionPane.showMessageDialog(this,"Thêm thất bại");
+            boolean result = customerService.insert(c);
+
+            if(result){
+                JOptionPane.showMessageDialog(this,"Thêm khách hàng thành công");
+                initCustomer();
+                resetForm();
+            }else{
+                JOptionPane.showMessageDialog(this,"Thêm thất bại");
+            }
+
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this,"Lỗi: " + e.getMessage());
+            e.printStackTrace();
         }
-
-    }catch(Exception e){
-        JOptionPane.showMessageDialog(this,"Lỗi: " + e.getMessage());
-        e.printStackTrace();
-    }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
@@ -529,6 +537,15 @@ public class CustomerUI extends javax.swing.JPanel {
 
         Customer c = getFormData();
         c.setId(listCustomer.get(modelRow).getId());
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn cập nhật khách hàng này?",
+            "Xác nhận sửa",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         boolean result = customerService.update(c);
 

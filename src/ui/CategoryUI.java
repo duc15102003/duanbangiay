@@ -4,6 +4,7 @@ import entity.Category;
 import entity.filter.CategoryFilter;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import listener.DataChangeListener;
 import service.CategoryService;
@@ -214,13 +215,26 @@ public class CategoryUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
-        if(selectedCategory == null) return;
+        if(selectedCategory == null){
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn danh mục cần xoá!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        if(categoryService.delete(selectedCategory.getId())){
-            loadCategory();
-            clearForm();
-            if(listener != null){
-                listener.onDataChanged();
+        int confirm = JOptionPane.showConfirmDialog(this, 
+                        "Bạn có chắc muốn xoá danh mục này?", 
+                        "Xác nhận xoá", 
+                        JOptionPane.YES_NO_OPTION);
+
+        if(confirm == JOptionPane.YES_OPTION){
+            if(categoryService.delete(selectedCategory.getId())){
+                JOptionPane.showMessageDialog(this, "Xoá thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                loadCategory();
+                clearForm();
+                if(listener != null){
+                    listener.onDataChanged();
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Xoá thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnDelActionPerformed
@@ -240,30 +254,43 @@ public class CategoryUI extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void btnUpdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdActionPerformed
-        if(selectedCategory == null) return;
+        if(selectedCategory == null){
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn danh mục cần sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         Category c = getFormData();
-
         c.setId(selectedCategory.getId());
 
         if(categoryService.update(c)){
+            JOptionPane.showMessageDialog(this, "Cập nhật danh mục thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadCategory();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnUpdActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Category c = getFormData();
 
+        if(c.getCode().isEmpty() || c.getName().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         if(categoryService.insert(c)){
+            JOptionPane.showMessageDialog(this, "Thêm danh mục thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
             loadCategory();
             clearForm();
             if(listener != null){
                 listener.onDataChanged();
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại! Kiểm tra lại dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAddActionPerformed
 

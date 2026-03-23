@@ -836,7 +836,15 @@ public class ProductVariantUI extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
-        try{
+        try {
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Bạn có chắc muốn thêm sản phẩm này?",
+                    "Xác nhận thêm",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if(confirm != JOptionPane.YES_OPTION) return;
 
             ProductVariant pv = getFormData();
 
@@ -845,32 +853,41 @@ public class ProductVariantUI extends javax.swing.JPanel {
             if(result){
                 JOptionPane.showMessageDialog(this,"Thêm thành công");
                 reloadData();
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(this,"Thêm thất bại");
             }
 
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(this,e.getMessage());
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(this,"Có lỗi xảy ra: " + e.getMessage());
+            e.printStackTrace();
         }
     }//GEN-LAST:event_btnInsertActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-            int row = tblProductVariant.getSelectedRow();
+        int row = tblProductVariant.getSelectedRow();
 
-            if(row < 0){
-                JOptionPane.showMessageDialog(this,"Chọn sản phẩm cần sửa");
-                return;
-            }
+        if(row < 0){
+            JOptionPane.showMessageDialog(this,"Chọn sản phẩm cần sửa");
+            return;
+        }
 
-            try{
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có chắc muốn cập nhật sản phẩm này?",
+                "Xác nhận cập nhật",
+                JOptionPane.YES_NO_OPTION
+        );
 
-                int id = (int) tblProductVariant.getValueAt(row, 11);
-                ProductVariant pvOld = productVariantMap.get(id);
-                
-                if(pvOld == null) return;
+        if(confirm != JOptionPane.YES_OPTION) return;
 
-                ProductVariant pv = getFormData();
-                pv.setId(pvOld.getId());
+        try{
+            int id = (int) tblProductVariant.getValueAt(row, 11);
+            ProductVariant pvOld = productVariantMap.get(id);
+
+            if(pvOld == null) return;
+
+            ProductVariant pv = getFormData();
+            pv.setId(pvOld.getId());
 
             boolean result = productVariantService.update(pv);
 
@@ -882,7 +899,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
             }
 
         }catch(Exception e){
-            JOptionPane.showMessageDialog(this,e.getMessage());
+            JOptionPane.showMessageDialog(this,"Có lỗi xảy ra: " + e.getMessage());
+            e.printStackTrace();
         }
     }//GEN-LAST:event_btnUpdateActionPerformed
 

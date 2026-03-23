@@ -505,28 +505,67 @@ public class DiscountUI extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Discount d = getForm();
+        if(d == null) return;
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn thêm phiếu giảm giá này?",
+            "Xác nhận thêm",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         if(discountService.insert(d)){
+            JOptionPane.showMessageDialog(this, "Thêm thành công");
             loadTable();
             refreshForm();
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm thất bại");
         }
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdActionPerformed
         Discount d = getForm();
+        if(d == null) return; 
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn cập nhật phiếu giảm giá này?",
+            "Xác nhận sửa",
+            JOptionPane.YES_NO_OPTION
+        );
+
+        if(confirm != JOptionPane.YES_OPTION) return;
 
         if(discountService.update(d)){
+            JOptionPane.showMessageDialog(this, "Cập nhật thành công");
             loadTable();
             refreshForm();
+        } else {
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại");
         }
     }//GEN-LAST:event_btnUpdActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
         if(selectedId == -1) return;
 
-        discountService.delete(selectedId);
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn xóa phiếu giảm giá này?",
+            "Xác nhận xóa",
+            JOptionPane.YES_NO_OPTION
+        );
 
-        loadTable();
+        if(confirm != JOptionPane.YES_OPTION) return;
+
+        if(discountService.delete(selectedId)){
+            JOptionPane.showMessageDialog(this, "Xóa thành công");
+            loadTable();
+            refreshForm();
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa thất bại");
+        }
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
