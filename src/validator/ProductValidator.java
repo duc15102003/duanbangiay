@@ -27,11 +27,6 @@ public class ProductValidator {
             return false;
         }
 
-        if (product.getStatus() == null) {
-            JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
-            return false;
-        }
-
         return true;
     }
 

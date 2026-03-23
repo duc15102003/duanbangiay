@@ -36,12 +36,7 @@ public class ProductVariantValidator {
             JOptionPane.showMessageDialog(null, "Vui lòng nhập đường dẫn hình ảnh");
             return false;
         }
-
-        if (pv.getStatus() == null) {
-            JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
-            return false;
-        }
-
+        
         return true;
     }
 

@@ -569,11 +569,19 @@ public class ProductVariantUI extends javax.swing.JPanel {
         loadTable(buildProductFilter());
     }
     
-    private void reloadProductCombo(){
+    public void selectProduct(int productId, String productName) {
+        Product found = null;
+        for (int i = 0; i < cbbProduct.getItemCount(); i++) {
+            Object item = cbbProduct.getItemAt(i);
+            if (item instanceof Product p && p.getId() == productId) {
+                found = p;
+                break;
+            }
+        }
 
-        listProduct = productService.findAll(null);
+        if (found == null) return;
 
-        loadCombo(cbbProduct, listProduct, " ");
+        cbbProduct.setSelectedItem(found);
     }
 
     @SuppressWarnings("unchecked")

@@ -22,6 +22,9 @@ public class ProductManagerUI extends javax.swing.JPanel {
     private ProductService productService = new ProductService();
     private ProductVariantService productVariantService = new ProductVariantService();
     
+    private ProductUI productUI;
+    private ProductVariantUI productVariantUI;
+    
     private List<Product> listProduct = new ArrayList<>();
     private Map<Integer, Product> productMap = new HashMap<>();
     
@@ -64,26 +67,32 @@ public class ProductManagerUI extends javax.swing.JPanel {
     
     private void loadProductUI() {
         pnProduct.removeAll();
-
-        ProductUI productUI = new ProductUI();
-
+        if (productUI == null) {
+            productUI = new ProductUI(this);
+        }
         pnProduct.setLayout(new java.awt.BorderLayout());
         pnProduct.add(productUI, java.awt.BorderLayout.CENTER);
-
         pnProduct.revalidate();
         pnProduct.repaint();
     }
     
     private void loadProductVariantUI() {
         pnProductDetail.removeAll();
-
-        ProductVariantUI variantUI = new ProductVariantUI();
-
+        if (productVariantUI == null) {
+            productVariantUI = new ProductVariantUI();
+        }
         pnProductDetail.setLayout(new java.awt.BorderLayout());
-        pnProductDetail.add(variantUI, java.awt.BorderLayout.CENTER);   
-
+        pnProductDetail.add(productVariantUI, java.awt.BorderLayout.CENTER);
         pnProductDetail.revalidate();
         pnProductDetail.repaint();
+    }
+    
+    public javax.swing.JTabbedPane getTabbedPane() {
+        return jTabbedPane1;
+    }
+
+    public ProductVariantUI getProductVariantUI() {
+        return productVariantUI;
     }
     
     private void initProductTable() {

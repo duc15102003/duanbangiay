@@ -29,14 +29,24 @@ public class ProductUI extends javax.swing.JPanel  {
     private List<Brand> brands = new ArrayList<>();
 
     private DataChangeListener listener;
+    
+    private ProductManagerUI parentManager;
 
     public ProductUI() {
         initComponents();
         initData();
         initFilterEvent();
     }
+    
+    public ProductUI(ProductManagerUI manager) {
+        this.parentManager = manager;
+        initComponents();
+        initData();
+        initFilterEvent();
+    }
 
-    public ProductUI(DataChangeListener listener) {
+    public ProductUI(ProductManagerUI manager, DataChangeListener listener) {
+        this.parentManager = manager;
         this.listener = listener;
         initComponents();
         initData();
@@ -235,15 +245,7 @@ public class ProductUI extends javax.swing.JPanel  {
     private void loadProductTable(){
         filterProduct();
     }
-    
-    //Reload cbb UI thay đổi dữ liệu (thêm, sửa xoá)
-    private void reloadBrandCombo(){
-        loadBrand();
-    }
-    
-    private void reloadCategoryCombo(){
-        loadCategory();
-    }
+   
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -487,9 +489,19 @@ public class ProductUI extends javax.swing.JPanel  {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jTable3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable3MouseClicked
-        txtMaSP.enable(false);
+        txtMaSP.setEnabled(false);
         int row = jTable3.getSelectedRow();
         fillForm(row);
+
+        if (evt.getClickCount() == 2 && row != -1) {
+            int productId = Integer.parseInt(jTable3.getValueAt(row, 6).toString());
+            String productName = jTable3.getValueAt(row, 1).toString();
+
+            if (parentManager != null) {
+                parentManager.getTabbedPane().setSelectedIndex(2);
+                parentManager.getProductVariantUI().selectProduct(productId, productName);
+            }
+        }
     }//GEN-LAST:event_jTable3MouseClicked
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
