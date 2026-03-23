@@ -1,10 +1,12 @@
 package validator;
 
+import dao.CustomerDAO;
 import entity.Customer;
-import enums.CustomerStatusEnum;
 import javax.swing.JOptionPane;
 
 public class CustomerValidator {
+
+    private static CustomerDAO customerDAO = new CustomerDAO();
 
     public static boolean validateCreate(Customer c) {
         if (c == null) {
@@ -16,20 +18,36 @@ public class CustomerValidator {
             JOptionPane.showMessageDialog(null, "Mã khách hàng không được để trống");
             return false;
         }
+        if (customerDAO.existsByCode(c.getCode())) {
+            JOptionPane.showMessageDialog(null, "Mã khách hàng đã tồn tại");
+            return false;
+        }
 
         if (c.getName() == null || c.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên khách hàng không được để trống");
             return false;
         }
 
-        if (c.getPhone() != null && !c.getPhone().isBlank() && !c.getPhone().matches("\\d+")) {
-            JOptionPane.showMessageDialog(null, "Số điện thoại không hợp lệ");
-            return false;
+        if (c.getPhone() != null && !c.getPhone().isBlank()) {
+            if (!c.getPhone().matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "Số điện thoại không hợp lệ");
+                return false;
+            }
+            if (customerDAO.existsByPhone(c.getPhone())) {
+                JOptionPane.showMessageDialog(null, "Số điện thoại đã tồn tại");
+                return false;
+            }
         }
 
-        if (c.getEmail() != null && !c.getEmail().isBlank() && !c.getEmail().matches(".+@.+\\..+")) {
-            JOptionPane.showMessageDialog(null, "Email không hợp lệ");
-            return false;
+        if (c.getEmail() != null && !c.getEmail().isBlank()) {
+            if (!c.getEmail().matches(".+@.+\\..+")) {
+                JOptionPane.showMessageDialog(null, "Email không hợp lệ");
+                return false;
+            }
+            if (customerDAO.existsByEmail(c.getEmail())) {
+                JOptionPane.showMessageDialog(null, "Email đã tồn tại");
+                return false;
+            }
         }
 
         return true;
@@ -40,6 +58,7 @@ public class CustomerValidator {
             JOptionPane.showMessageDialog(null, "ID khách hàng không hợp lệ");
             return false;
         }
+
         return validateCreate(c);
     }
 }

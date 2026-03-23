@@ -203,4 +203,45 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
 
         return c;
     }
+    
+    public boolean existsByCode(String code) {
+        String sql = "SELECT 1 FROM customer WHERE LOWER(code) = LOWER(?) AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, code.trim());
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existsByPhone(String phone) {
+        if (phone == null || phone.isBlank()) return false;
+        String sql = "SELECT 1 FROM customer WHERE phone = ? AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone.trim());
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existsByEmail(String email) {
+        if (email == null || email.isBlank()) return false;
+        String sql = "SELECT 1 FROM customer WHERE LOWER(email) = LOWER(?) AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
