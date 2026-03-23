@@ -29,6 +29,11 @@ public class CustomerValidator {
             JOptionPane.showMessageDialog(null, "Tên khách hàng không được để trống");
             return false;
         }
+        
+        if (!c.getName().matches("[a-zA-Z\\sÀ-ỹ]+")) {
+            JOptionPane.showMessageDialog(null, "Tên khách hàng chỉ được chứa chữ cái và khoảng trắng");
+            return false;
+        }
 
         // ===== PHONE =====
         if (c.getPhone() == null || c.getPhone().isBlank()) {

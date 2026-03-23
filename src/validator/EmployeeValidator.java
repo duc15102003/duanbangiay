@@ -29,6 +29,11 @@ public class EmployeeValidator {
             JOptionPane.showMessageDialog(null, "Tên nhân viên không được để trống");
             return false;
         }
+        
+        if (!e.getName().matches("[a-zA-Z\\sÀ-ỹ]+")) {
+            JOptionPane.showMessageDialog(null, "Tên nhân viên chỉ được chứa chữ cái và khoảng trắng");
+            return false;
+        }
 
         // ===== USERNAME =====
         if (e.getUsername() == null || e.getUsername().isBlank()) {
