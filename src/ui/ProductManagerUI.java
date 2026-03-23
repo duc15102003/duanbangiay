@@ -288,13 +288,13 @@ public class ProductManagerUI extends javax.swing.JPanel {
             pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnListProductLayout.createSequentialGroup()
                 .addContainerGap(316, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 349, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
             .addGroup(pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnListProductLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(371, Short.MAX_VALUE)))
+                    .addContainerGap(361, Short.MAX_VALUE)))
         );
 
         jTabbedPane1.addTab("Danh sách sản phẩm", pnListProduct);
@@ -307,7 +307,7 @@ public class ProductManagerUI extends javax.swing.JPanel {
         );
         pnProductLayout.setVerticalGroup(
             pnProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 671, Short.MAX_VALUE)
+            .addGap(0, 661, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("Sản phẩm", pnProduct);
@@ -320,7 +320,7 @@ public class ProductManagerUI extends javax.swing.JPanel {
         );
         pnProductDetailLayout.setVerticalGroup(
             pnProductDetailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 671, Short.MAX_VALUE)
+            .addGap(0, 661, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("Sản phẩm biến thể", pnProductDetail);
