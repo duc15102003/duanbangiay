@@ -37,6 +37,8 @@ public class InvoiceItem {
     
     private int productId;
     
+    private String productCode;
+    
     private String productName;
     
     private String image;
@@ -69,6 +71,38 @@ public class InvoiceItem {
         this.image = image;
         this.status = status;
         this.description = description;
+    }
+
+    public InvoiceItem(int id, int invoiceId, int productVariantId, int quantity, float price, LocalDateTime createdAt, String invoiceCode, int brandId, String brandName, int categoryId, String categoryName, int sizeId, String sizeName, int colorId, String colorName, int productId, String productCode, String productName, String image, String status, String description) {
+        this.id = id;
+        this.invoiceId = invoiceId;
+        this.productVariantId = productVariantId;
+        this.quantity = quantity;
+        this.price = price;
+        this.createdAt = createdAt;
+        this.invoiceCode = invoiceCode;
+        this.brandId = brandId;
+        this.brandName = brandName;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.sizeId = sizeId;
+        this.sizeName = sizeName;
+        this.colorId = colorId;
+        this.colorName = colorName;
+        this.productId = productId;
+        this.productCode = productCode;
+        this.productName = productName;
+        this.image = image;
+        this.status = status;
+        this.description = description;
+    }
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public int getId() {

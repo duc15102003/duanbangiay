@@ -214,7 +214,8 @@ public class InvoiceUI extends javax.swing.JPanel {
             InvoiceItem item = currentItems.get(i);
 
             model.addRow(new Object[]{
-                null,
+                null,                      
+                item.getProductCode(),   
                 item.getProductName(),
                 item.getBrandName(),
                 item.getCategoryName(),
@@ -360,7 +361,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         DefaultTableModel model = new DefaultTableModel(
             new Object[][]{},
             new String[]{
-                "Ảnh","Tên sản phẩm","Thương hiệu","Danh mục","Màu sắc","Kích thước","Số lượng","Đơn giá"
+                "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Màu sắc", "Kích thước", "Số lượng", "Đơn giá"
             }
         ){
             @Override
@@ -540,11 +541,11 @@ public class InvoiceUI extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Ảnh", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Màu sắc", "Kích thước", "Số lượng", "Đơn giá"
+                "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Màu sắc", "Kích thước", "Số lượng", "Đơn giá"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                false, true, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

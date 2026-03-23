@@ -93,6 +93,7 @@ public class CartDAO {
                 i.code AS invoice_code,
 
                 p.id AS product_id,
+                p.code AS product_code,
                 p.name AS product_name,
 
                 b.id AS brand_id,
@@ -367,6 +368,7 @@ public class CartDAO {
         i.setColorName(rs.getString("color_name"));
 
         i.setProductId(rs.getInt("product_id"));
+        i.setProductCode(rs.getString("product_code"));
         i.setProductName(rs.getString("product_name"));
 
         i.setImage(rs.getString("image"));
