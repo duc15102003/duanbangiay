@@ -6,6 +6,7 @@ import entity.Discount;
 import entity.filter.DiscountFilter;
 
 import java.util.List;
+import validator.DiscountValidator;
 
 public class DiscountService {
 
@@ -22,7 +23,7 @@ public class DiscountService {
 
     public boolean insert(Discount request) {
 
-        if (request == null) {
+        if (!DiscountValidator.validateCreate(request)) {
             return false;
         }
 
@@ -31,7 +32,7 @@ public class DiscountService {
 
     public boolean update(Discount request) {
 
-        if (request == null || request.getId() == 0) {
+        if (!DiscountValidator.validateUpdate(request)) {
             return false;
         }
 

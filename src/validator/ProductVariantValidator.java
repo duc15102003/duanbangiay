@@ -1,20 +1,57 @@
 package validator;
 
 import entity.ProductVariant;
+import javax.swing.JOptionPane;
 
 public class ProductVariantValidator {
     
-    public static void validateCreate(ProductVariant productVariant) {
+    public static boolean validateCreate(ProductVariant pv) {
 
-        
-    }
-
-    public static void validateUpdate(ProductVariant productVariant) {
-
-        if (productVariant.getId() <= 0) {
-            throw new RuntimeException("ID sản phẩm không hợp lệ: " + productVariant.getId());
+        if (pv.getProductId() <= 0) {
+            JOptionPane.showMessageDialog(null, "Sản phẩm không hợp lệ");
+            return false;
         }
 
-        validateCreate(productVariant);
+        if (pv.getColorId() <= 0) {
+            JOptionPane.showMessageDialog(null, "Màu sắc không hợp lệ");
+            return false;
+        }
+
+        if (pv.getSizeId() <= 0) {
+            JOptionPane.showMessageDialog(null, "Kích thước không hợp lệ");
+            return false;
+        }
+
+        if (pv.getPrice() <= 0) {
+            JOptionPane.showMessageDialog(null, "Giá phải lớn hơn 0");
+            return false;
+        }
+
+        if (pv.getQuantity() < 0) {
+            JOptionPane.showMessageDialog(null, "Số lượng không hợp lệ");
+            return false;
+        }
+
+        if (pv.getImage() == null || pv.getImage().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Vui lòng nhập đường dẫn hình ảnh");
+            return false;
+        }
+
+        if (pv.getStatus() == null) {
+            JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean validateUpdate(ProductVariant pv) {
+
+        if (pv.getId() <= 0) {
+            JOptionPane.showMessageDialog(null, "ID không hợp lệ: " + pv.getId());
+            return false;
+        }
+
+        return validateCreate(pv);
     }
 }

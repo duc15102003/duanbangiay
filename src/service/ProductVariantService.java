@@ -9,7 +9,6 @@ import validator.ProductVariantValidator;
 public class ProductVariantService {
  
     private ProductVariantDAO productVariantDAO = new ProductVariantDAO();
-    private ProductVariantValidator productVariantValidator = new ProductVariantValidator();
     
     public List<ProductVariant> findAll(ProductVariantFilter filter) {
         return productVariantDAO.findAll(filter);
@@ -20,14 +19,16 @@ public class ProductVariantService {
     }
 
     public boolean create(ProductVariant product) {
-        productVariantValidator.validateCreate(product);
-
+        if (!ProductVariantValidator.validateCreate(product)) {
+            return false;
+        }
         return productVariantDAO.insert(product);
     }
 
     public boolean update(ProductVariant product) {
-        productVariantValidator.validateUpdate(product);
-        
+        if (!ProductVariantValidator.validateUpdate(product)) {
+            return false;
+        }
         return productVariantDAO.update(product);
     }
 

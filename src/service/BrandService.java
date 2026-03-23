@@ -4,11 +4,11 @@ import dao.BrandDAO;
 import entity.Brand;
 import entity.filter.BrandFilter;
 import java.util.List;
+import validator.BrandValidator;
 
 public class BrandService {
     
-    private BrandDAO brandDAO = new BrandDAO();
-    
+    private BrandDAO brandDAO = new BrandDAO();    
     public List<Brand> findAll(BrandFilter filter) {
         return brandDAO.findAll(filter);
     }  
@@ -18,10 +18,16 @@ public class BrandService {
     }
 
     public boolean insert(Brand request) {
+        if (!BrandValidator.validateCreate(request)) {
+            return false;
+        }
         return brandDAO.insert(request);
     }
 
     public boolean update(Brand request) {
+        if (!BrandValidator.validateUpdate(request)) {
+            return false;
+        }
         return brandDAO.update(request);
     }
 

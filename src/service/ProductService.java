@@ -9,7 +9,6 @@ import validator.ProductValidator;
 public class ProductService {
     
     private ProductDAO productDAO = new ProductDAO();
-    private ProductValidator productValidator = new ProductValidator();
 
     public List<Product> findAll(ProductFilter filter) {
         return productDAO.findAll(filter);
@@ -20,14 +19,16 @@ public class ProductService {
     }
 
     public boolean create(Product product) {
-        productValidator.validateCreate(product);
-
+        if (!ProductValidator.validateCreate(product)) {
+            return false;
+        }
         return productDAO.insert(product);
     }
 
     public boolean update(Product product) {
-        productValidator.validateUpdate(product);
-        
+        if (!ProductValidator.validateUpdate(product)) {
+            return false;
+        }
         return productDAO.update(product);
     }
 

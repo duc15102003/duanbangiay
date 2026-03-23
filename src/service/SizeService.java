@@ -4,6 +4,7 @@ import dao.SizeDAO;
 import entity.Size;
 import entity.filter.SizeFilter;
 import java.util.List;
+import validator.SizeValidator;
 
 public class SizeService {
     
@@ -18,10 +19,16 @@ public class SizeService {
     }
 
     public boolean insert(Size request) {
+        if (!SizeValidator.validateCreate(request)) {
+            return false;
+        }
         return sizeDAO.insert(request);
     }
 
     public boolean update(Size request) {
+        if (!SizeValidator.validateUpdate(request)) {
+            return false;
+        }
         return sizeDAO.update(request);
     }
 
