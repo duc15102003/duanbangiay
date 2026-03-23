@@ -276,4 +276,35 @@
 
             return false;
         }
+        
+        public boolean updateInvoicePaymentInfo(Invoice invoice) {
+            String sql = """
+                UPDATE invoice
+                SET employee_id = ?, 
+                    customer_id = ?, 
+                    customer_name = ?, 
+                    customer_phone = ?, 
+                    customer_address = ?, 
+                    employee_name = ?
+                WHERE id = ?
+            """;
+
+            try (Connection conn = dbConfig.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setObject(1, invoice.getEmployeeId());
+                ps.setObject(2, invoice.getCustomerId());
+                ps.setString(3, invoice.getCustomerName());
+                ps.setString(4, invoice.getCustomerPhone());
+                ps.setString(5, invoice.getCustomerAddress());
+                ps.setString(6, invoice.getEmployeeName());
+                ps.setInt(7, invoice.getId());
+
+                return ps.executeUpdate() > 0;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
     }

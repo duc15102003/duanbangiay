@@ -1,12 +1,15 @@
 package service;
 
+import dao.EmployeeDAO;
 import dao.InvoiceDAO;
 import entity.Invoice;
+import entity.Employee;
 import enums.OrderStatusEnum;
 
 public class InvoiceService {
     
     private InvoiceDAO invoiceDAO = new InvoiceDAO();
+    private EmployeeDAO employeeDAO = new EmployeeDAO();
     
     public Invoice findById(int id){
         return invoiceDAO.findById(id);
@@ -30,5 +33,40 @@ public class InvoiceService {
      
     public boolean updateTotalAmount(int invoiceId, float totalAmount) {
         return invoiceDAO.updateTotalAmount(invoiceId, totalAmount);
+    }
+    
+    public boolean updatePaymentInfo(int invoiceId,
+                                     Integer employeeId,
+                                     Integer customerId,
+                                     String customerName,
+                                     String customerPhone,
+                                     String customerAddress,
+                                     String employeeName) {
+        try {
+            Invoice invoice = invoiceDAO.findById(invoiceId);
+            if (invoice == null) return false;
+
+            invoice.setEmployeeId(employeeId);
+            invoice.setCustomerId(customerId);
+            invoice.setCustomerName(customerName);
+            invoice.setCustomerPhone(customerPhone);
+            invoice.setCustomerAddress(customerAddress);
+            invoice.setEmployeeName(employeeName);
+
+            return invoiceDAO.updateInvoicePaymentInfo(invoice);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String findNameById(Integer employeeId) {
+        if (employeeId == null) return null;
+        Employee emp = employeeDAO.findById(employeeId);
+        if (emp != null) {
+            return emp.getName();
+        }
+        return null;
     }
 }

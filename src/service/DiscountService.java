@@ -86,4 +86,8 @@ public class DiscountService {
 
         return discount;
     }
+    
+    public boolean useDiscount(String code){
+        return discountDAO.useDiscount(code);
+    }
 }

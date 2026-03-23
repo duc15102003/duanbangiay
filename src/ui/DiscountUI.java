@@ -78,43 +78,32 @@ public class DiscountUI extends javax.swing.JPanel {
         }
     }
     
-    private void loadTable(){
-
+    private void loadTable() {
         DiscountFilter filter = new DiscountFilter();
-
         filter.setSearch(txtSearch.getText());
 
         Date from = dcStartedAt.getDate();
         Date to = dcEndedAt.getDate();
 
-        if(from != null){
-            filter.setFromStartedAt(
-                LocalDateTime.ofInstant(from.toInstant(), ZoneId.systemDefault())
-            );
-        }
-
-        if(to != null){
-            filter.setToEndedAt(
-                LocalDateTime.ofInstant(to.toInstant(), ZoneId.systemDefault())
-            );
-        }
+        if (from != null) filter.setFromStartedAt(LocalDateTime.ofInstant(from.toInstant(), ZoneId.systemDefault()));
+        if (to != null) filter.setToEndedAt(LocalDateTime.ofInstant(to.toInstant(), ZoneId.systemDefault()));
 
         discounts = discountService.findAll(filter);
 
         model.setRowCount(0);
-
         DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-        for(Discount d : discounts){
-
+        for (Discount d : discounts) {
             model.addRow(new Object[]{
-                    d.getCode(),
-                    d.getDiscountType(),
-                    moneyFormat.format(d.getDiscountValue()),
-                    moneyFormat.format(d.getMaximumDiscount()),
-                    d.getStartedAt() != null ? d.getStartedAt().format(f) : "",
-                    d.getEndedAt() != null ? d.getEndedAt().format(f) : "",
-                    d.getStatus().getLabel()
+                d.getCode(),                                  
+                d.getDiscountType(),                             
+                moneyFormat.format(d.getDiscountValue()),   
+                d.getMaximumDiscount() != null ? moneyFormat.format(d.getMaximumDiscount()) : "",
+                d.getStartedAt() != null ? d.getStartedAt().format(f) : "",
+                d.getEndedAt() != null ? d.getEndedAt().format(f) : "",     
+                d.getQuantity(),                                
+                d.getDiscountCondition(),                       
+                d.getStatus().getLabel()                       
             });
         }
     }
@@ -140,10 +129,8 @@ public class DiscountUI extends javax.swing.JPanel {
 
         d.setId(selectedId);
         d.setCode(txtCode.getText().trim());
-
         d.setDiscountType(cbbDiscountType.getSelectedItem().toString());
 
-        // xử lý discountValue
         String discountValueStr = txtDiscountValue.getText().replace(".", "").trim();
         if (discountValueStr.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Giá trị giảm không được để trống");
@@ -157,6 +144,20 @@ public class DiscountUI extends javax.swing.JPanel {
         } else {
             d.setMaximumDiscount(null);
         }
+
+        String qtyStr = txtQuantity.getText().trim();
+        if (!qtyStr.isEmpty()) {
+            try {
+                d.setQuantity(Integer.parseInt(qtyStr));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Số lượng phải là số nguyên!");
+                return null;
+            }
+        } else {
+            d.setQuantity(0);
+        }
+
+        d.setDiscountCondition(txtDiscountCondition.getText().trim());
 
         Date from = dcFrom.getDate();
         Date to = dcTo.getDate();
@@ -234,6 +235,11 @@ public class DiscountUI extends javax.swing.JPanel {
         cbbDiscountType = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        txtQuantity = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtDiscountCondition = new javax.swing.JTextArea();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -255,13 +261,13 @@ public class DiscountUI extends javax.swing.JPanel {
 
         tblDiscount.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã", "Loại giảm giá", "Giá trị giảm", "Giá trị giảm tối đa", "Từ ngày", "Đến ngày", "Trạng thái"
+                "Mã", "Loại giảm giá", "Giá trị giảm", "Giá trị giảm tối đa", "Từ ngày", "Đến ngày", "Số lượng", "Điều kiện giảm", "Trạng thái"
             }
         ));
         tblDiscount.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -328,6 +334,14 @@ public class DiscountUI extends javax.swing.JPanel {
 
         jLabel10.setText("Từ");
 
+        jLabel11.setText("Số lượng");
+
+        jLabel12.setText("Điều kiện giảm");
+
+        txtDiscountCondition.setColumns(20);
+        txtDiscountCondition.setRows(5);
+        jScrollPane2.setViewportView(txtDiscountCondition);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -338,55 +352,65 @@ public class DiscountUI extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnAdd)
-                        .addGap(184, 184, 184)
-                        .addComponent(btnUpd))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel2)
-                            .addGap(72, 72, 72)
-                            .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel5)
-                                .addComponent(jLabel4))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(cbbDiscountType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtDiscountValue, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)))))
-                .addGap(158, 158, 158)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel6)
-                        .addComponent(jLabel7)
-                        .addComponent(jLabel8)
-                        .addComponent(jLabel9))
-                    .addComponent(btnDel))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtMaximumDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                            .addComponent(dcFrom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnDel)
+                        .addGap(158, 158, 158)
+                        .addComponent(btnRefr))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(dcTo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cbbStatus, 0, 239, Short.MAX_VALUE)))
-                    .addComponent(btnRefr))
-                .addContainerGap(135, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel12)
+                                .addGap(11, 11, 11)
+                                .addComponent(jScrollPane2))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addGap(72, 72, 72)
+                                .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel11))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(cbbDiscountType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(txtDiscountValue, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                                    .addComponent(txtQuantity))))
+                        .addGap(158, 158, 158)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(jLabel7)
+                            .addComponent(jLabel8)
+                            .addComponent(jLabel9))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtMaximumDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                                .addComponent(dcFrom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(dcTo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cbbStatus, 0, 239, Short.MAX_VALUE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(334, 334, 334)
-                        .addComponent(jLabel10)
-                        .addGap(18, 18, 18)
-                        .addComponent(dcStartedAt, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
-                        .addGap(68, 68, 68)
-                        .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
-                        .addComponent(dcEndedAt, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(393, 393, 393)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnUpd)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel10)
+                                .addGap(18, 18, 18)
+                                .addComponent(dcStartedAt, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(57, 57, 57)
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(dcEndedAt, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -402,7 +426,6 @@ public class DiscountUI extends javax.swing.JPanel {
                     .addComponent(txtMaximumDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -412,71 +435,68 @@ public class DiscountUI extends javax.swing.JPanel {
                             .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel9)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7)
-                            .addComponent(cbbDiscountType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel5)))))
-                .addGap(43, 43, 43)
+                            .addComponent(jLabel4)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel7)
+                                    .addComponent(cbbDiscountType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel5)))))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel11)
+                            .addComponent(txtQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel12)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnAdd)
                     .addComponent(btnUpd)
                     .addComponent(btnDel)
-                    .addComponent(btnRefr))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                    .addComponent(btnRefr)
+                    .addComponent(btnAdd))
+                .addGap(33, 33, 33)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(dcStartedAt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(dcEndedAt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(dcStartedAt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(dcEndedAt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblDiscountMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblDiscountMouseClicked
         txtCode.enable(false);
-        
         int row = tblDiscount.getSelectedRow();
-
-        if(row < 0) return;
+        if (row < 0) return;
 
         Discount d = discounts.get(row);
-
         selectedId = d.getId();
 
         txtCode.setText(d.getCode());
         txtDiscountValue.setText(moneyFormat.format(d.getDiscountValue()));
-        txtMaximumDiscount.setText(moneyFormat.format(d.getMaximumDiscount())); 
+        txtMaximumDiscount.setText(d.getMaximumDiscount() != null ? moneyFormat.format(d.getMaximumDiscount()) : "");
+        txtQuantity.setText(String.valueOf(d.getQuantity()));
+        txtDiscountCondition.setText(d.getDiscountCondition());
 
         cbbDiscountType.setSelectedItem(d.getDiscountType());
         cbbStatus.setSelectedItem(d.getStatus().getLabel());
-        
-        if(d.getStartedAt() != null){
-            Date from = Date.from(d.getStartedAt()
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant());
-            dcFrom.setDate(from);
-        } else {
-            dcFrom.setDate(null);
-        }
 
-        if(d.getEndedAt() != null){
-            Date to = Date.from(d.getEndedAt()
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant());
-            dcTo.setDate(to);
-        } else {
-            dcTo.setDate(null);
-        }
+        if (d.getStartedAt() != null) dcFrom.setDate(Date.from(d.getStartedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        else dcFrom.setDate(null);
+
+        if (d.getEndedAt() != null) dcTo.setDate(Date.from(d.getEndedAt().atZone(ZoneId.systemDefault()).toInstant()));
+        else dcTo.setDate(null);
     }//GEN-LAST:event_tblDiscountMouseClicked
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
@@ -539,6 +559,8 @@ public class DiscountUI extends javax.swing.JPanel {
     private com.toedter.calendar.JDateChooser dcTo;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -548,10 +570,13 @@ public class DiscountUI extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable tblDiscount;
     private javax.swing.JTextField txtCode;
+    private javax.swing.JTextArea txtDiscountCondition;
     private javax.swing.JTextField txtDiscountValue;
     private javax.swing.JTextField txtMaximumDiscount;
+    private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }

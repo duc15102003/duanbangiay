@@ -1,6 +1,5 @@
 package ui;
 
-import com.itextpdf.text.pdf.BaseFont;
 import entity.Brand;
 import entity.Category;
 import entity.Color;
@@ -61,6 +60,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfWriter;
+import entity.Customer;
 
 // ===== Swing =====
 import javax.swing.JFileChooser;
@@ -73,6 +73,7 @@ import java.io.InputStream;
 
 // ===== Utils =====
 import java.util.List;
+import service.CustomerService;
 
 public class OrderUI extends JFrame {
     
@@ -88,6 +89,7 @@ public class OrderUI extends JFrame {
     private CartService cartService = new CartService();
     private DiscountService discountService = new DiscountService();
     private EmployeeService employeeService = new EmployeeService();
+    private CustomerService customerService = new CustomerService();
 
     // ================= UI SUPPORT =================
     private JDialog imagePreviewDialog;
@@ -102,7 +104,7 @@ public class OrderUI extends JFrame {
     private Map<Integer, Discount> discountMap = new HashMap<>();
     
     //Thông tin id người mua được chọn và id người bán hàng
-    private Integer selectedCustomerId = null;
+    private Integer selectedCustomerId = 1;
     private Integer employeeId;
 
     // ================= FORMAT =================
@@ -1233,16 +1235,13 @@ public class OrderUI extends JFrame {
 
         // ===== CHECK GIỎ HÀNG =====
         JTable table = getCurrentCartTable();
-
         if (table == null || table.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Giỏ hàng đang trống!");
             return;
         }
 
         // ===== CHECK TỒN KHO =====
-        boolean isValidStock = productVariantService.checkStockBeforePayment(invoiceId);
-
-        if (!isValidStock) {
+        if (!productVariantService.checkStockBeforePayment(invoiceId)) {
             JOptionPane.showMessageDialog(this, "Số lượng sản phẩm không đủ để thanh toán!");
             return;
         }
@@ -1250,17 +1249,31 @@ public class OrderUI extends JFrame {
         // ===== LẤY FINAL AMOUNT (ĐÃ TRỪ DISCOUNT) =====
         float finalAmount = getFinalAmount(invoiceId);
 
-        // ===== UPDATE DB =====
-        boolean updated = invoiceService.updateTotalAmount(invoiceId, finalAmount);
-
-        if (!updated) {
+        // ===== CẬP NHẬT TỔNG TIỀN =====
+        if (!invoiceService.updateTotalAmount(invoiceId, finalAmount)) {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật tổng tiền!");
             return;
         }
 
+        // ===== LẤY THÔNG TIN KHÁCH & NHÂN VIÊN =====
+        Integer customerId = selectedCustomerId; // có thể null
+        Customer customer = null;
+        String customerName = "";
+        String customerPhone = "";
+        String customerAddress = "";
+
+        if (customerId != null) {
+            customer = customerService.findById(customerId);
+            if (customer != null) {
+                customerName = customer.getName();
+                customerPhone = customer.getPhone();
+                customerAddress = customer.getAddress();
+            }
+}
+        String employeeName = invoiceService.findNameById(employeeId);
+
         // ===== CHỌN PHƯƠNG THỨC =====
         Object[] options = {"Tiền mặt", "Chuyển khoản"};
-
         int choice = JOptionPane.showOptionDialog(
                 this,
                 "Chọn phương thức thanh toán",
@@ -1271,48 +1284,81 @@ public class OrderUI extends JFrame {
                 options,
                 options[0]
         );
-
         if (choice == -1) return;
 
-        // ===== TIỀN MẶT =====
-        if (choice == 0) {
-
+        if (choice == 0) { // ===== TIỀN MẶT =====
             int confirm = JOptionPane.showConfirmDialog(
                     this,
-                    "Xác nhận thanh toán tiền mặt?\nSố tiền: " 
-                    + moneyFormat.format(finalAmount) + " VND",
+                    "Xác nhận thanh toán tiền mặt?\nSố tiền: " + moneyFormat.format(finalAmount) + " VND",
                     "Xác nhận",
                     JOptionPane.YES_NO_OPTION
             );
 
             if (confirm == JOptionPane.YES_OPTION) {
 
-                boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
+        if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
 
-                if (success) {
+            productVariantService.updateStockAfterPayment(invoiceId);
 
-                    productVariantService.updateStockAfterPayment(invoiceId);
-
-                    // RESET CUSTOMER
-                    selectedCustomerId = null;
-                    jLabel4.setText("");
-                    jLabel5.setText("");
-                    lbAddress.setText("");
-
-                    JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-                    showInvoiceDialog(invoiceId);   
-                    initCart();
-                    initProduct();
-
-                } else {
-                    JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+            // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
+            String discountCode = txtDiscount.getText().trim();
+            if (!discountCode.isEmpty()) {
+                boolean used = discountService.useDiscount(discountCode);
+                if (!used) {
+                    JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
                 }
             }
-        }
 
-        // ===== CHUYỂN KHOẢN =====
-        else if (choice == 1) {
+            // ===== LƯU THÔNG TIN THANH TOÁN =====
+            invoiceService.updatePaymentInfo(
+                    invoiceId,
+                    employeeId,
+                    selectedCustomerId,
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    employeeName
+            );
+
+            // RESET CUSTOMER
+            selectedCustomerId = null;
+            jLabel4.setText("");
+            jLabel5.setText("");
+            lbAddress.setText("");
+
+            JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+            showInvoiceDialog(invoiceId);
+            initCart();
+            initProduct();
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+        }
+    }
+
+        } else if (choice == 1) { // ===== CHUYỂN KHOẢN =====
+            // showQRDialog sẽ xử lý updateStatus và reset khách hàng
             showQRDialog(invoiceId);
+            
+            // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
+            String discountCode = txtDiscount.getText().trim();
+            if (!discountCode.isEmpty()) {
+                boolean used = discountService.useDiscount(discountCode);
+                if (!used) {
+                    JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
+                }
+            }
+
+            // Lưu thông tin thanh toán (chỉ lưu info, QR đã update status)
+            invoiceService.updatePaymentInfo(
+                    invoiceId,
+                    employeeId,
+                    selectedCustomerId,
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    employeeName
+            );
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
 
