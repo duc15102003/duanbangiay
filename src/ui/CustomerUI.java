@@ -103,7 +103,7 @@ public class CustomerUI extends javax.swing.JPanel {
     private Object[] buildCustomerRow(Customer c){
 
         return new Object[]{
-            c.getId(),
+            c.getCode(),
             c.getName(),
             c.getPhone(),
             c.getEmail(),
