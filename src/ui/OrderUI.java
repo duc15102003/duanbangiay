@@ -700,7 +700,7 @@ public class OrderUI extends JFrame {
             initCart();
             initProduct();
 
-            selectedCustomerId = null;
+            selectedCustomerId = 1;
             jLabel4.setText("");
             jLabel5.setText("");
             lbAddress.setText("");
@@ -1350,7 +1350,7 @@ public class OrderUI extends JFrame {
                     );
 
                     // RESET CUSTOMER
-                    selectedCustomerId = null;
+                    selectedCustomerId = 1;
                     jLabel4.setText("");
                     jLabel5.setText("");
                     lbAddress.setText("");
@@ -1375,20 +1375,6 @@ public class OrderUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
                 }
             }
-
-            invoiceService.updatePaymentInfo(
-                    invoiceId,
-                    employeeId,
-                    selectedCustomerId,
-                    customerName,
-                    customerPhone,
-                    customerAddress,
-                    employeeName
-            );
-            
-                    System.out.println("employeeId" + employeeId);
-                    System.out.println("selectedCustomerId" + selectedCustomerId);
-
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
 
