@@ -663,26 +663,52 @@ public class OrderUI extends JFrame {
 
         btnConfirm.addActionListener(e -> {
 
-            boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
-            productVariantService.updateStockAfterPayment(invoiceId);
+        boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
+        productVariantService.updateStockAfterPayment(invoiceId);
 
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-                dialog.dispose();
-                showInvoiceDialog(invoiceId);
-                initCart();
-                initProduct();
+        if (success) {
 
-                // RESET CUSTOMER
-                selectedCustomerId = null;
-                jLabel4.setText("");
-                jLabel5.setText("");
-                lbAddress.setText("");
+            Customer customer = null;
+            String customerName = "";
+            String customerPhone = "";
+            String customerAddress = "";
 
-            } else {
-                JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+            if (selectedCustomerId != null) {
+                customer = customerService.findById(selectedCustomerId);
+                if (customer != null) {
+                    customerName = customer.getName();
+                    customerPhone = customer.getPhone();
+                    customerAddress = customer.getAddress();
+                }
             }
-        });
+
+            String employeeName = invoiceService.findNameById(employeeId);
+
+            invoiceService.updatePaymentInfo(
+                invoiceId,
+                employeeId,
+                selectedCustomerId,
+                customerName,
+                customerPhone,
+                customerAddress,
+                employeeName
+            );
+
+            JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+            dialog.dispose();
+            showInvoiceDialog(invoiceId);
+            initCart();
+            initProduct();
+
+            selectedCustomerId = null;
+            jLabel4.setText("");
+            jLabel5.setText("");
+            lbAddress.setText("");
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+        }
+    });
 
         bottomPanel.add(btnConfirm);
 
@@ -1086,10 +1112,13 @@ public class OrderUI extends JFrame {
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel24)
                                     .addComponent(tblThanhToan))
-                                .addGap(10, 10, 10)
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(btnPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(btnSelectCustomer)))
+                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel5Layout.createSequentialGroup()
+                                        .addGap(15, 15, 15)
+                                        .addComponent(btnSelectCustomer))
+                                    .addGroup(jPanel5Layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1))
@@ -1296,51 +1325,49 @@ public class OrderUI extends JFrame {
 
             if (confirm == JOptionPane.YES_OPTION) {
 
-        if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
+                if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
 
-            productVariantService.updateStockAfterPayment(invoiceId);
+                    productVariantService.updateStockAfterPayment(invoiceId);
 
-            // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
-            String discountCode = txtDiscount.getText().trim();
-            if (!discountCode.isEmpty()) {
-                boolean used = discountService.useDiscount(discountCode);
-                if (!used) {
-                    JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
+                    // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
+                    String discountCode = txtDiscount.getText().trim();
+                    if (!discountCode.isEmpty()) {
+                        boolean used = discountService.useDiscount(discountCode);
+                        if (!used) {
+                            JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
+                        }
+                    }
+
+                    // ===== LƯU THÔNG TIN THANH TOÁN =====
+                    invoiceService.updatePaymentInfo(
+                            invoiceId,
+                            employeeId,
+                            selectedCustomerId,
+                            customerName,
+                            customerPhone,
+                            customerAddress,
+                            employeeName
+                    );
+
+                    // RESET CUSTOMER
+                    selectedCustomerId = null;
+                    jLabel4.setText("");
+                    jLabel5.setText("");
+                    lbAddress.setText("");
+
+                    JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                    showInvoiceDialog(invoiceId);
+                    initCart();
+                    initProduct();
+
+                } else {
+                    JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
                 }
             }
-
-            // ===== LƯU THÔNG TIN THANH TOÁN =====
-            invoiceService.updatePaymentInfo(
-                    invoiceId,
-                    employeeId,
-                    selectedCustomerId,
-                    customerName,
-                    customerPhone,
-                    customerAddress,
-                    employeeName
-            );
-
-            // RESET CUSTOMER
-            selectedCustomerId = null;
-            jLabel4.setText("");
-            jLabel5.setText("");
-            lbAddress.setText("");
-
-            JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-            showInvoiceDialog(invoiceId);
-            initCart();
-            initProduct();
-
-        } else {
-            JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
-        }
-    }
 
         } else if (choice == 1) { // ===== CHUYỂN KHOẢN =====
-            // showQRDialog sẽ xử lý updateStatus và reset khách hàng
             showQRDialog(invoiceId);
             
-            // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
             String discountCode = txtDiscount.getText().trim();
             if (!discountCode.isEmpty()) {
                 boolean used = discountService.useDiscount(discountCode);
@@ -1349,7 +1376,6 @@ public class OrderUI extends JFrame {
                 }
             }
 
-            // Lưu thông tin thanh toán (chỉ lưu info, QR đã update status)
             invoiceService.updatePaymentInfo(
                     invoiceId,
                     employeeId,
@@ -1359,6 +1385,10 @@ public class OrderUI extends JFrame {
                     customerAddress,
                     employeeName
             );
+            
+                    System.out.println("employeeId" + employeeId);
+                    System.out.println("selectedCustomerId" + selectedCustomerId);
+
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
 
