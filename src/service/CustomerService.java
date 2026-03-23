@@ -4,6 +4,7 @@ import dao.CustomerDAO;
 import entity.Customer;
 import entity.filter.CustomerFilter;
 import java.util.List;
+import validator.CustomerValidator;
 
 public class CustomerService {
 
@@ -18,10 +19,16 @@ public class CustomerService {
     }
 
     public boolean insert(Customer request) {
+        if (!CustomerValidator.validateCreate(request)) {
+            return false;
+        }
         return customerDAO.insert(request);
     }
 
     public boolean update(Customer request) {
+        if (!CustomerValidator.validateUpdate(request)) {
+            return false;
+        }
         return customerDAO.update(request);
     }
 

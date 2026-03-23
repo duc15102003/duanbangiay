@@ -273,6 +273,7 @@ public class ColorUI extends javax.swing.JPanel {
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         clearForm();
         loadColor();
+        txtCode.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased

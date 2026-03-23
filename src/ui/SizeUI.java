@@ -258,6 +258,7 @@ public class SizeUI extends javax.swing.JPanel {
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         clearForm();
         loadSize();
+        txtCode.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed

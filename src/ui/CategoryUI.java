@@ -226,7 +226,7 @@ public class CategoryUI extends javax.swing.JPanel {
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
-        clearForm();
+        clearForm();txtCode.enable(true);
         loadCategory();
     }//GEN-LAST:event_btnRefrActionPerformed
 

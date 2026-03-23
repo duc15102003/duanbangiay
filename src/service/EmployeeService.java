@@ -4,6 +4,7 @@ import dao.EmployeeDAO;
 import entity.Employee;
 import entity.filter.EmployeeFilter;
 import java.util.List;
+import validator.EmployeeValidator;
 
 public class EmployeeService {
     
@@ -18,10 +19,16 @@ public class EmployeeService {
     }
 
     public boolean insert(Employee request) {
+        if (!EmployeeValidator.validateCreate(request)) {
+            return false;
+        }
         return employeeDAO.insert(request);
     }
 
     public boolean update(Employee request) {
+        if (!EmployeeValidator.validateUpdate(request)) {
+            return false;
+        }
         return employeeDAO.update(request);
     }
 

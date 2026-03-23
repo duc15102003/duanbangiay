@@ -625,6 +625,7 @@ public class ProductUI extends javax.swing.JPanel  {
 
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         refreshData();
+        txtMaSP.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void jTextField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyReleased

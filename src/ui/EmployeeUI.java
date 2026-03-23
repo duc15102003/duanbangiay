@@ -494,6 +494,7 @@ public class EmployeeUI extends javax.swing.JPanel {
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         resetForm();
+        txtCode.enable(true);
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void tblEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblEmployeeMouseClicked

@@ -308,4 +308,31 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter>{
 
         return d;
     }
+    
+    public boolean existsByCode(String code, Integer excludeId) {
+        if (code == null || code.trim().isEmpty()) return false;
+
+        String sql = "SELECT 1 FROM discount WHERE LOWER(code) = LOWER(?) AND deleted_at IS NULL";
+
+        if (excludeId != null) {
+            sql += " AND id <> ?";
+        }
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code.trim());
+            if (excludeId != null) {
+                ps.setInt(2, excludeId);
+            }
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

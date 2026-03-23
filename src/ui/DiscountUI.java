@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import service.DiscountService;
 import java.time.format.DateTimeFormatter;
+import javax.swing.JOptionPane;
 
 public class DiscountUI extends javax.swing.JPanel {
     
@@ -134,32 +135,37 @@ public class DiscountUI extends javax.swing.JPanel {
         });
     }
     
-    private Discount getForm(){
-
+    private Discount getForm() {
         Discount d = new Discount();
 
         d.setId(selectedId);
-        d.setCode(txtCode.getText());
+        d.setCode(txtCode.getText().trim());
 
         d.setDiscountType(cbbDiscountType.getSelectedItem().toString());
 
-        d.setDiscountValue(Integer.parseInt(txtDiscountValue.getText().replace(".", "")));
-        String max = txtMaximumDiscount.getText().trim();
+        // xử lý discountValue
+        String discountValueStr = txtDiscountValue.getText().replace(".", "").trim();
+        if (discountValueStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Giá trị giảm không được để trống");
+            return null;
+        }
+        d.setDiscountValue(Integer.parseInt(discountValueStr));
 
-        if(!max.isEmpty()){
-            d.setMaximumDiscount(Integer.parseInt(max.replace(".", "")));
-        }else{
+        String maxStr = txtMaximumDiscount.getText().replace(".", "").trim();
+        if (!maxStr.isEmpty()) {
+            d.setMaximumDiscount(Integer.parseInt(maxStr));
+        } else {
             d.setMaximumDiscount(null);
         }
 
         Date from = dcFrom.getDate();
         Date to = dcTo.getDate();
 
-        if(from != null){
+        if (from != null) {
             d.setStartedAt(LocalDateTime.ofInstant(from.toInstant(), ZoneId.systemDefault()));
         }
 
-        if(to != null){
+        if (to != null) {
             d.setEndedAt(LocalDateTime.ofInstant(to.toInstant(), ZoneId.systemDefault()));
         }
 
@@ -182,6 +188,7 @@ public class DiscountUI extends javax.swing.JPanel {
         dcEndedAt.setDate(null);
 
         selectedId = -1;
+        txtCode.enable(true);
 
         loadTable();
     }
