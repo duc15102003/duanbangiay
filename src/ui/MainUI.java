@@ -27,10 +27,10 @@ public class MainUI extends javax.swing.JFrame {
     private DiscountService discountService = new DiscountService();
 
     public MainUI() {
-        this(null);
+        this(null, null);
     }
 
-    public MainUI(String name) {
+    public MainUI(String name, String screen) {
         initComponents();
         setLocationRelativeTo(null);
 
@@ -42,6 +42,12 @@ public class MainUI extends javax.swing.JFrame {
         pnContent.repaint();
 
         initView();
+        
+        if ("product".equals(screen)) {
+            showProduct();
+        } else {
+            showDashboard();
+        }
     }
 
     private void initView() {
