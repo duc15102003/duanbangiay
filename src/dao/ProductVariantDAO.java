@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVariantFilter> {
 
@@ -39,7 +40,7 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
             LEFT JOIN brand b ON p.brand_id = b.id
             LEFT JOIN size s ON pv.size_id = s.id
             LEFT JOIN color c ON pv.color_id = c.id
-            WHERE pv.deleted_at IS NULL
+            WHERE pv.deleted_at IS NULL AND pv.quantity > 0
         """);
 
         List<Object> params = new ArrayList<>();
@@ -147,6 +148,16 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
     @Override
     public boolean insert(ProductVariant request) {
         
+        if (existsDuplicate(request, false)) {
+            JOptionPane.showMessageDialog(
+                null,
+                "Biến thể đã tồn tại (trùng mã + màu + size)",
+                "Lỗi",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return false;
+        }
+        
         String sql = """
                 INSERT INTO product_variant
                 (product_id, color_id, size_id, price, quantity, image, created_at, updated_at)
@@ -177,6 +188,16 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
     @Override
     public boolean update(ProductVariant request) {
 
+        if (existsDuplicate(request, true)) {
+            JOptionPane.showMessageDialog(
+                null,
+                "Biến thể đã tồn tại (trùng mã + màu + size)",
+                "Lỗi",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return false;
+        }
+        
         String sql = """
                 UPDATE product_variant
                 SET product_id = ?,
@@ -332,5 +353,115 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    public boolean existsDuplicate(ProductVariant pv, boolean isUpdate) {
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT COUNT(*)
+            FROM product_variant
+            WHERE product_id = ?
+              AND color_id = ?
+              AND size_id = ?
+              AND deleted_at IS NULL
+        """);
+
+        if (isUpdate) {
+            sql.append(" AND id <> ?");
+        }
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            ps.setInt(1, pv.getProductId());
+            ps.setInt(2, pv.getColorId());
+            ps.setInt(3, pv.getSizeId());
+
+            if (isUpdate) {
+                ps.setInt(4, pv.getId());
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
+    public boolean updateQuantity(int productVariantId, int quantityChange) {
+
+        String sql = """
+            UPDATE product_variant
+            SET quantity = quantity + ?
+            WHERE id = ?
+            AND deleted_at IS NULL
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, quantityChange);
+            ps.setInt(2, productVariantId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
+    public boolean decreaseStock(int productVariantId, int quantity) {
+
+        String sql = """
+            UPDATE product_variant
+            SET quantity = quantity - ?
+            WHERE id = ? AND quantity >= ?
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, quantity);
+            ps.setInt(2, productVariantId);
+            ps.setInt(3, quantity);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    
+    public boolean increaseStock(int productVariantId, int quantity) {
+
+        String sql = """
+            UPDATE product_variant
+            SET quantity = quantity + ?
+            WHERE id = ?
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, quantity);
+            ps.setInt(2, productVariantId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

@@ -161,13 +161,7 @@ public class CartDAO {
     
     public boolean updateQuantity(int invoiceId, int productVariantId, int quantity) {
 
-        String stockSQL = """
-            SELECT quantity
-            FROM product_variant
-            WHERE id = ?
-        """;
-
-        String updateSQL = """
+        String sql = """
             UPDATE invoice_item
             SET quantity = ?
             WHERE invoice_id = ? AND product_variant_id = ?
@@ -175,45 +169,17 @@ public class CartDAO {
 
         try (
             Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
         ) {
 
-            int stock = 0;
+            ps.setInt(1, quantity);
+            ps.setInt(2, invoiceId);
+            ps.setInt(3, productVariantId);
 
-            // lấy tồn kho
-            try (PreparedStatement ps = conn.prepareStatement(stockSQL)) {
-                ps.setInt(1, productVariantId);
-
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        stock = rs.getInt("quantity");
-                    }
-                }
-            }
-
-            // check tồn kho
-            if (quantity > stock) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Số lượng vượt quá tồn kho (" + stock + ")",
-                        "Thông báo",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return false;
-            }
-
-            // update số lượng
-            try (PreparedStatement ps = conn.prepareStatement(updateSQL)) {
-
-                ps.setInt(1, quantity);
-                ps.setInt(2, invoiceId);
-                ps.setInt(3, productVariantId);
-
-                return ps.executeUpdate() > 0;
-            }
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Lỗi hệ thống");
         }
 
         return false;
@@ -401,5 +367,39 @@ public class CartDAO {
         }
         
         return i;
+    }
+    
+    public InvoiceItem findItem(int invoiceId, int productVariantId) {
+
+        String sql = """
+            SELECT *
+            FROM invoice_item
+            WHERE invoice_id = ? AND product_variant_id = ?
+        """;
+
+        try (
+            Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+        ) {
+
+            ps.setInt(1, invoiceId);
+            ps.setInt(2, productVariantId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                InvoiceItem item = new InvoiceItem();
+                item.setInvoiceId(rs.getInt("invoice_id"));
+                item.setProductVariantId(rs.getInt("product_variant_id"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setPrice(rs.getFloat("price"));
+                return item;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

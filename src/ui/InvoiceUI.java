@@ -212,6 +212,8 @@ public class InvoiceUI extends javax.swing.JPanel {
         for(int i = 0; i < currentItems.size(); i++){
 
             InvoiceItem item = currentItems.get(i);
+            
+            double totalPrice = item.getQuantity() * item.getPrice();
 
             model.addRow(new Object[]{
                 null,                      
@@ -222,7 +224,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                 item.getColorName(),
                 item.getSizeName(),
                 item.getQuantity(),
-                moneyFormat.format(item.getPrice())
+                moneyFormat.format(item.getPrice()),
+                moneyFormat.format(totalPrice) 
             });
 
             loadImage(item.getImage(), i);
@@ -361,7 +364,9 @@ public class InvoiceUI extends javax.swing.JPanel {
         DefaultTableModel model = new DefaultTableModel(
             new Object[][]{},
             new String[]{
-                "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu", "Danh mục", "Màu sắc", "Kích thước", "Số lượng", "Đơn giá"
+                "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu",
+                "Danh mục", "Màu sắc", "Kích thước",
+                "Số lượng", "Đơn giá", "Thành tiền" 
             }
         ){
             @Override
@@ -381,8 +386,6 @@ public class InvoiceUI extends javax.swing.JPanel {
         tblInvoiceItem.setRowHeight(90);
         tblInvoiceItem.getColumnModel().getColumn(0).setMinWidth(100);
         tblInvoiceItem.getColumnModel().getColumn(0).setMaxWidth(130);
-        tblInvoiceItem.getColumnModel().getColumn(0).setPreferredWidth(100);
-        tblInvoiceItem.getColumnModel().getColumn(0).setWidth(100);
     }
     
     private Image scaleImage(Image img,int width,int height){

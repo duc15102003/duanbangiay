@@ -381,7 +381,8 @@ public class OrderUI extends JFrame {
                 new Object[][]{},
                 new String[]{
                     "Ảnh",
-                    "Sản phẩm",
+                    "Mã sản phẩm",
+                    "Tên sản phẩm",
                     "Danh mục",
                     "Thương hiệu",
                     "Màu sắc",
@@ -406,9 +407,9 @@ public class OrderUI extends JFrame {
         );
         
         //Ẩn cột Id
-        table.getColumnModel().getColumn(9).setMinWidth(0);
-        table.getColumnModel().getColumn(9).setMaxWidth(0);
-        table.getColumnModel().getColumn(9).setWidth(0);
+        table.getColumnModel().getColumn(10).setMinWidth(0);
+        table.getColumnModel().getColumn(10).setMaxWidth(0);
+        table.getColumnModel().getColumn(10).setWidth(0);
         
         table.setRowHeight(50);
         table.setFillsViewportHeight(true);
@@ -471,6 +472,7 @@ public class OrderUI extends JFrame {
 
         return new Object[]{
             loadImage(item.getImage()),
+            item.getProductCode(),
             item.getProductName(),
             item.getCategoryName(),
             item.getBrandName(),
@@ -488,14 +490,15 @@ public class OrderUI extends JFrame {
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         table.getColumnModel().getColumn(0).setPreferredWidth(100); // ảnh
-        table.getColumnModel().getColumn(1).setPreferredWidth(275); // sản phẩm
-        table.getColumnModel().getColumn(2).setPreferredWidth(120); // danh mục
-        table.getColumnModel().getColumn(3).setPreferredWidth(120); // thương hiệu
-        table.getColumnModel().getColumn(4).setPreferredWidth(90);  // màu
-        table.getColumnModel().getColumn(5).setPreferredWidth(90);  // size
-        table.getColumnModel().getColumn(6).setPreferredWidth(120); // số lượng
-        table.getColumnModel().getColumn(7).setPreferredWidth(130); // đơn giá
-        table.getColumnModel().getColumn(8).setPreferredWidth(130); // thành tiền
+        table.getColumnModel().getColumn(1).setPreferredWidth(100); // mã sp
+        table.getColumnModel().getColumn(2).setPreferredWidth(275); // tên sp
+        table.getColumnModel().getColumn(3).setPreferredWidth(120); // danh mục
+        table.getColumnModel().getColumn(4).setPreferredWidth(120); // thương hiệu
+        table.getColumnModel().getColumn(5).setPreferredWidth(90);  // màu
+        table.getColumnModel().getColumn(6).setPreferredWidth(90);  // size
+        table.getColumnModel().getColumn(7).setPreferredWidth(120); // số lượng
+        table.getColumnModel().getColumn(8).setPreferredWidth(130); // đơn giá
+        table.getColumnModel().getColumn(9).setPreferredWidth(130); // thành tiền
     }
     
     // ================= FILTER =================
@@ -564,10 +567,10 @@ public class OrderUI extends JFrame {
         table.getColumnModel().getColumn(4).setCellRenderer(center);
         table.getColumnModel().getColumn(5).setCellRenderer(center);
         table.getColumnModel().getColumn(6).setCellRenderer(center);
-
-        // Number
         table.getColumnModel().getColumn(7).setCellRenderer(right);
+        // Number
         table.getColumnModel().getColumn(8).setCellRenderer(right);
+        table.getColumnModel().getColumn(9).setCellRenderer(right);
     }
     
     // ================= TABLE COLUMN SIZE =================
@@ -664,7 +667,7 @@ public class OrderUI extends JFrame {
         btnConfirm.addActionListener(e -> {
 
         boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
-        productVariantService.updateStockAfterPayment(invoiceId);
+        //productVariantService.updateStockAfterPayment(invoiceId);
 
         if (success) {
 
@@ -1160,16 +1163,14 @@ public class OrderUI extends JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblProductMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductMouseClicked
-        if (evt.getClickCount() != 2) {
-            return;
-        }
+        if (evt.getClickCount() != 2) return;
 
         if (jTabbedPane1.getTabCount() == 0) {
             JOptionPane.showMessageDialog(this, "Chưa có giỏ hàng");
             return;
         }
 
-        int row = ((JTable) evt.getSource()).getSelectedRow();
+        int row = tblProduct.getSelectedRow();
         if (row == -1) return;
 
         int tabIndex = jTabbedPane1.getSelectedIndex();
@@ -1178,49 +1179,40 @@ public class OrderUI extends JFrame {
             return;
         }
 
-        Invoice invoice = listInvoice.get(tabIndex);
-        int invoiceId = invoice.getId();
+        int invoiceId = listInvoice.get(tabIndex).getId();
 
         ProductVariant pv = listProductVariant.get(row);
 
-        int productVariantId = pv.getId();
-        float price = pv.getPrice();
-
-        String input = JOptionPane.showInputDialog(
-                this,
-                "Nhập số lượng:",
-                "Chọn số lượng",
-                JOptionPane.QUESTION_MESSAGE
-        );
+        String input = JOptionPane.showInputDialog(this, "Nhập số lượng:");
 
         if (input == null) return;
 
-        int quantity;
-
         try {
-
-            quantity = Integer.parseInt(input);
+            int quantity = Integer.parseInt(input);
 
             if (quantity <= 0) {
                 JOptionPane.showMessageDialog(this, "Số lượng phải > 0");
                 return;
             }
 
-        } catch (NumberFormatException e) {
+            boolean result = cartService.addProductToCart(
+                    invoiceId,
+                    pv.getId(),
+                    quantity,
+                    pv.getPrice()
+            );
+
+            if (!result) {
+                JOptionPane.showMessageDialog(this, "Không đủ hàng!");
+                return;
+            }
+
+            initCart();
+            initProduct();
+
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Số lượng không hợp lệ");
-            return;
         }
-
-        boolean result = cartService.addProductToCart(
-                invoiceId,
-                productVariantId,
-                quantity,
-                price
-        );
-
-        if (!result) return;
-
-        initCart();
     }//GEN-LAST:event_tblProductMouseClicked
 
     private void btnInsertCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertCartActionPerformed
@@ -1270,10 +1262,10 @@ public class OrderUI extends JFrame {
         }
 
         // ===== CHECK TỒN KHO =====
-        if (!productVariantService.checkStockBeforePayment(invoiceId)) {
-            JOptionPane.showMessageDialog(this, "Số lượng sản phẩm không đủ để thanh toán!");
-            return;
-        }
+//        if (!productVariantService.checkStockBeforePayment(invoiceId)) {
+//            JOptionPane.showMessageDialog(this, "Số lượng sản phẩm không đủ để thanh toán!");
+//            return;
+//        }
 
         // ===== LẤY FINAL AMOUNT (ĐÃ TRỪ DISCOUNT) =====
         float finalAmount = getFinalAmount(invoiceId);
@@ -1327,7 +1319,7 @@ public class OrderUI extends JFrame {
 
                 if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
 
-                    productVariantService.updateStockAfterPayment(invoiceId);
+                    //productVariantService.updateStockAfterPayment(invoiceId);
 
                     // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
                     String discountCode = txtDiscount.getText().trim();
@@ -1395,35 +1387,50 @@ public class OrderUI extends JFrame {
     private void btnDeleteCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCartActionPerformed
         int index = jTabbedPane1.getSelectedIndex();
 
-        if (index == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn giỏ hàng cần xoá");
-            return;
+    if (index == -1) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn giỏ hàng cần xoá");
+        return;
+    }
+
+    int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "Bạn có chắc muốn xoá giỏ hàng này?",
+        "Xác nhận",
+        JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm != JOptionPane.YES_OPTION) return;
+
+    Invoice invoice = listInvoice.get(index);
+    int invoiceId = invoice.getId();
+
+    // Hoàn stock tất cả sản phẩm trong giỏ
+    List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+    if (items != null) {
+        for (InvoiceItem item : items) {
+            boolean ok = productVariantService.increaseStock(item.getProductVariantId(), item.getQuantity());
+            if (!ok) {
+                System.err.println("Không thể hoàn stock cho productVariantId=" + item.getProductVariantId());
+            }
         }
+    }
 
-        int confirm = JOptionPane.showConfirmDialog(
-            this,
-            "Bạn có chắc muốn xoá giỏ hàng này?",
-            "Xác nhận",
-            JOptionPane.YES_NO_OPTION
-        );
+    // Xoá giỏ
+    boolean result = invoiceService.delete(invoiceId);
+    if (!result) {
+        JOptionPane.showMessageDialog(this, "Chỉ xoá được giỏ hàng ở trạng thái nháp");
+        return;
+    }
 
-        if (confirm != JOptionPane.YES_OPTION) return;
+    listInvoice.remove(index);
+    jTabbedPane1.remove(index);
 
-        Invoice invoice = listInvoice.get(index);
+    JOptionPane.showMessageDialog(this, "Xoá giỏ hàng thành công");
 
-        boolean result = invoiceService.delete(invoice.getId());
-
-        if (!result) {
-            JOptionPane.showMessageDialog(this, "Chỉ xoá được giỏ hàng ở trạng thái nháp");
-            return;
-        }
-
-        listInvoice.remove(index);
-        jTabbedPane1.remove(index);
-
-        JOptionPane.showMessageDialog(this, "Xoá giỏ hàng thành công");
-
-        updateTotalAmount();
+    // Refresh
+    initCart();
+    initProduct();
+    updateTotalAmount();
     }//GEN-LAST:event_btnDeleteCartActionPerformed
 
     private void btnDeleteRowCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteRowCartActionPerformed
@@ -1437,24 +1444,28 @@ public class OrderUI extends JFrame {
         }
 
         int tabIndex = jTabbedPane1.getSelectedIndex();
-        if(tabIndex < 0 || tabIndex >= listInvoice.size()) return;
-
         int invoiceId = listInvoice.get(tabIndex).getId();
 
-        List<InvoiceItem> items = cartFilteredData.get(invoiceId);
-        if(items == null || row >= items.size()) return;
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-        InvoiceItem item = items.get(row);
+        // ===== PV_ID =====
+        Object pvObj = model.getValueAt(row, 10);
+        int productVariantId = Integer.parseInt(pvObj.toString());
+
+        Object qtyObj = model.getValueAt(row, 7);
+        int quantity = Integer.parseInt(qtyObj.toString());
 
         boolean result = cartService.deleteRowCart(
-            invoiceId,
-            item.getProductVariantId()
+                invoiceId,
+                productVariantId,
+                quantity
         );
 
-        if(result){
+        if (result) {
             initCart();
-        }else{
-            JOptionPane.showMessageDialog(this,"Xoá sản phẩm thất bại");
+            initProduct();
+        } else {
+            JOptionPane.showMessageDialog(this, "Xoá sản phẩm thất bại");
         }
     }//GEN-LAST:event_btnDeleteRowCartActionPerformed
 
@@ -1476,38 +1487,34 @@ public class OrderUI extends JFrame {
 
         DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-        int productVariantId = (int) model.getValueAt(row, 9);
-        Object currentQty = model.getValueAt(row, 6);
+        int productVariantId = (int) model.getValueAt(row, 6); // PV_ID
+        int currentQty = Integer.parseInt(model.getValueAt(row, 3).toString());
 
         String input = JOptionPane.showInputDialog(this, "Nhập số lượng:", currentQty);
 
         if (input == null || input.trim().isEmpty()) return;
 
         try {
-            int quantity = Integer.parseInt(input);
+            int newQty = Integer.parseInt(input);
 
-            if (quantity <= 0) {
+            if (newQty <= 0) {
                 JOptionPane.showMessageDialog(this, "Số lượng phải > 0");
-                return;
-            }
-
-            ProductVariant pv = null;
-            for(ProductVariant p : listProductVariant){
-                if(p.getId() == productVariantId){
-                    pv = p;
-                    break;
-                }
-            }
-
-            if(pv == null){
-                JOptionPane.showMessageDialog(this, "Không tìm thấy sản phẩm");
                 return;
             }
 
             int tabIndex = jTabbedPane1.getSelectedIndex();
             int invoiceId = listInvoice.get(tabIndex).getId();
 
-            cartService.updateQuantity(invoiceId, productVariantId, quantity);
+            boolean result = cartService.updateQuantity(
+                    invoiceId,
+                    productVariantId,
+                    newQty
+            );
+
+            if (!result) {
+                JOptionPane.showMessageDialog(this, "Không đủ hàng!");
+                return;
+            }
 
             initCart();
 

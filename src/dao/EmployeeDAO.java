@@ -264,4 +264,72 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         }
         return false;
     }
+    
+    public boolean existsByCodeExcludeId(String code, int id) {
+        String sql = "SELECT 1 FROM employee WHERE LOWER(code) = LOWER(?) AND id <> ? AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean existsByUsernameExcludeId(String username, int id) {
+        String sql = "SELECT 1 FROM employee WHERE LOWER(username) = LOWER(?) AND id <> ? AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean existsByPhoneExcludeId(String phone, int id) {
+        String sql = "SELECT 1 FROM employee WHERE phone = ? AND id <> ? AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, phone.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean existsByEmailExcludeId(String email, int id) {
+        String sql = "SELECT 1 FROM employee WHERE LOWER(email) = LOWER(?) AND id <> ? AND deleted_at IS NULL";
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

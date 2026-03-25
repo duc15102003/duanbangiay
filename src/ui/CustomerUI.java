@@ -26,6 +26,8 @@ public class CustomerUI extends javax.swing.JPanel {
 
     public CustomerUI() {
         initComponents();
+        
+        rdoMale.setSelected(true);
 
         btnSelectCustomer.setVisible(false);
         initCustomer();
@@ -33,6 +35,8 @@ public class CustomerUI extends javax.swing.JPanel {
     
     public CustomerUI(OrderUI orderUI, boolean selectMode) {
         initComponents();
+        
+        rdoMale.setSelected(true);
 
         this.orderUI = orderUI;
         this.selectMode = selectMode;
@@ -193,6 +197,8 @@ public class CustomerUI extends javax.swing.JPanel {
         txtSearch.setText("");
 
         dcBirth.setDate(null);
+        
+        rdoMale.setSelected(true);
 
         buttonGroup1.clearSelection();
         buttonGroup2.clearSelection();

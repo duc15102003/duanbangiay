@@ -6,7 +6,9 @@ import entity.Product;
 import entity.filter.ProductFilter;
 import enums.ProductStatusEnum;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -27,6 +29,10 @@ public class ProductUI extends javax.swing.JPanel  {
 
     private List<Category> categories = new ArrayList<>();
     private List<Brand> brands = new ArrayList<>();
+    
+    private javax.swing.Timer searchTimer;
+    
+    private Map<Integer, Integer> quantityCache = new HashMap<>();
 
     private DataChangeListener listener;
     
@@ -112,7 +118,6 @@ public class ProductUI extends javax.swing.JPanel  {
         ProductFilter filter = new ProductFilter();
 
         filter.setSearch(jTextField1.getText().trim());
-
         filter.setBrandId(getSelectedId(cbbSearchBrand));
         filter.setCategoryId(getSelectedId(cbbSearchCategory));
 
@@ -123,7 +128,7 @@ public class ProductUI extends javax.swing.JPanel  {
         }
 
         List<Product> list = productService.findAll(filter);
-
+        
         renderTable(list);
     }
     
@@ -168,19 +173,32 @@ public class ProductUI extends javax.swing.JPanel  {
     }
     
     private void renderTable(List<Product> list){
+
         DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
         model.setRowCount(0);
+
+        if(list == null || list.isEmpty()){
+            return;
+        }
+
         for(Product p : list){
-            int quantity = productService.countVariants(p.getId());
+
+            Integer quantity = quantityCache.get(p.getId());
+
+            if(quantity == null){
+                quantity = productService.countVariants(p.getId());
+                quantityCache.put(p.getId(), quantity);
+            }
+
             model.addRow(new Object[]{
                 p.getCode(),
                 p.getName(),
                 p.getCategoryName(),
                 p.getBrandName(),
                 p.getStatus().getLabel(),
-                quantity,                     
-                p.getDescription(),        
-                p.getId()                    
+                quantity,
+                p.getDescription(),
+                p.getId()
             });
         }
 
@@ -254,8 +272,14 @@ public class ProductUI extends javax.swing.JPanel  {
    
     public void reloadAllData() {
         try {
-            categories = categoryService.findAll(null);
-            brands = brandService.findAll(null);
+
+            if(categories == null || categories.isEmpty()){
+                categories = categoryService.findAll(null);
+            }
+
+            if(brands == null || brands.isEmpty()){
+                brands = brandService.findAll(null);
+            }
 
             loadCombo(cbbCategory, categories, "");
             loadCombo(cbbBrand, brands, "");
@@ -265,12 +289,15 @@ public class ProductUI extends javax.swing.JPanel  {
             loadCombo(cbbSearchBrand, brands, "-- Chọn thương hiệu --");
             loadStatus(cbbSearchStatus, true);
 
+            quantityCache.clear();
+
             loadProductTable();
 
             txtMaSP.setText("");
             txtTenSP.setText("");
             txtGhiChu.setText("");
             txtQuantity.setText("");
+
             cbbCategory.setSelectedIndex(0);
             cbbBrand.setSelectedIndex(0);
             cbbStatus.setSelectedIndex(0);
@@ -692,7 +719,13 @@ public class ProductUI extends javax.swing.JPanel  {
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void jTextField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyReleased
-        filterProduct();
+        if(searchTimer != null){
+            searchTimer.stop();
+        }
+
+        searchTimer = new javax.swing.Timer(300, e -> filterProduct());
+        searchTimer.setRepeats(false);
+        searchTimer.start();
     }//GEN-LAST:event_jTextField1KeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

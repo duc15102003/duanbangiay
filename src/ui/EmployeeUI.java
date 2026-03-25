@@ -31,7 +31,8 @@ public class EmployeeUI extends javax.swing.JPanel {
 
         DefaultComboBoxModel model = new DefaultComboBoxModel<>();
 
-        for(RoleEnum r : RoleEnum.values()){
+        for (RoleEnum r : RoleEnum.values()) {
+            if (r == RoleEnum.MANAGER) continue;
             model.addElement(r);
         }
 

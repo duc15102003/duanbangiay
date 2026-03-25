@@ -110,10 +110,93 @@ public class EmployeeValidator {
     }
 
     public static boolean validateUpdate(Employee e) {
-        if (e.getId() == null || e.getId() <= 0) {
+        if (e == null || e.getId() == null || e.getId() <= 0) {
             JOptionPane.showMessageDialog(null, "ID nhân viên không hợp lệ");
             return false;
         }
-        return validateCreate(e);
+
+        // ===== CODE =====
+        if (e.getCode() == null || e.getCode().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Mã nhân viên không được để trống");
+            return false;
+        }
+        if (employeeDAO.existsByCodeExcludeId(e.getCode(), e.getId())) {
+            JOptionPane.showMessageDialog(null, "Mã nhân viên đã tồn tại");
+            return false;
+        }
+
+        // ===== NAME =====
+        if (e.getName() == null || e.getName().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Tên nhân viên không được để trống");
+            return false;
+        }
+        if (!e.getName().matches("[a-zA-Z\\sÀ-ỹ]+")) {
+            JOptionPane.showMessageDialog(null, "Tên nhân viên không hợp lệ");
+            return false;
+        }
+
+        // ===== USERNAME =====
+        if (e.getUsername() == null || e.getUsername().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Tên đăng nhập không được để trống");
+            return false;
+        }
+        if (employeeDAO.existsByUsernameExcludeId(e.getUsername(), e.getId())) {
+            JOptionPane.showMessageDialog(null, "Tên đăng nhập đã tồn tại");
+            return false;
+        }
+
+        // ===== PASSWORD =====
+        if (e.getPassword() == null || e.getPassword().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Mật khẩu không được để trống");
+            return false;
+        }
+
+        // ===== ROLE =====
+        if (e.getRole() == null) {
+            JOptionPane.showMessageDialog(null, "Vai trò không được để trống");
+            return false;
+        }
+
+        // ===== PHONE =====
+        if (e.getPhone() == null || e.getPhone().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại không được để trống");
+            return false;
+        }
+        if (!e.getPhone().matches("0\\d{9}")) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại không hợp lệ");
+            return false;
+        }
+        if (employeeDAO.existsByPhoneExcludeId(e.getPhone(), e.getId())) {
+            JOptionPane.showMessageDialog(null, "Số điện thoại đã tồn tại");
+            return false;
+        }
+
+        // ===== EMAIL =====
+        if (e.getEmail() == null || e.getEmail().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Email không được để trống");
+            return false;
+        }
+        if (!e.getEmail().matches(".+@.+\\..+")) {
+            JOptionPane.showMessageDialog(null, "Email không hợp lệ");
+            return false;
+        }
+        if (employeeDAO.existsByEmailExcludeId(e.getEmail(), e.getId())) {
+            JOptionPane.showMessageDialog(null, "Email đã tồn tại");
+            return false;
+        }
+
+        // ===== DATE =====
+        if (e.getDateOfBirth() == null) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh phải được chọn");
+            return false;
+        }
+
+        java.util.Date today = new java.util.Date();
+        if (e.getDateOfBirth().after(today)) {
+            JOptionPane.showMessageDialog(null, "Ngày sinh không hợp lệ");
+            return false;
+        }
+
+        return true;
     }
 }

@@ -43,4 +43,12 @@ public class ProductVariantService {
     public boolean checkStockBeforePayment(int invoiceId) {
         return productVariantDAO.checkStockBeforePayment(invoiceId);
     }
+    
+    public boolean updateQuantity(int id, int newQuantity) {
+        return productVariantDAO.updateQuantity(id, newQuantity);
+    }
+    
+    public boolean increaseStock(int productVariantId, int quantity){
+        return productVariantDAO.increaseStock(productVariantId, quantity);
+    }
 }

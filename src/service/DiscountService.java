@@ -54,7 +54,7 @@ public class DiscountService {
             return null;
         }
 
-        Discount discount = discountDAO.checkDiscount(code);
+        Discount discount = discountDAO.checkDiscount(code, total);
 
         if (discount == null) {
             return null;

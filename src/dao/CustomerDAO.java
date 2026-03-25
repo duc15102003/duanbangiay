@@ -216,6 +216,23 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         }
         return false;
     }
+    
+    public boolean existsByCodeExcludeId(String code, int id) {
+        String sql = "SELECT COUNT(*) FROM customer WHERE code = ? AND id <> ? AND deleted_at IS NULL";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code);
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public boolean existsByPhone(String phone) {
         if (phone == null || phone.isBlank()) return false;
@@ -230,6 +247,27 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         }
         return false;
     }
+    
+    public boolean existsByPhoneExcludeId(String phone, int id) {
+        if (phone == null || phone.isBlank()) return false;
+
+        String sql = "SELECT 1 FROM customer WHERE phone = ? AND id <> ? AND deleted_at IS NULL";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, phone.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
     public boolean existsByEmail(String email) {
         if (email == null || email.isBlank()) return false;
@@ -242,6 +280,27 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
+    
+    public boolean existsByEmailExcludeId(String email, int id) {
+        if (email == null || email.isBlank()) return false;
+
+        String sql = "SELECT 1 FROM customer WHERE LOWER(email) = LOWER(?) AND id <> ? AND deleted_at IS NULL";
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, email.trim());
+            ps.setInt(2, id);
+
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

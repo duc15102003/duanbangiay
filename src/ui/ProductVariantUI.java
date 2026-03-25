@@ -54,9 +54,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
     private List<Brand> listBrand = new ArrayList<>();
     private List<Category> listCategory = new ArrayList<>();
     private Map<String, ImageIcon> imageCache = new HashMap<>();
-    private Map<Integer, ProductVariant> productVariantMap = new HashMap<>();
+    private Map<Integer, ProductVariant> productVariantMap = new HashMap<>();  
+    private Map<String, List<Integer>> imageRowMap = new HashMap<>();
     
     private DataChangeListener listener;
+    private javax.swing.Timer searchTimer;
 
     private final java.util.concurrent.ExecutorService imageLoader 
         = java.util.concurrent.Executors.newFixedThreadPool(4);
@@ -73,10 +75,9 @@ public class ProductVariantUI extends javax.swing.JPanel {
         initComponents();
         initTable();
         initImagePreview();
-        enableTableImageHover();
         loadCombobox();
         reloadData();
-        
+
         cbbSearchBrand.addActionListener(e -> searchTable());
         cbbSearchCategory.addActionListener(e -> searchTable());
         cbbSearchColor.addActionListener(e -> searchTable());
@@ -84,27 +85,17 @@ public class ProductVariantUI extends javax.swing.JPanel {
     }
     
     public ProductVariantUI(DataChangeListener listener) {
+        this.listener = listener;
         initComponents();
         initTable();
-        initImagePreview();
-        enableTableImageHover();
+        initImagePreview(); 
         loadCombobox();
         reloadData();
-        
+
         cbbSearchBrand.addActionListener(e -> searchTable());
         cbbSearchCategory.addActionListener(e -> searchTable());
         cbbSearchColor.addActionListener(e -> searchTable());
         cbbSearchSize.addActionListener(e -> searchTable());
-    }
-    
-   private void reloadSizeCombo(){
-        listSize = sizeService.findAll(null);
-        loadCombo(cbbSize, listSize, " ");
-    }
-
-    private void reloadColorCombo(){
-        listColor = colorService.findAll(null);
-        loadCombo(cbbColor, listColor, " ");
     }
     
     private ProductVariantFilter buildProductFilter(){
@@ -222,11 +213,10 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     private void loadTable(ProductVariantFilter filter){
 
-        imageCache.clear();
-        
         listProductVariant = productVariantService.findAll(filter);
 
         productVariantMap.clear();
+        imageRowMap.clear();
 
         DefaultTableModel model = (DefaultTableModel) tblProductVariant.getModel();
         model.setRowCount(0);
@@ -235,7 +225,9 @@ public class ProductVariantUI extends javax.swing.JPanel {
             return;
         }
 
-        for(ProductVariant pv : listProductVariant){
+        for(int i = 0; i < listProductVariant.size(); i++){
+
+            ProductVariant pv = listProductVariant.get(i);
 
             productVariantMap.put(pv.getId(), pv);
 
@@ -253,8 +245,12 @@ public class ProductVariantUI extends javax.swing.JPanel {
                 pv.getDescription(),
                 pv.getId(),
             });
+
+            imageRowMap
+                .computeIfAbsent(pv.getImage(), k -> new ArrayList<>())
+                .add(i);
         }
-        
+
         tblProductVariant.getColumnModel().getColumn(11).setMinWidth(0);
         tblProductVariant.getColumnModel().getColumn(11).setMaxWidth(0);
         tblProductVariant.getColumnModel().getColumn(11).setWidth(0);
@@ -268,13 +264,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
 
         if(url == null || url.isBlank()) return null;
 
-        // ===== CACHE HIT =====
         ImageIcon cached = imageCache.get(url);
         if(cached != null){
             return cached;
         }
 
-        // ===== LOAD ASYNC =====
         imageLoader.submit(() -> {
             try{
 
@@ -282,31 +276,21 @@ public class ProductVariantUI extends javax.swing.JPanel {
                 Image scaled = scaleImage(icon.getImage(), 90, 90);
                 ImageIcon finalIcon = new ImageIcon(scaled);
 
-                // lưu cache
                 imageCache.put(url, finalIcon);
 
-                // update UI
                 javax.swing.SwingUtilities.invokeLater(() -> {
 
-                    for(int i = 0; i < tblProductVariant.getRowCount(); i++){
+                    List<Integer> rows = imageRowMap.get(url);
 
-                        try{
-                            int id = (int) tblProductVariant.getValueAt(i, 11);
-                            ProductVariant pv = productVariantMap.get(id);
-
-                            if(pv != null && url.equals(pv.getImage())){
-                                tblProductVariant.setValueAt(finalIcon, i, 0);
-                            }
-
-                        }catch(Exception ex){
-                            ex.printStackTrace();
+                    if(rows != null){
+                        for(int row : rows){
+                            tblProductVariant.setValueAt(finalIcon, row, 0);
                         }
                     }
 
                 });
 
             }catch(Exception e){
-                e.printStackTrace();
             }
         });
 
@@ -401,94 +385,6 @@ public class ProductVariantUI extends javax.swing.JPanel {
 
         imagePreviewDialog.add(imagePreviewLabel);
         imagePreviewDialog.setSize(600,600);
-
-        imagePreviewLabel.setHorizontalAlignment(JLabel.CENTER);
-        imagePreviewLabel.setVerticalAlignment(JLabel.CENTER);
-
-        enableImagePreview(lbImagePreview);
-    }
-    
-    private void enableImagePreview(JLabel label){
-
-        label.addMouseListener(new MouseAdapter(){
-
-            @Override
-            public void mouseEntered(MouseEvent e){
-
-                if(originalImage == null) return;
-
-                Image scaled = scaleImage(originalImage,600,600);
-
-                imagePreviewLabel.setIcon(new ImageIcon(scaled));
-
-                imagePreviewDialog.setSize(600,600);
-
-                imagePreviewDialog.setLocationRelativeTo(null);
-
-                imagePreviewDialog.setVisible(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e){
-
-                imagePreviewDialog.setVisible(false);
-            }
-        });
-    }
-    
-    private void enableTableImageHover(){
-
-        tblProductVariant.addMouseMotionListener(new MouseAdapter(){
-
-            @Override
-            public void mouseMoved(MouseEvent e){
-
-                int row = tblProductVariant.rowAtPoint(e.getPoint());
-                int col = tblProductVariant.columnAtPoint(e.getPoint());
-
-                if(row < 0 || col != 0){
-                    imagePreviewDialog.setVisible(false);
-                    return;
-                }
-
-                String code = tblProductVariant.getValueAt(row,1).toString();
-
-                for(ProductVariant pv : listProductVariant){
-
-                    if(pv.getProductCode().equals(code)){
-
-                        try{
-
-                            ImageIcon icon = new ImageIcon(new URL(pv.getImage()));
-
-                            Image scaled = scaleImage(icon.getImage(),600,600);
-
-                            imagePreviewLabel.setIcon(new ImageIcon(scaled));
-
-                            imagePreviewLabel.setIcon(new ImageIcon(scaled));
-
-                            imagePreviewDialog.setSize(600,600);
-                            imagePreviewDialog.setLocationRelativeTo(null);
-
-                            imagePreviewDialog.setVisible(true);
-
-                        }catch(Exception ex){
-                            imagePreviewDialog.setVisible(false);
-                        }
-
-                        break;
-                    }
-                }
-            }
-        });
-
-        tblProductVariant.addMouseListener(new MouseAdapter(){
-
-            @Override
-            public void mouseExited(MouseEvent e){
-                imagePreviewDialog.setVisible(false);
-            }
-        });
     }
     
     private Image scaleImage(Image img, int width, int height){
@@ -529,23 +425,25 @@ public class ProductVariantUI extends javax.swing.JPanel {
 
         try{
 
-            ImageIcon icon = new ImageIcon(new URL(url));
+            ImageIcon icon = imageCache.get(url);
+
+            if(icon == null){
+                icon = new ImageIcon(new URL(url));
+                imageCache.put(url, icon);
+            }
 
             originalImage = icon.getImage();
 
             Image preview = scaleImage(originalImage,90,90);
 
             lbImagePreview.setText("");
-
             lbImagePreview.setIcon(new ImageIcon(preview));
 
         }
         catch(Exception e){
 
             originalImage = null;
-
             lbImagePreview.setIcon(null);
-
             lbImagePreview.setText("Sai URL");
         }
     }
@@ -577,7 +475,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     public void reloadData(){
         refreshForm();
-        imageCache.clear();
+
         loadTable(buildProductFilter());
     }
     
@@ -875,7 +773,13 @@ public class ProductVariantUI extends javax.swing.JPanel {
     }//GEN-LAST:event_tblProductVariantMouseClicked
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
-        searchTable();
+        if(searchTimer != null){
+            searchTimer.stop();
+        }
+
+        searchTimer = new javax.swing.Timer(300, e -> searchTable());
+        searchTimer.setRepeats(false);
+        searchTimer.start();
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed

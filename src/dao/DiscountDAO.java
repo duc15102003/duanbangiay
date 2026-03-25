@@ -251,7 +251,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         return false;
     }
     
-    public Discount checkDiscount(String code) {
+    public Discount checkDiscount(String code, double orderTotal) {
         if (code == null || code.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Vui lòng nhập mã giảm giá!");
             return null;
@@ -269,8 +269,25 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 JOptionPane.showMessageDialog(null, "Mã giảm giá không tồn tại!");
                 return null;
             }
+            
 
             Discount discount = mapRow(rs);
+            
+            if (discount.getDiscountCondition() != null && !discount.getDiscountCondition().isBlank()) {
+                try {
+                    double minOrder = Double.parseDouble(discount.getDiscountCondition());
+
+                    if (orderTotal < minOrder) {
+                        JOptionPane.showMessageDialog(null,
+                            "Đơn hàng phải từ " + String.format("%,.0f", minOrder).replace(",", ".") + " trở lên để áp dụng mã!");
+                        return null;
+                    }
+
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Điều kiện giảm giá không hợp lệ!");
+                    return null;
+                }
+            }
 
             if (discount.getStatus() != DiscountStatusEnum.ACTIVE) {
                 JOptionPane.showMessageDialog(null, "Mã giảm giá không ở trạng thái hoạt động!");
