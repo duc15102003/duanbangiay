@@ -104,7 +104,7 @@ public class OrderUI extends JFrame {
     private Map<Integer, Discount> discountMap = new HashMap<>();
     
     //Thông tin id người mua được chọn và id người bán hàng
-    private Integer selectedCustomerId = 1;
+    private Map<Integer, Customer> cartCustomerMap = new HashMap<>();
     private Integer employeeId;
 
     // ================= FORMAT =================
@@ -120,6 +120,8 @@ public class OrderUI extends JFrame {
         setLocationRelativeTo(null);
         
         initData();
+        
+        initTabListener();
     }
     
     public OrderUI(int userId) {
@@ -128,6 +130,8 @@ public class OrderUI extends JFrame {
         setLocationRelativeTo(null);
         
         initData();
+        
+        initTabListener();
     }
     
     private void initData() {
@@ -588,16 +592,7 @@ public class OrderUI extends JFrame {
         table.getColumnModel().getColumn(7).setPreferredWidth(120); // tồn
         table.getColumnModel().getColumn(8).setPreferredWidth(130); // giá
     }
-    
-    // ================= CUSTOMER =================
-    public void setSelectedCustomer(Integer id, String name, String phone, String address) {
-        jLabel4.setText(name);
-        jLabel5.setText(phone);
-        lbAddress.setText(address);
         
-        this.selectedCustomerId = id;
-    }
-    
     private void showQRDialog(int invoiceId) {
 
         JDialog dialog = new JDialog(this, "Thanh toán chuyển khoản", true);
@@ -632,7 +627,7 @@ public class OrderUI extends JFrame {
 
         panel.add(lblQR, BorderLayout.CENTER);
 
-        // ===== DÙNG FINAL AMOUNT =====
+        // Lấy tổng tiền
         float totalAmount = getFinalAmount(invoiceId);
 
         String invoiceCode = listInvoice
@@ -666,52 +661,57 @@ public class OrderUI extends JFrame {
 
         btnConfirm.addActionListener(e -> {
 
-        boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
-        //productVariantService.updateStockAfterPayment(invoiceId);
+            boolean success = invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID);
 
-        if (success) {
+            if (success) {
 
-            Customer customer = null;
-            String customerName = "";
-            String customerPhone = "";
-            String customerAddress = "";
+                // Lấy thông tin khách hàng của tab hiện tại
+                int tabIndex = jTabbedPane1.getSelectedIndex();
+                Customer customer = cartCustomerMap.get(tabIndex);
 
-            if (selectedCustomerId != null) {
-                customer = customerService.findById(selectedCustomerId);
+                String customerName = "";
+                String customerPhone = "";
+                String customerAddress = "";
+                Integer selectedCustomerId = null;
+
                 if (customer != null) {
+                    selectedCustomerId = customer.getId();
                     customerName = customer.getName();
                     customerPhone = customer.getPhone();
                     customerAddress = customer.getAddress();
                 }
+
+                String employeeName = invoiceService.findNameById(employeeId);
+
+                // Cập nhật thông tin thanh toán
+                invoiceService.updatePaymentInfo(
+                    invoiceId,
+                    employeeId,
+                    selectedCustomerId,
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    employeeName
+                );
+
+                JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                dialog.dispose();
+                showInvoiceDialog(invoiceId);
+
+                // Chỉ xóa thông tin khách hàng của tab hiện tại
+                cartCustomerMap.remove(tabIndex);
+                jLabel4.setText("");
+                jLabel5.setText("");
+                lbAddress.setText("");
+
+                // Reload cart và sản phẩm
+                initCart();
+                initProduct();
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
             }
-
-            String employeeName = invoiceService.findNameById(employeeId);
-
-            invoiceService.updatePaymentInfo(
-                invoiceId,
-                employeeId,
-                selectedCustomerId,
-                customerName,
-                customerPhone,
-                customerAddress,
-                employeeName
-            );
-
-            JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-            dialog.dispose();
-            showInvoiceDialog(invoiceId);
-            initCart();
-            initProduct();
-
-            selectedCustomerId = 1;
-            jLabel4.setText("");
-            jLabel5.setText("");
-            lbAddress.setText("");
-
-        } else {
-            JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
-        }
-    });
+        });
 
         bottomPanel.add(btnConfirm);
 
@@ -761,6 +761,39 @@ public class OrderUI extends JFrame {
 
         return total - discountAmount;
     }
+    
+    public void setSelectedCustomer(int customerId, String name, String phone, String address) {
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        customer.setName(name);
+        customer.setPhone(phone);
+        customer.setAddress(address);
+
+        int tabIndex = jTabbedPane1.getSelectedIndex();
+        cartCustomerMap.put(tabIndex, customer);
+
+        jLabel4.setText(name);
+        jLabel5.setText(phone);
+        lbAddress.setText(address);
+    }
+    
+    
+    private void initTabListener() {
+        jTabbedPane1.addChangeListener(e -> {
+            int tabIndex = jTabbedPane1.getSelectedIndex();
+            Customer c = cartCustomerMap.get(tabIndex);
+
+            if (c != null) {
+                jLabel4.setText(c.getName());
+                jLabel5.setText(c.getPhone());
+                lbAddress.setText(c.getAddress());
+            } else {
+                jLabel4.setText("");   
+                jLabel5.setText("");
+                lbAddress.setText("");
+            }
+        });
+    }   
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -1261,36 +1294,20 @@ public class OrderUI extends JFrame {
             return;
         }
 
-        // ===== CHECK TỒN KHO =====
-//        if (!productVariantService.checkStockBeforePayment(invoiceId)) {
-//            JOptionPane.showMessageDialog(this, "Số lượng sản phẩm không đủ để thanh toán!");
-//            return;
-//        }
-
-        // ===== LẤY FINAL AMOUNT (ĐÃ TRỪ DISCOUNT) =====
+        // ===== LẤY FINAL AMOUNT =====
         float finalAmount = getFinalAmount(invoiceId);
 
-        // ===== CẬP NHẬT TỔNG TIỀN =====
         if (!invoiceService.updateTotalAmount(invoiceId, finalAmount)) {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật tổng tiền!");
             return;
         }
 
         // ===== LẤY THÔNG TIN KHÁCH & NHÂN VIÊN =====
-        Integer customerId = selectedCustomerId; // có thể null
-        Customer customer = null;
-        String customerName = "";
-        String customerPhone = "";
-        String customerAddress = "";
+        Customer customer = cartCustomerMap.get(tabIndex);
+        String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
+        String customerPhone = (customer != null) ? customer.getPhone() : "";
+        String customerAddress = (customer != null) ? customer.getAddress() : "";
 
-        if (customerId != null) {
-            customer = customerService.findById(customerId);
-            if (customer != null) {
-                customerName = customer.getName();
-                customerPhone = customer.getPhone();
-                customerAddress = customer.getAddress();
-            }
-}
         String employeeName = invoiceService.findNameById(employeeId);
 
         // ===== CHỌN PHƯƠNG THỨC =====
@@ -1307,7 +1324,7 @@ public class OrderUI extends JFrame {
         );
         if (choice == -1) return;
 
-        if (choice == 0) { // ===== TIỀN MẶT =====
+        if (choice == 0) { // TIỀN MẶT
             int confirm = JOptionPane.showConfirmDialog(
                     this,
                     "Xác nhận thanh toán tiền mặt?\nSố tiền: " + moneyFormat.format(finalAmount) + " VND",
@@ -1319,9 +1336,7 @@ public class OrderUI extends JFrame {
 
                 if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
 
-                    //productVariantService.updateStockAfterPayment(invoiceId);
-
-                    // ===== TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ =====
+                    // TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ
                     String discountCode = txtDiscount.getText().trim();
                     if (!discountCode.isEmpty()) {
                         boolean used = discountService.useDiscount(discountCode);
@@ -1330,22 +1345,16 @@ public class OrderUI extends JFrame {
                         }
                     }
 
-                    // ===== LƯU THÔNG TIN THANH TOÁN =====
+                    // LƯU THÔNG TIN THANH TOÁN
                     invoiceService.updatePaymentInfo(
                             invoiceId,
                             employeeId,
-                            selectedCustomerId,
+                            (customer != null ? customer.getId() : null),
                             customerName,
                             customerPhone,
                             customerAddress,
                             employeeName
                     );
-
-                    // RESET CUSTOMER
-                    selectedCustomerId = 1;
-                    jLabel4.setText("");
-                    jLabel5.setText("");
-                    lbAddress.setText("");
 
                     JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                     showInvoiceDialog(invoiceId);
@@ -1357,9 +1366,9 @@ public class OrderUI extends JFrame {
                 }
             }
 
-        } else if (choice == 1) { // ===== CHUYỂN KHOẢN =====
+        } else if (choice == 1) { // CHUYỂN KHOẢN
             showQRDialog(invoiceId);
-            
+
             String discountCode = txtDiscount.getText().trim();
             if (!discountCode.isEmpty()) {
                 boolean used = discountService.useDiscount(discountCode);
@@ -1542,7 +1551,11 @@ public class OrderUI extends JFrame {
 
         float total = getTotalFromCart();
 
-        Discount discount = discountService.checkDiscount(code, invoiceId, total, selectedCustomerId);
+        // Lấy customer của tab hiện tại
+        Customer customer = cartCustomerMap.get(tabIndex);
+        Integer customerId = (customer != null) ? customer.getId() : null;
+
+        Discount discount = discountService.checkDiscount(code, invoiceId, total, customerId);
 
         if (discount == null) {
             JOptionPane.showMessageDialog(this, "Mã giảm giá không hợp lệ!");
@@ -1933,11 +1946,16 @@ public class OrderUI extends JFrame {
         // ===== EMPLOYEE =====
         Employee emp = employeeService.findById(employeeId);
 
-        String employeeName = (emp != null && emp.getName() != null)
-                ? emp.getName() : "N/A";
+        String employeeName = (emp != null && emp.getName() != null) ? emp.getName() : "N/A";
+        String employeeCode = (emp != null && emp.getCode() != null) ? emp.getCode() : "N/A";
 
-        String employeeCode = (emp != null && emp.getCode() != null)
-                ? emp.getCode() : "N/A";
+        // ===== CUSTOMER =====
+        int tabIndex = jTabbedPane1.getSelectedIndex();
+        Customer customer = cartCustomerMap.get(tabIndex);
+
+        String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
+        String customerPhone = (customer != null) ? customer.getPhone() : "";
+        String customerAddress = (customer != null) ? customer.getAddress() : "";
 
         // ===== HEADER =====
         JLabel lblTitle = centerLabel("HÓA ĐƠN THANH TOÁN");
@@ -1958,11 +1976,9 @@ public class OrderUI extends JFrame {
         panel.add(centerLabel("------------------------------"));
 
         // ===== CUSTOMER =====
-        String customerName = jLabel4.getText().isEmpty() ? "Khách lẻ" : jLabel4.getText();
-
         panel.add(centerLabel("Khách: " + customerName));
-        panel.add(centerLabel("SĐT: " + jLabel5.getText()));
-        panel.add(centerLabel("Địa chỉ: " + lbAddress.getText()));
+        panel.add(centerLabel("SĐT: " + customerPhone));
+        panel.add(centerLabel("Địa chỉ: " + customerAddress));
 
         panel.add(centerLabel("------------------------------"));
 
@@ -2028,7 +2044,6 @@ public class OrderUI extends JFrame {
             float finalAmount = total - discountAmount;
 
             Invoice invoice = invoiceService.findById(invoiceId);
-
             String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
 
             java.time.format.DateTimeFormatter formatter =
@@ -2039,11 +2054,16 @@ public class OrderUI extends JFrame {
                     : "N/A";
 
             Employee emp = employeeService.findById(employeeId);
-
             String employeeName = (emp != null && emp.getName() != null) ? emp.getName() : "N/A";
             String employeeCode = (emp != null && emp.getCode() != null) ? emp.getCode() : "N/A";
 
-            String customerName = jLabel4.getText().isEmpty() ? "Khách lẻ" : jLabel4.getText();
+            // ===== CUSTOMER THEO TAB HIỆN TẠI =====
+            int tabIndex = jTabbedPane1.getSelectedIndex();
+            Customer customer = cartCustomerMap.get(tabIndex);
+
+            String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
+            String customerPhone = (customer != null) ? customer.getPhone() : "";
+            String customerAddress = (customer != null) ? customer.getAddress() : "";
 
             // ===== CHỌN FILE =====
             JFileChooser fileChooser = new JFileChooser();
@@ -2055,14 +2075,12 @@ public class OrderUI extends JFrame {
 
             // ===== LOAD FONT =====
             InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
-
             if (is == null) {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
                 return;
             }
 
             byte[] fontBytes = is.readAllBytes();
-
             BaseFont bf = BaseFont.createFont(
                     "Roboto-Regular.ttf",
                     BaseFont.IDENTITY_H,
@@ -2072,14 +2090,9 @@ public class OrderUI extends JFrame {
                     null
             );
 
-            com.itextpdf.text.Font titleFont =
-                    new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD);
-
-            com.itextpdf.text.Font normalFont =
-                    new com.itextpdf.text.Font(bf, 12);
-
-            com.itextpdf.text.Font boldFont =
-                    new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(bf, 12);
+            com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
 
             // ===== TẠO PDF =====
             Document document = new Document();
@@ -2107,8 +2120,8 @@ public class OrderUI extends JFrame {
 
             // ===== CUSTOMER =====
             document.add(new Paragraph("Khách: " + customerName, normalFont));
-            document.add(new Paragraph("SĐT: " + jLabel5.getText(), normalFont));
-            document.add(new Paragraph("Địa chỉ: " + lbAddress.getText(), normalFont));
+            document.add(new Paragraph("SĐT: " + customerPhone, normalFont));
+            document.add(new Paragraph("Địa chỉ: " + customerAddress, normalFont));
 
             addLine(document, normalFont);
 
@@ -2117,7 +2130,6 @@ public class OrderUI extends JFrame {
                 String line = item.getProductName()
                         + " | SL: " + item.getQuantity()
                         + " | " + moneyFormat.format(item.getPrice());
-
                 document.add(new Paragraph(line, normalFont));
             }
 
