@@ -121,7 +121,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
             }
 
             ps.setInt(7, request.getStatus().getValue());
-            ps.setString(8, request.getDiscountCondition());
+            ps.setInt(8, request.getDiscountCondition());
 
             if (request.getQuantity() != null) {
                 ps.setInt(9, request.getQuantity());
@@ -173,7 +173,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
             }
 
             ps.setInt(7, request.getStatus().getValue());
-            ps.setString(8, request.getDiscountCondition());
+            ps.setInt(8, request.getDiscountCondition());
 
             if (request.getQuantity() != null) {
                 ps.setInt(9, request.getQuantity());
@@ -219,7 +219,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         d.setStartedAt(rs.getTimestamp("started_at") != null ? rs.getTimestamp("started_at").toLocalDateTime() : null);
         d.setEndedAt(rs.getTimestamp("ended_at") != null ? rs.getTimestamp("ended_at").toLocalDateTime() : null);
         d.setStatus(DiscountStatusEnum.fromValue(rs.getInt("status")));
-        d.setDiscountCondition(rs.getString("discount_condition"));
+        d.setDiscountCondition(rs.getInt("discount_condition"));
 
         int qty = rs.getInt("quantity");
         d.setQuantity(rs.wasNull() ? null : qty);
@@ -273,9 +273,9 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
 
             Discount discount = mapRow(rs);
             
-            if (discount.getDiscountCondition() != null && !discount.getDiscountCondition().isBlank()) {
+            if (discount.getDiscountCondition() != null) {
                 try {
-                    double minOrder = Double.parseDouble(discount.getDiscountCondition());
+                    double minOrder = discount.getDiscountCondition();
 
                     if (orderTotal < minOrder) {
                         JOptionPane.showMessageDialog(null,

@@ -103,7 +103,7 @@ public class DiscountUI extends javax.swing.JPanel {
                 d.getEndedAt() != null ? d.getEndedAt().format(f) : "",     
                 d.getQuantity(),                                
                 d.getDiscountCondition(),                       
-                d.getStatus().getLabel()                       
+                d.getStatus().getLabel()                      
             });
         }
     }
@@ -157,7 +157,8 @@ public class DiscountUI extends javax.swing.JPanel {
             d.setQuantity(0);
         }
 
-        d.setDiscountCondition(txtDiscountCondition.getText().trim());
+        int condition = Integer.parseInt(txtDiscountCondition.getText().trim());
+        d.setDiscountCondition(condition);
 
         Date from = dcFrom.getDate();
         Date to = dcTo.getDate();
@@ -487,7 +488,7 @@ public class DiscountUI extends javax.swing.JPanel {
         txtDiscountValue.setText(moneyFormat.format(d.getDiscountValue()));
         txtMaximumDiscount.setText(d.getMaximumDiscount() != null ? moneyFormat.format(d.getMaximumDiscount()) : "");
         txtQuantity.setText(String.valueOf(d.getQuantity()));
-        txtDiscountCondition.setText(d.getDiscountCondition());
+        txtDiscountCondition.setText(String.valueOf(d.getDiscountCondition()));
 
         cbbDiscountType.setSelectedItem(d.getDiscountType());
         cbbStatus.setSelectedItem(d.getStatus().getLabel());

@@ -28,7 +28,7 @@ public class CustomerUI extends javax.swing.JPanel {
         initComponents();
         
         rdoMale.setSelected(true);
-
+        
         btnSelectCustomer.setVisible(false);
         initCustomer();
     }
@@ -197,11 +197,12 @@ public class CustomerUI extends javax.swing.JPanel {
         txtSearch.setText("");
 
         dcBirth.setDate(null);
-        
-        rdoMale.setSelected(true);
 
         buttonGroup1.clearSelection();
         buttonGroup2.clearSelection();
+
+        rdoMale.setSelected(true);       
+        rdoActive.setSelected(true);    
     }
     
     private boolean validateDateFormat() {

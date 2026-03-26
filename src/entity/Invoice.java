@@ -28,6 +28,8 @@ public class Invoice {
 
     // map data
     private String employeeName;
+    
+    private long discountAmount;
 
     public Invoice() {
     }
@@ -47,6 +49,29 @@ public class Invoice {
         this.customerAddress = customerAddress;
         this.customerName = customerName;
         this.employeeName = employeeName;
+    }
+
+    public Invoice(int id, String code, int employeeId, int customerId, float totalAmount, OrderStatusEnum status, LocalDateTime createdAt, String customerPhone, String customerAddress, String customerName, String employeeName, long discountAmount) {
+        this.id = id;
+        this.code = code;
+        this.employeeId = employeeId;
+        this.customerId = customerId;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.customerPhone = customerPhone;
+        this.customerAddress = customerAddress;
+        this.customerName = customerName;
+        this.employeeName = employeeName;
+        this.discountAmount = discountAmount;
+    }
+
+    public long getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(long discountAmount) {
+        this.discountAmount = discountAmount;
     }
 
     public int getId() { return id; }

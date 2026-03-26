@@ -41,7 +41,9 @@ public class InvoiceService {
                                      String customerName,
                                      String customerPhone,
                                      String customerAddress,
-                                     String employeeName) {
+                                     String employeeName,
+                                     long discountAmount
+    ) {
         try {
             Invoice invoice = invoiceDAO.findById(invoiceId);
             if (invoice == null) return false;
@@ -52,6 +54,7 @@ public class InvoiceService {
             invoice.setCustomerPhone(customerPhone);
             invoice.setCustomerAddress(customerAddress);
             invoice.setEmployeeName(employeeName);
+            invoice.setDiscountAmount(discountAmount);
 
             return invoiceDAO.updateInvoicePaymentInfo(invoice);
 

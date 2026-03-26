@@ -115,8 +115,8 @@
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                           <Component id="lblTongTien" max="32767" attributes="0"/>
-                                          <Component id="tblGiamGia" max="32767" attributes="0"/>
-                                          <Component id="tblThanhToan" min="-2" pref="206" max="-2" attributes="0"/>
+                                          <Component id="lblGiamGia" max="32767" attributes="0"/>
+                                          <Component id="lblThanhToan" min="-2" pref="206" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <Component id="btnPayment" min="-2" pref="294" max="-2" attributes="0"/>
@@ -213,12 +213,12 @@
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tblGiamGia" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblGiamGia" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="jLabel24" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="tblThanhToan" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblThanhToan" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" attributes="0">
@@ -546,7 +546,7 @@
             <Property name="text" type="java.lang.String" value="T&#x1ed5;ng ti&#x1ec1;n"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="tblGiamGia">
+        <Component class="javax.swing.JLabel" name="lblGiamGia">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="14" style="0"/>
@@ -555,7 +555,7 @@
             <Property name="text" type="java.lang.String" value="Giam gia"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="tblThanhToan">
+        <Component class="javax.swing.JLabel" name="lblThanhToan">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Segoe UI" size="14" style="0"/>

@@ -285,7 +285,8 @@
                     customer_name = ?, 
                     customer_phone = ?, 
                     customer_address = ?, 
-                    employee_name = ?
+                    employee_name = ?,
+                    discount_amount = ?
                 WHERE id = ?
             """;
 
@@ -298,7 +299,8 @@
                 ps.setString(4, invoice.getCustomerPhone());
                 ps.setString(5, invoice.getCustomerAddress());
                 ps.setString(6, invoice.getEmployeeName());
-                ps.setInt(7, invoice.getId());
+                ps.setLong(7, invoice.getDiscountAmount());
+                ps.setInt(8, invoice.getId());
 
                 return ps.executeUpdate() > 0;
 

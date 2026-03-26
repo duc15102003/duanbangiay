@@ -69,6 +69,11 @@ public class DiscountValidator {
             JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
             return false;
         }
+        
+        if (d.getDiscountCondition() < 0) {
+            JOptionPane.showMessageDialog(null, "Điều kiện giảm giá phải là số >= 0");
+            return false;
+        }
 
         return true;
     }
@@ -128,6 +133,11 @@ public class DiscountValidator {
 
         if (d.getStatus() == null) {
             JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
+            return false;
+        }
+        
+        if (d.getDiscountCondition() < 0) {
+            JOptionPane.showMessageDialog(null, "Điều kiện giảm giá phải là số >= 0");
             return false;
         }
 

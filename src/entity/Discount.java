@@ -12,7 +12,7 @@ public class Discount extends BaseEntity {
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     private DiscountStatusEnum status;
-    private String discountCondition; // Điều kiện giảm
+    private int discountCondition; // Điều kiện giảm
     private Integer quantity;
 
     public Discount() {
@@ -20,7 +20,7 @@ public class Discount extends BaseEntity {
 
     public Discount(String code, String discountType, int discountValue, Integer maximumDiscount, 
                     LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status,
-                    String discountCondition, Integer quantity) {
+                    int discountCondition, Integer quantity) {
         this.code = code;
         this.discountType = discountType;
         this.discountValue = discountValue;
@@ -35,7 +35,7 @@ public class Discount extends BaseEntity {
     public Discount(String code, String discountType, int discountValue, Integer maximumDiscount, 
                     LocalDateTime startedAt, LocalDateTime endedAt, DiscountStatusEnum status, 
                     Integer id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt,
-                    String discountCondition, Integer quantity) {
+                    int discountCondition, Integer quantity) {
         super(id, createdAt, updatedAt, deletedAt);
         this.code = code;
         this.discountType = discountType;
@@ -48,11 +48,11 @@ public class Discount extends BaseEntity {
         this.quantity = quantity;
     }
 
-    public String getDiscountCondition() {
+    public Integer getDiscountCondition() {
         return discountCondition;
     }
 
-    public void setDiscountCondition(String discountCondition) {
+    public void setDiscountCondition(int discountCondition) {
         this.discountCondition = discountCondition;
     }
 

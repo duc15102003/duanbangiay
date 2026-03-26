@@ -534,6 +534,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         cbbBrand = new javax.swing.JComboBox<>();
         txtSearchInvoiceItem = new javax.swing.JTextField();
         cbbStatus = new javax.swing.JComboBox<>();
+        btnInvoicePrint = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -602,6 +603,13 @@ public class InvoiceUI extends javax.swing.JPanel {
             }
         });
 
+        btnInvoicePrint.setText("In hóa đơn");
+        btnInvoicePrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInvoicePrintActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -625,7 +633,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addComponent(txtSearchInvoiceItem, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnInvoicePrint, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel3)
@@ -654,7 +663,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                     .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
-                        .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnInvoicePrint)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -697,8 +707,23 @@ public class InvoiceUI extends javax.swing.JPanel {
         loadInvoiceItem(invoice.getId());
     }//GEN-LAST:event_txtSearchInvoiceItemKeyReleased
 
+    private void btnInvoicePrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInvoicePrintActionPerformed
+        int row = tblInvoice.getSelectedRow();
+
+        if (row < 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn!");
+            return;
+        }
+
+        int modelRow = tblInvoice.convertRowIndexToModel(row);
+        Invoice invoice = invoices.get(modelRow);
+
+        //exportInvoiceToPDF(invoice.getId());      
+    }//GEN-LAST:event_btnInvoicePrintActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnInvoicePrint;
     private javax.swing.JComboBox<String> cbbBrand;
     private javax.swing.JComboBox<String> cbbCategory;
     private javax.swing.JComboBox<String> cbbColor;

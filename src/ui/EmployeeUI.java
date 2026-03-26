@@ -25,6 +25,8 @@ public class EmployeeUI extends javax.swing.JPanel {
         initComponents();
         initEmployee();
         loadRole();
+        
+        rdoMale.setSelected(true);
     }
     
     private void loadRole(){
@@ -161,6 +163,8 @@ public class EmployeeUI extends javax.swing.JPanel {
         buttonGroup1.clearSelection();
 
         cbbRole.setSelectedIndex(0);
+        
+        rdoMale.setSelected(true);
     }
     
     private EmployeeFilter buildEmployeeFilter(){

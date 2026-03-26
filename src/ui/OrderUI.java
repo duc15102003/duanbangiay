@@ -682,6 +682,22 @@ public class OrderUI extends JFrame {
                 }
 
                 String employeeName = invoiceService.findNameById(employeeId);
+                
+                int discountAmount = 0;
+
+                String text = lblGiamGia.getText();
+
+                if (text != null && !text.isBlank()) {
+
+                    String number = text.replaceAll("[^0-9]", "");
+
+                    if (!number.isEmpty()) {
+                        try {
+                            discountAmount = Integer.parseInt(number);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
 
                 // Cập nhật thông tin thanh toán
                 invoiceService.updatePaymentInfo(
@@ -691,7 +707,8 @@ public class OrderUI extends JFrame {
                     customerName,
                     customerPhone,
                     customerAddress,
-                    employeeName
+                    employeeName,
+                    discountAmount
                 );
 
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
@@ -830,8 +847,8 @@ public class OrderUI extends JFrame {
         cbbSizeCart = new javax.swing.JComboBox<>();
         cbbColorCart = new javax.swing.JComboBox<>();
         jLabel19 = new javax.swing.JLabel();
-        tblGiamGia = new javax.swing.JLabel();
-        tblThanhToan = new javax.swing.JLabel();
+        lblGiamGia = new javax.swing.JLabel();
+        lblThanhToan = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lbAddress = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
@@ -978,14 +995,14 @@ public class OrderUI extends JFrame {
         jLabel19.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jLabel19.setText("Tổng tiền");
 
-        tblGiamGia.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        tblGiamGia.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        tblGiamGia.setText("Giam gia");
+        lblGiamGia.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblGiamGia.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblGiamGia.setText("Giam gia");
 
-        tblThanhToan.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        tblThanhToan.setForeground(new java.awt.Color(204, 0, 51));
-        tblThanhToan.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        tblThanhToan.setText("Thanh toan");
+        lblThanhToan.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        lblThanhToan.setForeground(new java.awt.Color(204, 0, 51));
+        lblThanhToan.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblThanhToan.setText("Thanh toan");
 
         jLabel6.setText("Địa chỉ:");
 
@@ -1069,8 +1086,8 @@ public class OrderUI extends JFrame {
                                     .addGap(18, 18, 18)
                                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(lblTongTien, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(tblGiamGia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(tblThanhToan, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(lblGiamGia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lblThanhToan, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addComponent(btnPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 294, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addGroup(jPanel5Layout.createSequentialGroup()
@@ -1143,11 +1160,11 @@ public class OrderUI extends JFrame {
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel18)
-                                    .addComponent(tblGiamGia))
+                                    .addComponent(lblGiamGia))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel24)
-                                    .addComponent(tblThanhToan))
+                                    .addComponent(lblThanhToan))
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel5Layout.createSequentialGroup()
                                         .addGap(15, 15, 15)
@@ -1304,6 +1321,12 @@ public class OrderUI extends JFrame {
 
         // ===== LẤY THÔNG TIN KHÁCH & NHÂN VIÊN =====
         Customer customer = cartCustomerMap.get(tabIndex);
+
+        if (customer == null) {
+            customer = customerService.findById(1);
+            cartCustomerMap.put(tabIndex, customer); 
+        }
+        
         String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
         String customerPhone = (customer != null) ? customer.getPhone() : "";
         String customerAddress = (customer != null) ? customer.getAddress() : "";
@@ -1344,6 +1367,20 @@ public class OrderUI extends JFrame {
                             JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
                         }
                     }
+                    
+                    int discountAmount = 0;
+
+                    String text = lblGiamGia.getText();
+
+                    if (text != null && !text.isBlank()) {
+                        try {
+                            discountAmount = Integer.parseInt(text.replaceAll("[^0-9]", ""));
+                        } catch (Exception e) {
+                            discountAmount = 0;
+                        }
+                    }
+                    
+                    System.out.println("discountAmount" + discountAmount);
 
                     // LƯU THÔNG TIN THANH TOÁN
                     invoiceService.updatePaymentInfo(
@@ -1353,14 +1390,15 @@ public class OrderUI extends JFrame {
                             customerName,
                             customerPhone,
                             customerAddress,
-                            employeeName
+                            employeeName,
+                            discountAmount
                     );
 
                     JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                     showInvoiceDialog(invoiceId);
                     initCart();
                     initProduct();
-
+                    txtDiscount.setText("");
                 } else {
                     JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
                 }
@@ -1376,6 +1414,8 @@ public class OrderUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
                 }
             }
+            
+            txtDiscount.setText("");
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
 
@@ -1496,8 +1536,8 @@ public class OrderUI extends JFrame {
 
         DefaultTableModel model = (DefaultTableModel) table.getModel();
 
-        int productVariantId = (int) model.getValueAt(row, 6); // PV_ID
-        int currentQty = Integer.parseInt(model.getValueAt(row, 3).toString());
+        int productVariantId = (int) model.getValueAt(row, 10);
+        int currentQty = Integer.parseInt(model.getValueAt(row, 7).toString());
 
         String input = JOptionPane.showInputDialog(this, "Nhập số lượng:", currentQty);
 
@@ -1825,8 +1865,8 @@ public class OrderUI extends JFrame {
 
         if(tabIndex < 0 || tabIndex >= listInvoice.size()){
             lblTongTien.setText("0");
-            tblGiamGia.setText("0");
-            tblThanhToan.setText("0");
+            lblGiamGia.setText("0");
+            lblThanhToan.setText("0");
             return;
         }
 
@@ -1873,10 +1913,10 @@ public class OrderUI extends JFrame {
         float finalAmount = total - discountAmount;
 
         lblTongTien.setText(moneyFormat.format(total));
-        tblGiamGia.setText(discountAmount > 0 
+        lblGiamGia.setText(discountAmount > 0 
                 ? "- " + moneyFormat.format(discountAmount) 
                 : "0");
-        tblThanhToan.setText(moneyFormat.format(finalAmount));
+        lblThanhToan.setText(moneyFormat.format(finalAmount));
 
         txtDiscount.setText(currentDiscount != null ? currentDiscount.getCode() : "");
     }
@@ -1904,6 +1944,20 @@ public class OrderUI extends JFrame {
         return total;
     }
     
+    private float parseMoney(String text) {
+        if (text == null || text.isBlank()) return 0;
+
+        String number = text.replaceAll("[^0-9]", "");
+
+        if (number.isEmpty()) return 0;
+
+        try {
+            return Float.parseFloat(number);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+    
     private void showInvoiceDialog(int invoiceId) {
 
         JDialog dialog = new JDialog(this, "Hóa đơn", true);
@@ -1916,20 +1970,9 @@ public class OrderUI extends JFrame {
 
         // ===== LẤY DATA =====
         List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
-        float total = invoiceService.getTotalAmount(invoiceId);
-
-        Discount discount = discountMap.get(invoiceId);
-        float discountAmount = 0;
-
-        if (discount != null) {
-            if ("%".equals(discount.getDiscountType())) {
-                discountAmount = total * discount.getDiscountValue() / 100f;
-            } else {
-                discountAmount = discount.getDiscountValue();
-            }
-        }
-
-        float finalAmount = total - discountAmount;
+        float total = parseMoney(lblTongTien.getText());
+        float discountAmount = parseMoney(lblGiamGia.getText());
+        float finalAmount = parseMoney(lblThanhToan.getText());
 
         // ===== INVOICE =====
         Invoice invoice = invoiceService.findById(invoiceId);
@@ -2032,13 +2075,20 @@ public class OrderUI extends JFrame {
             List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
             float total = invoiceService.getTotalAmount(invoiceId);
 
-            Discount discount = discountMap.get(invoiceId);
             float discountAmount = 0;
 
-            if (discount != null) {
-                discountAmount = "%".equals(discount.getDiscountType())
-                        ? total * discount.getDiscountValue() / 100f
-                        : discount.getDiscountValue();
+            String text = lblGiamGia.getText();
+
+            if (text != null && !text.isBlank()) {
+
+                String number = text.replaceAll("[^0-9]", "");
+
+                if (!number.isEmpty()) {
+                    try {
+                        discountAmount = Float.parseFloat(number);
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
             }
 
             float finalAmount = total - discountAmount;
@@ -2186,11 +2236,11 @@ public class OrderUI extends JFrame {
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel lbAddress;
+    private javax.swing.JLabel lblGiamGia;
+    private javax.swing.JLabel lblThanhToan;
     private javax.swing.JLabel lblTongTien;
     private javax.swing.JTable tblCart;
-    private javax.swing.JLabel tblGiamGia;
     private javax.swing.JTable tblProduct;
-    private javax.swing.JLabel tblThanhToan;
     private javax.swing.JTextField txtCartSearch;
     private javax.swing.JTextField txtDiscount;
     private javax.swing.JTextField txtSearchProduct;
