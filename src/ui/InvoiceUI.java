@@ -1,6 +1,7 @@
 package ui;
 
 import dao.CartDAO;
+import dao.InvoiceDAO;
 import entity.Invoice;
 import entity.InvoiceItem;
 import entity.filter.InvoiceFilter;
@@ -175,6 +176,7 @@ public class InvoiceUI extends javax.swing.JPanel {
                 i.getCustomerName(),
                 i.getCustomerPhone(),
                 i.getCustomerAddress(),
+                moneyFormat.format(i.getDiscountAmount()),
                 moneyFormat.format(i.getTotalAmount()),
                 createdDate,
                 i.getStatus().getLabel()
@@ -513,6 +515,111 @@ public class InvoiceUI extends javax.swing.JPanel {
         header.setHorizontalAlignment(SwingConstants.CENTER);
     } 
         
+    private void exportInvoiceToPDF(int invoiceId) {
+
+        try {
+            // ===== LẤY DATA =====
+            InvoiceDAO invoiceDAO = new InvoiceDAO();
+            Invoice invoice = invoiceDAO.findById(invoiceId);
+
+            List<InvoiceItem> items = cartDAO.findByInvoiceId(invoiceId, null);
+
+            float total = 0;
+
+            for (InvoiceItem item : items) {
+                total += item.getPrice() * item.getQuantity();
+            }
+
+            float discount = invoice.getDiscountAmount();
+            float finalAmount = total - discount;
+
+            // ===== CHỌN FILE =====
+            javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+            fileChooser.setSelectedFile(new java.io.File("invoice_" + invoice.getCode() + ".pdf"));
+
+            if (fileChooser.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+            // ===== LOAD FONT =====
+            java.io.InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
+
+            if (is == null) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
+                return;
+            }
+
+            byte[] fontBytes = is.readAllBytes();
+
+            com.itextpdf.text.pdf.BaseFont bf = com.itextpdf.text.pdf.BaseFont.createFont(
+                    "Roboto-Regular.ttf",
+                    com.itextpdf.text.pdf.BaseFont.IDENTITY_H,
+                    com.itextpdf.text.pdf.BaseFont.EMBEDDED,
+                    true,
+                    fontBytes,
+                    null
+            );
+
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(bf, 12);
+            com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
+
+            // ===== TẠO PDF =====
+            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+            com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(filePath));
+
+            document.open();
+
+            // ===== HEADER =====
+            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
+            title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            document.add(title);
+
+            document.add(new com.itextpdf.text.Paragraph(" "));
+
+            // ===== INFO =====
+            document.add(new com.itextpdf.text.Paragraph("Mã HĐ: " + invoice.getCode(), normalFont));
+            document.add(new com.itextpdf.text.Paragraph("Ngày: " +
+                    (invoice.getCreatedAt() != null ? invoice.getCreatedAt().format(dateFormat) : ""), normalFont));
+
+            document.add(new com.itextpdf.text.Paragraph("Nhân viên: " + invoice.getEmployeeName(), normalFont));
+
+            document.add(new com.itextpdf.text.Paragraph("Khách: " + invoice.getCustomerName(), normalFont));
+            document.add(new com.itextpdf.text.Paragraph("SĐT: " + invoice.getCustomerPhone(), normalFont));
+            document.add(new com.itextpdf.text.Paragraph("Địa chỉ: " + invoice.getCustomerAddress(), normalFont));
+
+            document.add(new com.itextpdf.text.Paragraph(" "));
+
+            // ===== ITEMS =====
+            for (InvoiceItem item : items) {
+
+                float lineTotal = item.getPrice() * item.getQuantity();
+
+                String line = item.getProductName()
+                        + " | SL: " + item.getQuantity()
+                        + " | " + moneyFormat.format(item.getPrice())
+                        + " | = " + moneyFormat.format(lineTotal);
+
+                document.add(new com.itextpdf.text.Paragraph(line, normalFont));
+            }
+
+            document.add(new com.itextpdf.text.Paragraph(" "));
+
+            // ===== TOTAL =====
+            document.add(new com.itextpdf.text.Paragraph("Tổng tiền: " + moneyFormat.format(total), normalFont));
+            document.add(new com.itextpdf.text.Paragraph("Giảm giá: - " + moneyFormat.format(discount), normalFont));
+            document.add(new com.itextpdf.text.Paragraph("Thanh toán: " + moneyFormat.format(finalAmount), boldFont));
+
+            document.close();
+
+            javax.swing.JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -564,17 +671,17 @@ public class InvoiceUI extends javax.swing.JPanel {
 
         tblInvoice.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Ngày tạo", "Trạng thái"
+                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Giảm giá", "Tổng tiền", "Ngày tạo", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -718,7 +825,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         int modelRow = tblInvoice.convertRowIndexToModel(row);
         Invoice invoice = invoices.get(modelRow);
 
-        //exportInvoiceToPDF(invoice.getId());      
+        exportInvoiceToPDF(invoice.getId());      
     }//GEN-LAST:event_btnInvoicePrintActionPerformed
 
 

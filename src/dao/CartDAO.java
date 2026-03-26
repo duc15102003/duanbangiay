@@ -356,6 +356,7 @@ public class CartDAO {
         i.setCustomerAddress(rs.getString("customer_address"));
 
         i.setEmployeeName(rs.getString("employee_name"));
+        i.setDiscountAmount(rs.getInt("discount_amount"));
 
         i.setTotalAmount(rs.getFloat("total_amount"));
         i.setStatus(OrderStatusEnum.fromValue(rs.getInt("status")));
