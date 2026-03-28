@@ -3,7 +3,8 @@ package enums;
 public enum RoleEnum {
     
     STAFF(1, "Nhân viên bán hàng"),
-    MANAGER(2, "Quản lý");
+    MANAGER(2, "Quản lý"),
+    ADMIN(3, "ADMIN");
 
     private final int value;
     private final String label;
