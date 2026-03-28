@@ -224,7 +224,7 @@ public class LoginUI extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Đăng nhập thành công");
 
         if ("MANAGER".equals(role)) {
-            new MainUI(name, "product").setVisible(true);
+            new MainUI(userId, name, "product").setVisible(true);
         } else {
             new OrderUI(userId).setVisible(true);
         }

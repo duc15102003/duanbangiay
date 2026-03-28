@@ -122,6 +122,8 @@ public class OrderUI extends JFrame {
         initData();
         
         initTabListener();
+        
+        setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
     }
     
     public OrderUI(int userId) {
@@ -132,6 +134,8 @@ public class OrderUI extends JFrame {
         initData();
         
         initTabListener();
+        
+        setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
     }
     
     private void initData() {
@@ -1621,11 +1625,17 @@ public class OrderUI extends JFrame {
 
         if (confirm == JOptionPane.YES_OPTION) {
 
+            // Mở Login
             LoginUI login = new LoginUI();
             login.setLocationRelativeTo(null);
             login.setVisible(true);
 
-            this.dispose();
+            // Đóng tất cả window đang mở
+            for (java.awt.Window window : java.awt.Window.getWindows()) {
+                if (window != login) {
+                    window.dispose();
+                }
+            }
         }
     }//GEN-LAST:event_jLabel7MouseClicked
 

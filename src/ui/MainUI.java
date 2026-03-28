@@ -19,21 +19,26 @@ public class MainUI extends javax.swing.JFrame {
     private InvoiceUI invoiceUI;
     private DiscountUI discountUI;
     private AttributeUI attributeUI;
+    private OrderUI orderUI;
     
     private BrandService brandService = new BrandService();
     private CategoryService categoryService = new CategoryService();
     private SizeService sizeService = new SizeService();
     private ColorService colorService = new ColorService();
     private DiscountService discountService = new DiscountService();
+    
+    private int customerId;
 
     public MainUI() {
-        this(null, null);
+        this(0, null, null);
     }
 
-    public MainUI(String name, String screen) {
+    public MainUI(int customerId, String name, String screen) {
         initComponents();
         setLocationRelativeTo(null);
 
+        this.customerId = customerId;
+        
         if (name != null) {
             lbName.setText(name);
         }
@@ -59,6 +64,7 @@ public class MainUI extends javax.swing.JFrame {
         invoiceUI = new InvoiceUI();
         discountUI = new DiscountUI();
         attributeUI = new AttributeUI();
+        orderUI = new OrderUI(customerId);
 
         pnContent.add(dashboardUI, "dashboard");
         pnContent.add(productManagerUI, "product_manager");
@@ -121,6 +127,10 @@ public class MainUI extends javax.swing.JFrame {
         CardLayout card = (CardLayout) pnContent.getLayout();
         card.show(pnContent, "discount");
     }
+    
+    private void showOrder(){
+        new OrderUI(customerId).setVisible(true);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -137,6 +147,7 @@ public class MainUI extends javax.swing.JFrame {
         lbLogout = new javax.swing.JLabel();
         lbInvoice1 = new javax.swing.JLabel();
         lbDashboard1 = new javax.swing.JLabel();
+        lbDashboard2 = new javax.swing.JLabel();
         pnContent = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -249,6 +260,17 @@ public class MainUI extends javax.swing.JFrame {
             }
         });
 
+        lbDashboard2.setBackground(new java.awt.Color(255, 255, 255));
+        lbDashboard2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbDashboard2.setForeground(new java.awt.Color(255, 255, 255));
+        lbDashboard2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbDashboard2.setText("Bán hàng");
+        lbDashboard2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbDashboard2MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnMenuLayout = new javax.swing.GroupLayout(pnMenu);
         pnMenu.setLayout(pnMenuLayout);
         pnMenuLayout.setHorizontalGroup(
@@ -264,7 +286,8 @@ public class MainUI extends javax.swing.JFrame {
                     .addComponent(lbInvoice, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lbInvoice1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lbDashboard1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lbDashboard1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbDashboard2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(100, Short.MAX_VALUE))
             .addComponent(lbLogout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -275,7 +298,9 @@ public class MainUI extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
                 .addComponent(lbName)
-                .addGap(55, 55, 55)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lbDashboard2)
+                .addGap(40, 40, 40)
                 .addComponent(lbDashboard)
                 .addGap(40, 40, 40)
                 .addComponent(ldProduct)
@@ -289,7 +314,7 @@ public class MainUI extends javax.swing.JFrame {
                 .addComponent(lbInvoice1)
                 .addGap(40, 40, 40)
                 .addComponent(lbInvoice)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(42, 42, 42)
                 .addComponent(lbLogout)
                 .addGap(23, 23, 23))
         );
@@ -358,6 +383,10 @@ public class MainUI extends javax.swing.JFrame {
         showAttribute();
     }//GEN-LAST:event_lbDashboard1MouseClicked
 
+    private void lbDashboard2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbDashboard2MouseClicked
+        showOrder();
+    }//GEN-LAST:event_lbDashboard2MouseClicked
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -385,6 +414,7 @@ public class MainUI extends javax.swing.JFrame {
     private javax.swing.JLabel lbCustomer;
     private javax.swing.JLabel lbDashboard;
     private javax.swing.JLabel lbDashboard1;
+    private javax.swing.JLabel lbDashboard2;
     private javax.swing.JLabel lbEmployee;
     private javax.swing.JLabel lbInvoice;
     private javax.swing.JLabel lbInvoice1;
