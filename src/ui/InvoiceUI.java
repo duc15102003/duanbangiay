@@ -147,8 +147,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         String selectedStatus = (String) cbbStatus.getSelectedItem();
 
         invoices = list.stream()
-            // bỏ pending nếu bạn vẫn muốn
-            .filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
+            //.filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
 
             // ===== FILTER STATUS =====
             .filter(i -> {
@@ -170,15 +169,19 @@ public class InvoiceUI extends javax.swing.JPanel {
                 createdDate = i.getCreatedAt().format(dateFormat);
             }
 
+            double totalBeforeDiscount = i.getTotalAmount() + i.getDiscountAmount();
+
             model.addRow(new Object[]{
                 i.getCode(),
                 i.getEmployeeName(),
                 i.getCustomerName(),
                 i.getCustomerPhone(),
                 i.getCustomerAddress(),
+                moneyFormat.format(totalBeforeDiscount),  
                 moneyFormat.format(i.getDiscountAmount()),
                 moneyFormat.format(i.getTotalAmount()),
                 createdDate,
+                i.getPaymentType(),
                 i.getStatus().getLabel()
             });
         }
@@ -671,17 +674,17 @@ public class InvoiceUI extends javax.swing.JPanel {
 
         tblInvoice.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Giảm giá", "Tổng tiền", "Ngày tạo", "Trạng thái"
+                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Giảm giá", "Thanh toán", "Ngày tạo", "Loại thanh toán", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, true, false, false, false, true, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

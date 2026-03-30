@@ -41,6 +41,7 @@
                         invoice.setCreatedAt(ts.toLocalDateTime());
                     }
                     invoice.setEmployeeName(rs.getString("employee_name"));
+                    invoice.setPaymentType(rs.getString("payment_type"));
 
                     return invoice;
                 }
@@ -309,5 +310,28 @@
                 e.printStackTrace();
                 return false;
             }
+        }
+        
+        public boolean updatePaymentType(int invoiceId, String paymentType) {
+
+            String sql = """
+                UPDATE invoice
+                SET payment_type = ?
+                WHERE id = ?
+            """;
+
+            try (Connection conn = dbConfig.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, paymentType);
+                ps.setInt(2, invoiceId);
+
+                return ps.executeUpdate() > 0;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return false;
         }
     }

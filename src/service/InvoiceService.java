@@ -72,4 +72,8 @@ public class InvoiceService {
         }
         return null;
     }
+    
+    public boolean updatePaymentType(int invoiceId, String paymentType){
+        return invoiceDAO.updatePaymentType(invoiceId, paymentType);
+    }
 }

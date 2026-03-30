@@ -265,18 +265,16 @@ public class CartDAO {
                 }
             }
 
-            int newQuantity = currentQuantity + quantity;
-
             // Check tồn kho
-            if (newQuantity > stock) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Số lượng vượt quá tồn kho!\nChỉ còn " + stock + " sản phẩm.",
-                        "Thông báo",
-                        JOptionPane.WARNING_MESSAGE
-                );
-                return false;
-            }
+//            if (stock > (quantity + currentQuantity)) {
+//                 JOptionPane.showMessageDialog(
+//                     null,
+//                     "Số lượng vượt quá tồn kho!\nChỉ còn " + (stock) + " sản phẩm.",
+//                     "Thông báo",
+//                     JOptionPane.WARNING_MESSAGE
+//                 );
+//                 return false;
+//             }
 
             if (exists) {
 
@@ -359,6 +357,7 @@ public class CartDAO {
         i.setDiscountAmount(rs.getInt("discount_amount"));
 
         i.setTotalAmount(rs.getFloat("total_amount"));
+        i.setPaymentType(rs.getString("payment_type"));
         i.setStatus(OrderStatusEnum.fromValue(rs.getInt("status")));
 
         Timestamp created = rs.getTimestamp("created_at");
