@@ -235,7 +235,7 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
     @Override
     public boolean delete(int id) {
         
-        String sql = "UPDATE product_variant SET deleted_at = NOW() WHERE id = ?";
+        String sql = "UPDATE product_variant SET deleted_at = GETDATE() WHERE id = ?";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
