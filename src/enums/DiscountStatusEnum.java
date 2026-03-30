@@ -1,9 +1,10 @@
 package enums;
 
 public enum DiscountStatusEnum {
-    
-    ACTIVE(1, "Hoạt động"),
-    INACTIVE(2, "Ngừng bán");
+
+    UPCOMING(1, "Chưa tới ngày"),
+    ACTIVE(2, "Đang hoạt động"),
+    EXPIRED(3, "Quá ngày");
 
     private final int value;
     private final String label;

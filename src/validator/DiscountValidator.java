@@ -42,9 +42,9 @@ public class DiscountValidator {
             return false;
         }
 
-        // Nếu là % thì không quá 100
-        if ("%".equals(d.getDiscountType()) && d.getDiscountValue() > 100) {
-            JOptionPane.showMessageDialog(null, "Giảm giá % không được vượt quá 100%");
+        // Nếu là % thì không quá 50
+        if ("%".equals(d.getDiscountType()) && d.getDiscountValue() > 50) {
+            JOptionPane.showMessageDialog(null, "Giảm giá % không được vượt quá 50%");
             return false;
         }
 
@@ -65,10 +65,6 @@ public class DiscountValidator {
             return false;
         }
 
-        if (d.getStatus() == null) {
-            JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
-            return false;
-        }
         
         if (d.getDiscountCondition() < 0) {
             JOptionPane.showMessageDialog(null, "Điều kiện giảm giá phải là số >= 0");
@@ -111,8 +107,8 @@ public class DiscountValidator {
             return false;
         }
 
-        if ("%".equals(d.getDiscountType()) && d.getDiscountValue() > 100) {
-            JOptionPane.showMessageDialog(null, "Giảm giá % không được vượt quá 100%");
+        if ("%".equals(d.getDiscountType()) && d.getDiscountValue() > 50) {
+            JOptionPane.showMessageDialog(null, "Giảm giá % không được vượt quá 50%");
             return false;
         }
 
@@ -128,11 +124,6 @@ public class DiscountValidator {
 
         if (d.getStartedAt().isAfter(d.getEndedAt())) {
             JOptionPane.showMessageDialog(null, "Ngày bắt đầu phải trước ngày kết thúc");
-            return false;
-        }
-
-        if (d.getStatus() == null) {
-            JOptionPane.showMessageDialog(null, "Trạng thái không được để trống");
             return false;
         }
         

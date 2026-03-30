@@ -90,4 +90,8 @@ public class DiscountService {
     public boolean useDiscount(String code){
         return discountDAO.useDiscount(code);
     }
+    
+    public boolean updateStatus(int id, int status) {
+        return discountDAO.updateStatus(id, status);
+    }
 }

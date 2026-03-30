@@ -60,6 +60,8 @@ public class DiscountUI extends javax.swing.JPanel {
             public void removeUpdate(javax.swing.event.DocumentEvent e){ loadTable(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e){ loadTable(); }
         });
+        
+        cbbStatus.setSelectedIndex(0);
     }
     
     private void formatDate(){
@@ -72,6 +74,8 @@ public class DiscountUI extends javax.swing.JPanel {
     private void loadStatus(){
 
         cbbStatus.removeAllItems();
+        
+        cbbStatus.addItem("");
 
         for(DiscountStatusEnum s : DiscountStatusEnum.values()){
             cbbStatus.addItem(s.getLabel());
@@ -94,6 +98,15 @@ public class DiscountUI extends javax.swing.JPanel {
         DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         for (Discount d : discounts) {
+            
+            DiscountStatusEnum status;
+        
+            if (d.getStatus() == null || d.getStatus().getValue() == 0) {
+                status = calculateStatus(d.getStartedAt(), d.getEndedAt());
+            } else {
+                status = d.getStatus();
+            }
+
             model.addRow(new Object[]{
                 d.getCode(),                                  
                 d.getDiscountType(),                             
@@ -103,8 +116,20 @@ public class DiscountUI extends javax.swing.JPanel {
                 d.getEndedAt() != null ? d.getEndedAt().format(f) : "",     
                 d.getQuantity(),                                
                 d.getDiscountCondition(),                       
-                d.getStatus().getLabel()                      
+                status.getLabel()                    
             });
+        }
+    }
+    
+    private DiscountStatusEnum calculateStatus(LocalDateTime start, LocalDateTime end) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isBefore(start)) {
+            return DiscountStatusEnum.UPCOMING;
+        } else if (now.isAfter(end)) {
+            return DiscountStatusEnum.EXPIRED;
+        } else {
+            return DiscountStatusEnum.ACTIVE;
         }
     }
     
@@ -171,9 +196,6 @@ public class DiscountUI extends javax.swing.JPanel {
             d.setEndedAt(LocalDateTime.ofInstant(to.toInstant(), ZoneId.systemDefault()));
         }
 
-        int statusIndex = cbbStatus.getSelectedIndex();
-        d.setStatus(DiscountStatusEnum.values()[statusIndex]);
-
         return d;
     }
     
@@ -192,6 +214,7 @@ public class DiscountUI extends javax.swing.JPanel {
         selectedId = -1;
         txtCode.enable(true);
         txtDiscountCondition.setValue(0);
+        cbbStatus.setSelectedIndex(0);
 
         loadTable();
     }
@@ -259,6 +282,8 @@ public class DiscountUI extends javax.swing.JPanel {
         jLabel8.setText("Đến ngày");
 
         jLabel9.setText("Trạng thái");
+
+        cbbStatus.setEnabled(false);
 
         tblDiscount.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -376,23 +401,24 @@ public class DiscountUI extends javax.swing.JPanel {
                                 .addGap(158, 158, 158)
                                 .addComponent(btnRefr))
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                        .addComponent(jLabel2)
-                                        .addGap(72, 72, 72)
-                                        .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(jLabel5)
                                             .addComponent(jLabel4)
                                             .addComponent(jLabel11)
                                             .addComponent(jLabel12))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(txtDiscountCondition)
-                                            .addComponent(cbbDiscountType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(txtDiscountValue, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
-                                            .addComponent(txtQuantity))))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addGap(72, 72, 72)))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(txtCode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(txtDiscountCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(cbbDiscountType, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txtDiscountValue, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(txtQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, 239, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(158, 158, 158)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
@@ -487,7 +513,15 @@ public class DiscountUI extends javax.swing.JPanel {
         txtDiscountCondition.setValue(d.getDiscountCondition());
 
         cbbDiscountType.setSelectedItem(d.getDiscountType());
-        cbbStatus.setSelectedItem(d.getStatus().getLabel());
+        DiscountStatusEnum status;
+
+        if (d.getStatus() != null) {
+            status = d.getStatus();
+        } else {
+            status = calculateStatus(d.getStartedAt(), d.getEndedAt());
+        }
+
+        cbbStatus.setSelectedItem(status.getLabel());
 
         if (d.getStartedAt() != null) dcFrom.setDate(Date.from(d.getStartedAt().atZone(ZoneId.systemDefault()).toInstant()));
         else dcFrom.setDate(null);

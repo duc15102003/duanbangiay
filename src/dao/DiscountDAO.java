@@ -91,8 +91,8 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         String sql = """
             INSERT INTO discount
             (code, discount_type, discount_value, maximum_discount,
-             started_at, ended_at, status, discount_condition, quantity, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
+             started_at, ended_at, discount_condition, quantity, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
         """;
 
         try (Connection conn = dbConfig.getConnection();
@@ -120,13 +120,12 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 ps.setNull(6, Types.TIMESTAMP);
             }
 
-            ps.setInt(7, request.getStatus().getValue());
-            ps.setInt(8, request.getDiscountCondition());
+            ps.setInt(7, request.getDiscountCondition());
 
             if (request.getQuantity() != null) {
-                ps.setInt(9, request.getQuantity());
+                ps.setInt(8, request.getQuantity());
             } else {
-                ps.setNull(9, Types.INTEGER);
+                ps.setNull(8, Types.INTEGER);
             }
 
             return ps.executeUpdate() > 0;
@@ -143,7 +142,7 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         String sql = """
             UPDATE discount
             SET code = ?, discount_type = ?, discount_value = ?, maximum_discount = ?,
-                started_at = ?, ended_at = ?, status = ?, discount_condition = ?, quantity = ?, updated_at = GETDATE()
+                started_at = ?, ended_at = ?, discount_condition = ?, quantity = ?, updated_at = GETDATE()
             WHERE id = ?
         """;
 
@@ -172,16 +171,15 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 ps.setNull(6, Types.TIMESTAMP);
             }
 
-            ps.setInt(7, request.getStatus().getValue());
-            ps.setInt(8, request.getDiscountCondition());
+            ps.setInt(7, request.getDiscountCondition());
 
             if (request.getQuantity() != null) {
-                ps.setInt(9, request.getQuantity());
+                ps.setInt(8, request.getQuantity());
             } else {
-                ps.setNull(9, Types.INTEGER);
+                ps.setNull(8, Types.INTEGER);
             }
 
-            ps.setInt(10, request.getId());
+            ps.setInt(9, request.getId());
 
             return ps.executeUpdate() > 0;
 
@@ -368,5 +366,22 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
             JOptionPane.showMessageDialog(null, "Có lỗi xảy ra khi sử dụng mã giảm giá!");
             return false;
         }
+    }
+    
+    public boolean updateStatus(int id, int status) {
+        String sql = "UPDATE discount SET status = ? WHERE id = ?";
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, status);
+            ps.setInt(2, id);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

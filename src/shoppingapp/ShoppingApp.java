@@ -4,6 +4,7 @@ import entity.Customer;
 import entity.Employee;
 import enums.RoleEnum;
 import java.util.List;
+import schedule.DiscountStatusSchedule;
 import service.CustomerService;
 import service.EmployeeService;
 import ui.auth.LoginUI;
@@ -18,6 +19,11 @@ public class ShoppingApp {
 
         app.initDataCustomer();
         app.initDataEmployee();
+        
+        DiscountStatusSchedule schedule = new DiscountStatusSchedule();
+
+        schedule.updateDiscountStatus(); // chạy ngay khi mở app
+        schedule.start();
         
         new LoginUI().setVisible(true);
     }
