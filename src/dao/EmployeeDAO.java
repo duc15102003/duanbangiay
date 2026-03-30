@@ -26,6 +26,7 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
             SELECT *
             FROM employee
             WHERE deleted_at IS NULL
+              AND role != 3                        
         """);
 
         List<Object> params = new ArrayList<>();

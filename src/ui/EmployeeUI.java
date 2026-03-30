@@ -29,15 +29,9 @@ public class EmployeeUI extends javax.swing.JPanel {
         rdoMale.setSelected(true);
     }
     
-    private void loadRole(){
-
+    private void loadRole() {
         DefaultComboBoxModel model = new DefaultComboBoxModel<>();
-
-        for (RoleEnum r : RoleEnum.values()) {
-            if (r == RoleEnum.MANAGER) continue;
-            model.addElement(r);
-        }
-
+        model.addElement(RoleEnum.STAFF);
         cbbRole.setModel(model);
     }
     
