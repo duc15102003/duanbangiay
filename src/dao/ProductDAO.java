@@ -185,7 +185,7 @@ public class ProductDAO implements GenericDAO<Product, ProductFilter> {
     @Override
     public boolean delete(int id) {
 
-        String sql = "UPDATE product SET deleted_at = NOW() WHERE id = ?";
+        String sql = "UPDATE product SET deleted_at = GETDATE() WHERE id = ?";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

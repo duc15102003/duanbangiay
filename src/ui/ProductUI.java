@@ -649,7 +649,7 @@ public class ProductUI extends javax.swing.JPanel  {
             Product p = getFormData();
 
             int id = Integer.parseInt(
-                jTable3.getValueAt(row,6).toString()
+                jTable3.getValueAt(row,7).toString()
             );
 
             p.setId(id);
