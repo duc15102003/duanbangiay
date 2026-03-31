@@ -187,4 +187,46 @@ public class SizeDAO implements GenericDAO<Size, SizeFilter> {
 
         return s;
     }
+    
+    public boolean existsByCode(String code, Integer excludeId) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT 1 FROM size
+            WHERE LOWER(code) = LOWER(?)
+            AND deleted_at IS NULL
+        """);
+        if (excludeId != null) sql.append(" AND id != ?");
+
+        try (
+            Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql.toString());
+        ) {
+            ps.setString(1, code.trim());
+            if (excludeId != null) ps.setInt(2, excludeId);
+            return ps.executeQuery().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean existsByName(String name, Integer excludeId) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT 1 FROM size
+            WHERE LOWER(name) = LOWER(?)
+            AND deleted_at IS NULL
+        """);
+        if (excludeId != null) sql.append(" AND id != ?");
+
+        try (
+            Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql.toString());
+        ) {
+            ps.setString(1, name.trim());
+            if (excludeId != null) ps.setInt(2, excludeId);
+            return ps.executeQuery().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
