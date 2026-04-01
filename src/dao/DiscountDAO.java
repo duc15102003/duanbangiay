@@ -384,4 +384,29 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         }
         return false;
     }
+    
+    public List<Discount> getValidDiscounts(double orderTotal) {
+        List<Discount> list = new ArrayList<>();
+        String sql = """
+            SELECT *
+            FROM discount
+            WHERE deleted_at IS NULL
+              AND status = 2
+              AND (started_at IS NULL OR started_at <= GETDATE())
+              AND (ended_at IS NULL OR ended_at >= GETDATE())
+              AND (quantity IS NULL OR quantity > 0)
+              AND discount_condition <= ?
+        """;
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, orderTotal);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

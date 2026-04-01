@@ -20,6 +20,8 @@
         private LocalDateTime createdAt;
 
         private String paymentType;
+        
+        private Integer discountId;
 
         // customer info (lưu trực tiếp trong invoice)
         private String customerPhone;
@@ -35,6 +37,25 @@
 
         public Invoice() {
         }
+
+        public Invoice(int id, String code, int employeeId, int customerId, float totalAmount, OrderStatusEnum status, LocalDateTime createdAt, String paymentType, Integer discountId, String customerPhone, String customerAddress, String customerName, String employeeName, long discountAmount) {
+            this.id = id;
+            this.code = code;
+            this.employeeId = employeeId;
+            this.customerId = customerId;
+            this.totalAmount = totalAmount;
+            this.status = status;
+            this.createdAt = createdAt;
+            this.paymentType = paymentType;
+            this.discountId = discountId;
+            this.customerPhone = customerPhone;
+            this.customerAddress = customerAddress;
+            this.customerName = customerName;
+            this.employeeName = employeeName;
+            this.discountAmount = discountAmount;
+        }
+
+
 
         public Invoice(int id, String code, int employeeId, int customerId, float totalAmount, OrderStatusEnum status, LocalDateTime createdAt, String paymentType, String customerPhone, String customerAddress, String customerName, String employeeName, long discountAmount) {
             this.id = id;
@@ -82,6 +103,14 @@
             this.customerName = customerName;
             this.employeeName = employeeName;
             this.discountAmount = discountAmount;
+        }
+
+        public Integer getDiscountId() {
+            return discountId;
+        }
+
+        public void setDiscountId(Integer discountId) {
+            this.discountId = discountId;
         }
 
         public String getPaymentType() {

@@ -94,4 +94,8 @@ public class DiscountService {
     public boolean updateStatus(int id, int status) {
         return discountDAO.updateStatus(id, status);
     }
+    
+    public List<Discount> getValidDiscounts(double orderTotal) {
+        return discountDAO.getValidDiscounts(orderTotal);
+    }
 }

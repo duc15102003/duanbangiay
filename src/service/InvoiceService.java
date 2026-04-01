@@ -36,33 +36,32 @@ public class InvoiceService {
     }
     
     public boolean updatePaymentInfo(int invoiceId,
-                                     Integer employeeId,
-                                     Integer customerId,
-                                     String customerName,
-                                     String customerPhone,
-                                     String customerAddress,
-                                     String employeeName,
-                                     long discountAmount
-    ) {
-        try {
-            Invoice invoice = invoiceDAO.findById(invoiceId);
-            if (invoice == null) return false;
-
-            invoice.setEmployeeId(employeeId);
-            invoice.setCustomerId(customerId);
-            invoice.setCustomerName(customerName);
-            invoice.setCustomerPhone(customerPhone);
-            invoice.setCustomerAddress(customerAddress);
-            invoice.setEmployeeName(employeeName);
-            invoice.setDiscountAmount(discountAmount);
-
-            return invoiceDAO.updateInvoicePaymentInfo(invoice);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+                                    Integer employeeId,
+                                    Integer customerId,
+                                    String customerName,
+                                    String customerPhone,
+                                    String customerAddress,
+                                    String employeeName,
+                                    long discountAmount,
+                                    Integer discountId
+   ) {
+       try {
+           Invoice invoice = invoiceDAO.findById(invoiceId);
+           if (invoice == null) return false;
+           invoice.setEmployeeId(employeeId);
+           invoice.setCustomerId(customerId);
+           invoice.setCustomerName(customerName);
+           invoice.setCustomerPhone(customerPhone);
+           invoice.setCustomerAddress(customerAddress);
+           invoice.setEmployeeName(employeeName);
+           invoice.setDiscountAmount(discountAmount);
+           invoice.setDiscountId(discountId);
+           return invoiceDAO.updateInvoicePaymentInfo(invoice);
+       } catch (Exception e) {
+           e.printStackTrace();
+           return false;
+       }
+   }
 
     public String findNameById(Integer employeeId) {
         if (employeeId == null) return null;

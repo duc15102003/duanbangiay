@@ -107,6 +107,7 @@ public class OrderUI extends JFrame {
     private Map<Integer, List<InvoiceItem>> cartData = new HashMap<>();
     private Map<Integer, List<InvoiceItem>> cartFilteredData = new HashMap<>();
     private Map<Integer, Discount> discountMap = new HashMap<>();
+    private Map<Integer, Discount> selectedDiscountComboMap = new HashMap<>();
     
     //Thông tin id người mua được chọn và id người bán hàng
     private Map<Integer, Customer> cartCustomerMap = new HashMap<>();
@@ -148,10 +149,13 @@ public class OrderUI extends JFrame {
         initFilterCombobox();
         initFilterEvents();
 
-        jTabbedPane1.addChangeListener(e -> updateTotalAmount());
-
         initProduct();
-        initCart();
+        initCart();       
+
+        txtDiscount.setVisible(false);
+        btnApplyDiscount.setVisible(false);
+
+        initTabListener(); 
     }
     
     private void initImagePreview() {
@@ -274,8 +278,6 @@ public class OrderUI extends JFrame {
     
     // ================= CART =================
     private void initCart() {
-
-        discountMap.clear();
         int selectedTab = jTabbedPane1.getSelectedIndex();
 
         jTabbedPane1.removeAll();
@@ -325,6 +327,7 @@ public class OrderUI extends JFrame {
         }
 
         updateTotalAmount();
+        loadDiscountCombo();
     }
     
     private void filterCart(){
@@ -621,7 +624,6 @@ public class OrderUI extends JFrame {
 
         try {
             URL url = getClass().getResource("/common/images/qrcode.png");
-
             if (url != null) {
                 ImageIcon icon = new ImageIcon(url);
                 Image img = icon.getImage().getScaledInstance(260, 260, Image.SCALE_SMOOTH);
@@ -629,14 +631,12 @@ public class OrderUI extends JFrame {
             } else {
                 lblQR.setText("Không tìm thấy QR");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         panel.add(lblQR, BorderLayout.CENTER);
 
-        // Lấy tổng tiền
         float totalAmount = getFinalAmount(invoiceId);
 
         String invoiceCode = listInvoice
@@ -660,7 +660,6 @@ public class OrderUI extends JFrame {
         infoPanel.add(lblContent);
 
         panel.add(infoPanel, BorderLayout.SOUTH);
-
         dialog.add(panel, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel();
@@ -674,7 +673,6 @@ public class OrderUI extends JFrame {
 
             if (success) {
 
-                // Lấy thông tin khách hàng của tab hiện tại
                 int tabIndex = jTabbedPane1.getSelectedIndex();
                 Customer customer = cartCustomerMap.get(tabIndex);
 
@@ -691,15 +689,11 @@ public class OrderUI extends JFrame {
                 }
 
                 String employeeName = invoiceService.findNameById(employeeId);
-                
+
                 int discountAmount = 0;
-
                 String text = lblGiamGia.getText();
-
                 if (text != null && !text.isBlank()) {
-
                     String number = text.replaceAll("[^0-9]", "");
-
                     if (!number.isEmpty()) {
                         try {
                             discountAmount = Integer.parseInt(number);
@@ -708,7 +702,9 @@ public class OrderUI extends JFrame {
                     }
                 }
 
-                // Cập nhật thông tin thanh toán
+                Discount appliedDiscount = discountMap.get(invoiceId);
+                Integer discountId = (appliedDiscount != null) ? appliedDiscount.getId() : null;
+
                 invoiceService.updatePaymentInfo(
                     invoiceId,
                     employeeId,
@@ -717,20 +713,22 @@ public class OrderUI extends JFrame {
                     customerPhone,
                     customerAddress,
                     employeeName,
-                    discountAmount
+                    discountAmount,
+                    discountId
                 );
 
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                 dialog.dispose();
                 showInvoiceDialog(invoiceId);
 
-                // Chỉ xóa thông tin khách hàng của tab hiện tại
+                discountMap.remove(invoiceId);
+                selectedDiscountComboMap.remove(invoiceId);
+
                 cartCustomerMap.remove(tabIndex);
                 jLabel4.setText("");
                 jLabel5.setText("");
                 lbAddress.setText("");
 
-                // Reload cart và sản phẩm
                 initCart();
                 initProduct();
 
@@ -740,9 +738,7 @@ public class OrderUI extends JFrame {
         });
 
         bottomPanel.add(btnConfirm);
-
         dialog.add(bottomPanel, BorderLayout.SOUTH);
-
         dialog.setVisible(true);
     }
     
@@ -814,12 +810,15 @@ public class OrderUI extends JFrame {
                 jLabel5.setText(c.getPhone());
                 lbAddress.setText(c.getAddress());
             } else {
-                jLabel4.setText("");   
+                jLabel4.setText("");
                 jLabel5.setText("");
                 lbAddress.setText("");
             }
+
+            updateTotalAmount();
+            loadDiscountCombo();
         });
-    }   
+    }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -864,6 +863,7 @@ public class OrderUI extends JFrame {
         btnApplyDiscount = new javax.swing.JButton();
         txtDiscount = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
+        cbbDiscount = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -1067,21 +1067,29 @@ public class OrderUI extends JFrame {
                                     .addComponent(jLabel6))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(lbAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                    .addComponent(lbAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(jPanel5Layout.createSequentialGroup()
+                                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                                .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
+                                                .addGap(33, 33, 33))
+                                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(btnApplyDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(txtDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(23, 23, 23))))
                             .addComponent(jLabel3)
                             .addComponent(jLabel2))
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addGap(163, 163, 163)
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(btnApplyDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(txtDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(jPanel5Layout.createSequentialGroup()
                                 .addGap(38, 38, 38)
-                                .addComponent(jLabel7)))
-                        .addGap(75, 75, 75)
+                                .addComponent(jLabel7)
+                                .addGap(347, 347, 347))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cbbDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(36, 36, 36)))
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel5Layout.createSequentialGroup()
                                 .addGap(11, 11, 11)
@@ -1163,9 +1171,13 @@ public class OrderUI extends JFrame {
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel19)
-                                    .addComponent(lblTongTien))
+                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel19)
+                                        .addComponent(lblTongTien))
+                                    .addGroup(jPanel5Layout.createSequentialGroup()
+                                        .addGap(2, 2, 2)
+                                        .addComponent(cbbDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel18)
@@ -1194,7 +1206,7 @@ public class OrderUI extends JFrame {
                         .addComponent(jLabel5)
                         .addGap(3, 3, 3)
                         .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
+                        .addGap(27, 27, 27)
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6)
                             .addComponent(lbAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -1211,7 +1223,7 @@ public class OrderUI extends JFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 680, Short.MAX_VALUE)
+            .addGap(0, 687, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1367,22 +1379,17 @@ public class OrderUI extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
 
                 if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
-                    
+
                     invoiceService.updatePaymentType(invoiceId, "Tiền mặt");
 
                     // TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ
-                    String discountCode = txtDiscount.getText().trim();
-                    if (!discountCode.isEmpty()) {
-                        boolean used = discountService.useDiscount(discountCode);
-                        if (!used) {
-                            JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
-                        }
+                    Discount appliedDiscount = discountMap.get(invoiceId);
+                    if (appliedDiscount != null) {
+                        discountService.useDiscount(appliedDiscount.getCode());
                     }
-                    
+
                     int discountAmount = 0;
-
                     String text = lblGiamGia.getText();
-
                     if (text != null && !text.isBlank()) {
                         try {
                             discountAmount = Integer.parseInt(text.replaceAll("[^0-9]", ""));
@@ -1390,10 +1397,9 @@ public class OrderUI extends JFrame {
                             discountAmount = 0;
                         }
                     }
-                    
-                    System.out.println("discountAmount" + discountAmount);
 
-                    // LƯU THÔNG TIN THANH TOÁN
+                    Integer discountId = (appliedDiscount != null) ? appliedDiscount.getId() : null;
+
                     invoiceService.updatePaymentInfo(
                             invoiceId,
                             employeeId,
@@ -1402,11 +1408,17 @@ public class OrderUI extends JFrame {
                             customerPhone,
                             customerAddress,
                             employeeName,
-                            discountAmount
+                            discountAmount,
+                            discountId
                     );
 
                     JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                     showInvoiceDialog(invoiceId);
+
+                    // Xóa discount của tab sau khi thanh toán
+                    discountMap.remove(invoiceId);
+                    selectedDiscountComboMap.remove(invoiceId);
+
                     initCart();
                     initProduct();
                     txtDiscount.setText("");
@@ -1419,14 +1431,13 @@ public class OrderUI extends JFrame {
             invoiceService.updatePaymentType(invoiceId, "Chuyển khoản");
             showQRDialog(invoiceId);
 
-            String discountCode = txtDiscount.getText().trim();
-            if (!discountCode.isEmpty()) {
-                boolean used = discountService.useDiscount(discountCode);
-                if (!used) {
-                    JOptionPane.showMessageDialog(this, "Không thể sử dụng mã giảm giá: " + discountCode);
-                }
+            Discount appliedDiscount = discountMap.get(invoiceId);
+            if (appliedDiscount != null) {
+                discountService.useDiscount(appliedDiscount.getCode());
+                discountMap.remove(invoiceId);
+                selectedDiscountComboMap.remove(invoiceId);
             }
-            
+
             txtDiscount.setText("");
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
@@ -2090,8 +2101,79 @@ public class OrderUI extends JFrame {
         return label;
     }
     
+    private void loadDiscountCombo() {
+        JComboBox<Object> combo = (JComboBox<Object>) (JComboBox<?>) cbbDiscount;
+
+        for (java.awt.event.ActionListener al : combo.getActionListeners()) {
+            combo.removeActionListener(al);
+        }
+
+        combo.removeAllItems();
+        combo.addItem(null);
+
+        float total = getTotalFromCart();
+        List<Discount> validDiscounts = discountService.getValidDiscounts(total);
+
+        for (Discount d : validDiscounts) {
+            combo.addItem(d);
+        }
+
+        combo.setRenderer(new javax.swing.DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(
+                    javax.swing.JList<?> list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value == null) {
+                    setText("-- Chọn mã giảm giá --");
+                } else if (value instanceof Discount d) {
+                    String label = d.getCode() + " | ";
+                    if ("%".equals(d.getDiscountType())) {
+                        label += d.getDiscountValue() + "%";
+                        if (d.getMaximumDiscount() != null) {
+                            label += " (tối đa " + moneyFormat.format(d.getMaximumDiscount()) + ")";
+                        }
+                    } else {
+                        label += moneyFormat.format(d.getDiscountValue()) + " VND";
+                    }
+                    setText(label);
+                }
+                return this;
+            }
+        });
+
+        int tabIndex = jTabbedPane1.getSelectedIndex();
+        if (tabIndex >= 0 && tabIndex < listInvoice.size()) {
+            int invoiceId = listInvoice.get(tabIndex).getId();
+            Discount saved = selectedDiscountComboMap.get(invoiceId);
+            if (saved != null) {
+                for (int i = 0; i < combo.getItemCount(); i++) {
+                    Object item = combo.getItemAt(i);
+                    if (item instanceof Discount d && d.getId().equals(saved.getId())) {
+                        combo.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        combo.addActionListener(e -> {
+            Object selected = combo.getSelectedItem();
+            if (!(selected instanceof Discount discount)) return;
+            int tab = jTabbedPane1.getSelectedIndex();
+            if (tab < 0 || tab >= listInvoice.size()) return;
+            int invoiceId = listInvoice.get(tab).getId();
+
+            selectedDiscountComboMap.put(invoiceId, discount);
+            discountMap.put(invoiceId, discount);
+
+            JOptionPane.showMessageDialog(this, "Áp dụng mã \"" + discount.getCode() + "\" thành công!");
+            updateTotalAmount();
+        });
+    }
+    
     //Xuất PDF hoá đơn
-private void exportInvoiceToPDF(int invoiceId) {
+    private void exportInvoiceToPDF(int invoiceId) {
     try {
         // ===== LẤY DATA =====
         List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
@@ -2278,6 +2360,7 @@ private void exportInvoiceToPDF(int invoiceId) {
     private javax.swing.JComboBox<String> cbbCategoryProduct;
     private javax.swing.JComboBox<String> cbbColorCart;
     private javax.swing.JComboBox<String> cbbColorProduct;
+    private javax.swing.JComboBox<String> cbbDiscount;
     private javax.swing.JComboBox<String> cbbSizeCart;
     private javax.swing.JComboBox<String> cbbSizeProduct;
     private javax.swing.JLabel jLabel1;

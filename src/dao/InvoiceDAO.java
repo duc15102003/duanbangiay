@@ -8,6 +8,7 @@
     import java.sql.Connection;
     import java.sql.PreparedStatement;
     import java.sql.ResultSet;
+    import java.sql.Types;
     
     import java.sql.Timestamp;
 
@@ -288,13 +289,12 @@
                     customer_phone = ?, 
                     customer_address = ?, 
                     employee_name = ?,
-                    discount_amount = ?
+                    discount_amount = ?,
+                    discount_id = ?
                 WHERE id = ?
             """;
-
             try (Connection conn = dbConfig.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
-
                 ps.setObject(1, invoice.getEmployeeId());
                 ps.setObject(2, invoice.getCustomerId());
                 ps.setString(3, invoice.getCustomerName());
@@ -302,10 +302,15 @@
                 ps.setString(5, invoice.getCustomerAddress());
                 ps.setString(6, invoice.getEmployeeName());
                 ps.setLong(7, invoice.getDiscountAmount());
-                ps.setInt(8, invoice.getId());
 
+                if (invoice.getDiscountId() != null) {
+                    ps.setInt(8, invoice.getDiscountId());
+                } else {
+                    ps.setNull(8, Types.INTEGER);
+                }
+
+                ps.setInt(9, invoice.getId());
                 return ps.executeUpdate() > 0;
-
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
