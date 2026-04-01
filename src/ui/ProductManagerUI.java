@@ -184,6 +184,8 @@ public class ProductManagerUI extends javax.swing.JPanel {
         DefaultTableModel model = (DefaultTableModel) tblProductVariant.getModel();
         model.setRowCount(0);
         
+        int totalQuantity = 0;
+        
         for(ProductVariant pv : list){
             
             ImageIcon cached = imageCache.get(pv.getImage());
@@ -199,8 +201,12 @@ public class ProductManagerUI extends javax.swing.JPanel {
                 pv.getId()
             });
 
+            totalQuantity += pv.getQuantity();
+            
             loadImageAsync(pv.getImage(), pv.getId());
         }
+        
+        txtTotalQuantity.setText(String.valueOf(totalQuantity));
     }
     
     private String formatMoney(float price){
@@ -272,6 +278,8 @@ public class ProductManagerUI extends javax.swing.JPanel {
         tblProductVariant = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblProduct = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
+        txtTotalQuantity = new javax.swing.JLabel();
         pnProduct = new javax.swing.JPanel();
         pnProductDetail = new javax.swing.JPanel();
 
@@ -306,13 +314,24 @@ public class ProductManagerUI extends javax.swing.JPanel {
         });
         jScrollPane2.setViewportView(tblProduct);
 
+        jLabel1.setText("Tổng số lượng");
+
+        txtTotalQuantity.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        txtTotalQuantity.setText(".......................................");
+
         javax.swing.GroupLayout pnListProductLayout = new javax.swing.GroupLayout(pnListProduct);
         pnListProduct.setLayout(pnListProductLayout);
         pnListProductLayout.setHorizontalGroup(
             pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnListProductLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1026, Short.MAX_VALUE)
+                .addGroup(pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1026, Short.MAX_VALUE)
+                    .addGroup(pnListProductLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtTotalQuantity)))
                 .addContainerGap())
             .addGroup(pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnListProductLayout.createSequentialGroup()
@@ -324,7 +343,11 @@ public class ProductManagerUI extends javax.swing.JPanel {
             pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnListProductLayout.createSequentialGroup()
                 .addContainerGap(316, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21)
+                .addGroup(pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtTotalQuantity))
                 .addContainerGap())
             .addGroup(pnListProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(pnListProductLayout.createSequentialGroup()
@@ -384,6 +407,7 @@ public class ProductManagerUI extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
@@ -392,5 +416,6 @@ public class ProductManagerUI extends javax.swing.JPanel {
     private javax.swing.JPanel pnProductDetail;
     private javax.swing.JTable tblProduct;
     private javax.swing.JTable tblProductVariant;
+    private javax.swing.JLabel txtTotalQuantity;
     // End of variables declaration//GEN-END:variables
 }
