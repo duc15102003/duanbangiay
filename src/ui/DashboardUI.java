@@ -46,10 +46,14 @@ public class DashboardUI extends javax.swing.JPanel {
             reloadChart();
         });
         cbbTypeChart.addActionListener(e -> reloadChart());
+        
+        jComboBox1.addActionListener(e -> toggleBestSellerView());
 
         disablePopupIfNotDay(getSelectedType());
         reloadChart();
         loadBestSellerTable();
+        
+        toggleBestSellerView();
     }
 
     private void reloadChart() {
@@ -94,9 +98,13 @@ public class DashboardUI extends javax.swing.JPanel {
         JFreeChart chart = createBarChart(type, from, to);
         ChartPanel chartPanel = new ChartPanel(chart);
 
+        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 635));
+
         pnChart.removeAll();
         pnChart.setLayout(new BorderLayout());
-        pnChart.add(chartPanel, BorderLayout.CENTER);
+
+        pnChart.add(chartPanel, BorderLayout.NORTH);
+
         pnChart.revalidate();
         pnChart.repaint();
     }
@@ -105,9 +113,13 @@ public class DashboardUI extends javax.swing.JPanel {
         JFreeChart chart = createPieChart(type, from, to);
         ChartPanel chartPanel = new ChartPanel(chart);
 
+        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 635));
+
         pnChart.removeAll();
         pnChart.setLayout(new BorderLayout());
-        pnChart.add(chartPanel, BorderLayout.CENTER);
+
+        pnChart.add(chartPanel, BorderLayout.NORTH);
+
         pnChart.revalidate();
         pnChart.repaint();
     }
@@ -256,7 +268,7 @@ public class DashboardUI extends javax.swing.JPanel {
             new String[]{
                 "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu",
                 "Danh mục", "Kích thước", "Màu sắc",
-                "Số lượng bán", "Tổng doanh thu sản phẩm"
+                "Số lượng bán", "Tổng doanh thu"
             }
         ) {
             @Override
@@ -338,6 +350,68 @@ public class DashboardUI extends javax.swing.JPanel {
         }
     }
     
+    private void toggleBestSellerView() {
+        String type = jComboBox1.getSelectedItem().toString();
+
+        if ("Bảng".equals(type)) {
+            showBestSellerTable();
+        } else {
+            showBestSellerChart();
+        }
+    }
+    
+    private void showBestSellerTable() {
+        pnBestSellerProduct.removeAll();
+
+        pnBestSellerProduct.setLayout(new BorderLayout());
+
+        pnBestSellerProduct.setPreferredSize(null);
+        pnBestSellerProduct.setMinimumSize(null);
+        pnBestSellerProduct.setMaximumSize(null);
+
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(1038, 723));
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(1038, 723));
+
+        pnBestSellerProduct.add(jScrollPane1, BorderLayout.CENTER);
+
+        pnBestSellerProduct.revalidate();
+        pnBestSellerProduct.repaint();
+    }
+    
+    private void showBestSellerChart() {
+        List<ProductVariant> list = productVariantService.getTop3BestSeller();
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        if (list == null || list.isEmpty()) {
+            dataset.addValue(0, "Doanh thu", "Không có dữ liệu");
+        } else {
+            for (ProductVariant pv : list) {
+                String name = pv.getProductName();
+                dataset.addValue(pv.getTotalRevenue(), "Doanh thu", name);
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+            "Top sản phẩm bán chạy",
+            "Sản phẩm",
+            "Doanh thu (VNĐ)",
+            dataset
+        );
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        
+        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 635));
+
+        pnBestSellerProduct.removeAll();
+        pnBestSellerProduct.setLayout(new BorderLayout());
+
+        pnBestSellerProduct.add(chartPanel, BorderLayout.NORTH);
+
+        pnBestSellerProduct.revalidate();
+        pnBestSellerProduct.repaint();
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -351,6 +425,8 @@ public class DashboardUI extends javax.swing.JPanel {
         cbbTypeChart = new javax.swing.JComboBox<>();
         pnChart = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        pnBestSellerProduct = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblBestSellerProduct = new javax.swing.JTable();
 
@@ -411,6 +487,8 @@ public class DashboardUI extends javax.swing.JPanel {
 
         jTabbedPane1.addTab("Thống kê doanh thu", jPanel1);
 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Bảng", "Biểu đồ" }));
+
         tblBestSellerProduct.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         tblBestSellerProduct.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -430,21 +508,33 @@ public class DashboardUI extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(tblBestSellerProduct);
 
+        javax.swing.GroupLayout pnBestSellerProductLayout = new javax.swing.GroupLayout(pnBestSellerProduct);
+        pnBestSellerProduct.setLayout(pnBestSellerProductLayout);
+        pnBestSellerProductLayout.setHorizontalGroup(
+            pnBestSellerProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1038, Short.MAX_VALUE)
+        );
+        pnBestSellerProductLayout.setVerticalGroup(
+            pnBestSellerProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 654, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1026, Short.MAX_VALUE)
+            .addComponent(pnBestSellerProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 676, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnBestSellerProduct, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         jTabbedPane1.addTab("Sản phẩm bán chạy", jPanel2);
@@ -472,10 +562,12 @@ public class DashboardUI extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cbbTypeChart;
     private com.toedter.calendar.JDateChooser dcFrom;
     private com.toedter.calendar.JDateChooser dcTo;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JPanel pnBestSellerProduct;
     private javax.swing.JPanel pnChart;
     private javax.swing.JTable tblBestSellerProduct;
     // End of variables declaration//GEN-END:variables
