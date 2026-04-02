@@ -51,4 +51,8 @@ public class ProductVariantService {
     public boolean increaseStock(int productVariantId, int quantity){
         return productVariantDAO.increaseStock(productVariantId, quantity);
     }
+    
+    public List<ProductVariant> getTop3BestSeller() {
+        return productVariantDAO.getTop3BestSeller();
+    }
 }

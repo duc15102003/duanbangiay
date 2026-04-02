@@ -78,6 +78,7 @@ import java.time.format.DateTimeFormatter;
 
 // ===== Utils =====
 import java.util.List;
+import javax.swing.SwingUtilities;
 import service.CustomerService;
 
 public class OrderUI extends JFrame {
@@ -124,11 +125,7 @@ public class OrderUI extends JFrame {
     public OrderUI() {
         initComponents();
         setLocationRelativeTo(null);
-        
         initData();
-        
-        initTabListener();
-        
         setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
     }
     
@@ -136,11 +133,7 @@ public class OrderUI extends JFrame {
         this.employeeId = userId;
         initComponents();
         setLocationRelativeTo(null);
-        
         initData();
-        
-        initTabListener();
-        
         setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
     }
     
@@ -155,7 +148,7 @@ public class OrderUI extends JFrame {
         txtDiscount.setVisible(false);
         btnApplyDiscount.setVisible(false);
 
-        initTabListener(); 
+        initTabListener();
     }
     
     private void initImagePreview() {
@@ -817,6 +810,18 @@ public class OrderUI extends JFrame {
 
             updateTotalAmount();
             loadDiscountCombo();
+        });
+
+        this.addWindowFocusListener(new java.awt.event.WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(java.awt.event.WindowEvent e) {
+                if (listInvoice != null && !listInvoice.isEmpty()) {
+                    loadDiscountCombo();
+                }
+            }
+
+            @Override
+            public void windowLostFocus(java.awt.event.WindowEvent e) {}
         });
     }
     

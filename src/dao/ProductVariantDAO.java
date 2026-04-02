@@ -3,6 +3,7 @@ package dao;
 import config.DBConfig;
 import entity.ProductVariant;
 import entity.filter.ProductVariantFilter;
+import enums.OrderStatusEnum;
 import enums.ProductStatusEnum;
 
 import java.sql.Connection;
@@ -463,5 +464,59 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
         }
 
         return false;
+    }
+    
+    public List<ProductVariant> getTop3BestSeller() {
+        List<ProductVariant> list = new ArrayList<>();
+
+        String sql = """
+            SELECT TOP 5
+                pv.image,
+                p.code AS product_code,
+                p.name AS product_name,
+                b.name AS brand_name,
+                c.name AS category_name,
+                s.name AS size_name,
+                cl.name AS color_name,
+                SUM(ii.quantity) AS total_quantity,
+                SUM(ii.quantity * ii.price) AS total_revenue
+            FROM invoice_item ii
+            JOIN invoice i ON ii.invoice_id = i.id
+            JOIN product_variant pv ON ii.product_variant_id = pv.id
+            JOIN product p ON pv.product_id = p.id
+            JOIN brand b ON p.brand_id = b.id
+            JOIN category c ON p.category_id = c.id
+            JOIN size s ON pv.size_id = s.id
+            JOIN color cl ON pv.color_id = cl.id
+            WHERE i.status = ?
+            GROUP BY pv.image, p.code, p.name, b.name, c.name, s.name, cl.name
+            ORDER BY total_quantity DESC
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, OrderStatusEnum.PAID.getValue());
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ProductVariant pv = new ProductVariant();
+                pv.setImage(rs.getString("image"));
+                pv.setProductCode(rs.getString("product_code"));
+                pv.setProductName(rs.getString("product_name"));
+                pv.setBrandName(rs.getString("brand_name"));
+                pv.setCategoryName(rs.getString("category_name"));
+                pv.setSizeName(rs.getString("size_name"));
+                pv.setColorName(rs.getString("color_name"));
+                pv.setTotalQuantity(rs.getInt("total_quantity"));
+                pv.setTotalRevenue(rs.getFloat("total_revenue"));
+                list.add(pv);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 }

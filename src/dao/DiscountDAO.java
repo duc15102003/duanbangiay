@@ -392,8 +392,8 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
             FROM discount
             WHERE deleted_at IS NULL
               AND status = 2
-              AND (started_at IS NULL OR started_at <= GETDATE())
-              AND (ended_at IS NULL OR ended_at >= GETDATE())
+              AND (started_at IS NULL OR CAST(started_at AS DATE) <= CAST(GETDATE() AS DATE))
+              AND (ended_at IS NULL OR CAST(ended_at AS DATE) >= CAST(GETDATE() AS DATE))
               AND (quantity IS NULL OR quantity > 0)
               AND discount_condition <= ?
         """;

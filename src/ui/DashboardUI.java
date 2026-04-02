@@ -1,23 +1,33 @@
 package ui;
 
+import entity.ProductVariant;
 import entity.RevenueDTO;
 import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.Image;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import service.DashboardService;
+import service.ProductVariantService;
 
 public class DashboardUI extends javax.swing.JPanel {
 
     private DashboardService dashboardService = new DashboardService();
+    private ProductVariantService productVariantService = new ProductVariantService();
 
     public DashboardUI() {
         initComponents();
@@ -39,6 +49,7 @@ public class DashboardUI extends javax.swing.JPanel {
 
         disablePopupIfNotDay(getSelectedType());
         reloadChart();
+        loadBestSellerTable();
     }
 
     private void reloadChart() {
@@ -235,6 +246,96 @@ public class DashboardUI extends javax.swing.JPanel {
         boolean enablePopup = "DAY".equals(type);
         dcFrom.getCalendarButton().setEnabled(enablePopup);
         dcTo.getCalendarButton().setEnabled(enablePopup);
+    }
+    
+    private void loadBestSellerTable() {
+        List<ProductVariant> list = productVariantService.getTop3BestSeller();
+
+        DefaultTableModel model = new DefaultTableModel(
+            new Object[][]{},
+            new String[]{
+                "Ảnh", "Mã sản phẩm", "Tên sản phẩm", "Thương hiệu",
+                "Danh mục", "Kích thước", "Màu sắc",
+                "Số lượng bán", "Tổng doanh thu sản phẩm"
+            }
+        ) {
+            @Override
+            public Class<?> getColumnClass(int column) {
+                if (column == 0) return javax.swing.Icon.class;
+                return Object.class;
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        tblBestSellerProduct.setModel(model);
+        tblBestSellerProduct.setRowHeight(120);
+
+        DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) tblBestSellerProduct.getTableHeader().getDefaultRenderer();
+        headerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        tblBestSellerProduct.getTableHeader().setFont(
+            tblBestSellerProduct.getTableHeader().getFont().deriveFont(Font.BOLD, 14f)
+        );
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+
+        for (ProductVariant pv : list) {
+            model.addRow(new Object[]{
+                null,
+                pv.getProductCode(),
+                pv.getProductName(),
+                pv.getBrandName(),
+                pv.getCategoryName(),
+                pv.getSizeName(),
+                pv.getColorName(),
+                pv.getTotalQuantity(),
+                String.format("%,.0f", pv.getTotalRevenue()).replace(",", ".")
+            });
+        }
+
+        for (int i = 1; i < tblBestSellerProduct.getColumnCount(); i++) {
+            tblBestSellerProduct.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+        
+        tblBestSellerProduct.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(java.awt.event.MouseEvent e) {
+                int row = tblBestSellerProduct.rowAtPoint(e.getPoint());
+                int col = tblBestSellerProduct.columnAtPoint(e.getPoint());
+
+                if (row >= 0 && col == 2) {
+                    Object value = tblBestSellerProduct.getValueAt(row, col);
+                    tblBestSellerProduct.setToolTipText(value != null ? value.toString() : null);
+                } else {
+                    tblBestSellerProduct.setToolTipText(null);
+                }
+            }
+        });
+
+        for (int i = 0; i < list.size(); i++) {
+            final int rowIndex = i;
+            final String imageUrl = list.get(i).getImage();
+
+            if (imageUrl == null || imageUrl.isBlank()) continue;
+
+            new Thread(() -> {
+                try {
+                    ImageIcon icon = new ImageIcon(new java.net.URL(imageUrl));
+                    Image scaled = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                    ImageIcon finalIcon = new ImageIcon(scaled);
+
+                    SwingUtilities.invokeLater(() ->
+                        tblBestSellerProduct.setValueAt(finalIcon, rowIndex, 0)
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
     
     @SuppressWarnings("unchecked")

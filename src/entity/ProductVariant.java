@@ -34,6 +34,10 @@ public class ProductVariant extends BaseEntity {
     
     private ProductStatusEnum status;
     
+    private int totalQuantity;
+    
+    private float totalRevenue;
+    
     public ProductVariant() {
     }
 
@@ -44,6 +48,45 @@ public class ProductVariant extends BaseEntity {
         this.price = price;
         this.quantity = quantity;
         this.image = image;
+    }
+
+    public ProductVariant(int productId, int colorId, int sizeId, float price, int quantity, String image, String productCode, String productName, String colorName, String sizeName, String brandName, String categoryName, String description, ProductStatusEnum status, int totalQuantity, float totalRevenue) {
+        this.productId = productId;
+        this.colorId = colorId;
+        this.sizeId = sizeId;
+        this.price = price;
+        this.quantity = quantity;
+        this.image = image;
+        this.productCode = productCode;
+        this.productName = productName;
+        this.colorName = colorName;
+        this.sizeName = sizeName;
+        this.brandName = brandName;
+        this.categoryName = categoryName;
+        this.description = description;
+        this.status = status;
+        this.totalQuantity = totalQuantity;
+        this.totalRevenue = totalRevenue;
+    }
+
+    public ProductVariant(int productId, int colorId, int sizeId, float price, int quantity, String image, String productCode, String productName, String colorName, String sizeName, String brandName, String categoryName, String description, ProductStatusEnum status, int totalQuantity, float totalRevenue, Integer id, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
+        super(id, createdAt, updatedAt, deletedAt);
+        this.productId = productId;
+        this.colorId = colorId;
+        this.sizeId = sizeId;
+        this.price = price;
+        this.quantity = quantity;
+        this.image = image;
+        this.productCode = productCode;
+        this.productName = productName;
+        this.colorName = colorName;
+        this.sizeName = sizeName;
+        this.brandName = brandName;
+        this.categoryName = categoryName;
+        this.description = description;
+        this.status = status;
+        this.totalQuantity = totalQuantity;
+        this.totalRevenue = totalRevenue;
     }
     
     public ProductVariant(int productId, int colorId, int sizeId, float price, int quantity, String image, String productCode, String productName, String colorName, String sizeName, String brandName, String categoryName, String description, ProductStatusEnum status) {
@@ -79,6 +122,22 @@ public class ProductVariant extends BaseEntity {
         this.categoryName = categoryName;
         this.description = description;
         this.status = status;
+    }
+
+    public int getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public void setTotalQuantity(int totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
+    public float getTotalRevenue() {
+        return totalRevenue;
+    }
+
+    public void setTotalRevenue(float totalRevenue) {
+        this.totalRevenue = totalRevenue;
     }
 
     public int getProductId() {
