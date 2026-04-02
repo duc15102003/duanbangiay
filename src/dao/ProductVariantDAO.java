@@ -30,7 +30,7 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
                 p.code AS product_code,
                 p.name AS product_name,
                 p.description AS description,
-                p.status AS status,
+                p.status AS product_status,
                 b.name AS brand_name,
                 cg.name AS category_name,
                 s.name AS size_name,
@@ -52,7 +52,7 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
                 sql.append(" AND pv.size_id = ?");
                 params.add(filter.getSizeId());
             }
-            
+
             if (filter.getProductId() != null) {
                 sql.append(" AND pv.product_id = ?");
                 params.add(filter.getProductId());
@@ -80,7 +80,7 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
                 params.add(keyword);
             }
         }
-        
+
         sql.append(" ORDER BY p.code ASC");
 
         try (Connection conn = dbConfig.getConnection();
@@ -273,13 +273,13 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
 
         pv.setSizeName(rs.getString("size_name"));
         pv.setColorName(rs.getString("color_name"));
-        pv.setStatus(ProductStatusEnum.fromValue(rs.getInt("status")));
-        
+
+        pv.setStatus(ProductStatusEnum.fromValue(rs.getInt("product_status")));
+
         Timestamp created = rs.getTimestamp("created_at");
         Timestamp updated = rs.getTimestamp("updated_at");
 
         if (created != null) pv.setCreatedAt(created.toLocalDateTime());
-
         if (updated != null) pv.setUpdatedAt(updated.toLocalDateTime());
 
         return pv;

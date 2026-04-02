@@ -8,8 +8,6 @@ import entity.ProductVariant;
 import entity.Size;
 import entity.filter.ProductVariantFilter;
 import java.awt.Image;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
