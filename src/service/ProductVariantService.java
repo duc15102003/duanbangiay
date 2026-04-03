@@ -3,6 +3,7 @@ package service;
 import dao.ProductVariantDAO;
 import entity.ProductVariant;
 import entity.filter.ProductVariantFilter;
+import java.time.LocalDateTime;
 import java.util.List;
 import validator.ProductVariantValidator;
 
@@ -52,7 +53,7 @@ public class ProductVariantService {
         return productVariantDAO.increaseStock(productVariantId, quantity);
     }
     
-    public List<ProductVariant> getTop3BestSeller() {
-        return productVariantDAO.getTop3BestSeller();
+    public List<ProductVariant> getTop3BestSeller(LocalDateTime from, LocalDateTime to) {
+        return productVariantDAO.getTop3BestSeller(from, to);
     }
 }

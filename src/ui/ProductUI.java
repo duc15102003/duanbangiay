@@ -238,7 +238,6 @@ public class ProductUI extends javax.swing.JPanel  {
         }
 
         Object quantityObj = jTable3.getValueAt(row, 5);
-        txtQuantity.setText(quantityObj == null ? "" : quantityObj.toString());
 
         // set ghi chú
         txtGhiChu.setText(
@@ -296,7 +295,6 @@ public class ProductUI extends javax.swing.JPanel  {
             txtMaSP.setText("");
             txtTenSP.setText("");
             txtGhiChu.setText("");
-            txtQuantity.setText("");
 
             cbbCategory.setSelectedIndex(0);
             cbbBrand.setSelectedIndex(0);
@@ -349,8 +347,6 @@ public class ProductUI extends javax.swing.JPanel  {
         cbbSearchCategory = new javax.swing.JComboBox<>();
         cbbSearchStatus = new javax.swing.JComboBox<>();
         cbbCategory = new javax.swing.JComboBox<>();
-        jLabel8 = new javax.swing.JLabel();
-        txtQuantity = new javax.swing.JTextField();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -457,10 +453,6 @@ public class ProductUI extends javax.swing.JPanel  {
             }
         });
 
-        jLabel8.setText("Số lượng");
-
-        txtQuantity.setEnabled(false);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -482,10 +474,6 @@ public class ProductUI extends javax.swing.JPanel  {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(282, 282, 282)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addGap(56, 56, 56)
-                                .addComponent(txtQuantity, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE))
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                 .addGroup(layout.createSequentialGroup()
                                     .addComponent(btnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -550,14 +538,10 @@ public class ProductUI extends javax.swing.JPanel  {
                     .addComponent(jLabel7)
                     .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(txtQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnAdd)
                             .addComponent(btnUpd)
@@ -746,7 +730,6 @@ public class ProductUI extends javax.swing.JPanel  {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -757,7 +740,6 @@ public class ProductUI extends javax.swing.JPanel  {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextArea txtGhiChu;
     private javax.swing.JTextField txtMaSP;
-    private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtTenSP;
     // End of variables declaration//GEN-END:variables
 }

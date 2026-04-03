@@ -149,6 +149,10 @@
                   <Component id="pnBestSellerProduct" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
+                      <Component id="dcProductFrom" min="-2" pref="173" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="dcProductTo" min="-2" pref="173" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jComboBox1" min="-2" pref="200" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -157,7 +161,11 @@
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="jComboBox1" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jComboBox1" min="-2" max="-2" attributes="0"/>
+                          <Component id="dcProductTo" min="-2" max="-2" attributes="0"/>
+                          <Component id="dcProductFrom" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="pnBestSellerProduct" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -226,6 +234,10 @@
                 </Container>
               </SubComponents>
             </Container>
+            <Component class="com.toedter.calendar.JDateChooser" name="dcProductTo">
+            </Component>
+            <Component class="com.toedter.calendar.JDateChooser" name="dcProductFrom">
+            </Component>
           </SubComponents>
         </Container>
       </SubComponents>

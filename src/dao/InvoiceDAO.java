@@ -42,6 +42,7 @@
                         invoice.setCreatedAt(ts.toLocalDateTime());
                     }
                     invoice.setEmployeeName(rs.getString("employee_name"));
+                    invoice.setEmployeeId(rs.getInt("employee_id"));
                     invoice.setPaymentType(rs.getString("payment_type"));
 
                     return invoice;

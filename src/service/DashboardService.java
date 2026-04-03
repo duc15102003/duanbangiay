@@ -20,4 +20,8 @@ public class DashboardService {
     public List<RevenueDTO> getRevenueByYear(LocalDateTime from, LocalDateTime to) {
         return dao.getRevenue("YEAR", from, to);
     }
+    
+    public List<RevenueDTO> getRevenueByPaymentType(LocalDateTime from, LocalDateTime to) {
+        return dao.getRevenueByPaymentType(from, to);
+    }
 }

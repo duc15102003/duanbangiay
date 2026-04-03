@@ -1,31 +1,66 @@
 package ui;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
 import dao.CartDAO;
 import dao.InvoiceDAO;
+import entity.Employee;
+
 import entity.Invoice;
 import entity.InvoiceItem;
 import entity.filter.InvoiceFilter;
+
 import java.awt.Image;
+
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+
 import java.text.DecimalFormat;
+
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.SwingConstants;
-import java.time.format.DateTimeFormatter;
+import service.CartService;
+import service.CustomerService;
+import service.EmployeeService;
+import service.InvoiceService;
 
 public class InvoiceUI extends javax.swing.JPanel {
     
     private final CartDAO cartDAO = new CartDAO();
+    private final CustomerService customerService = new CustomerService();
+    private final CartService cartService = new CartService();
+    private final EmployeeService employeeService = new EmployeeService();
+    private final InvoiceService invoiceService = new InvoiceService();
 
     private List<Invoice> invoices = new ArrayList<>();
     private List<InvoiceItem> currentItems = new ArrayList<>();
@@ -519,108 +554,232 @@ public class InvoiceUI extends javax.swing.JPanel {
     } 
         
     private void exportInvoiceToPDF(int invoiceId) {
-
         try {
-            // ===== LẤY DATA =====
-            InvoiceDAO invoiceDAO = new InvoiceDAO();
-            Invoice invoice = invoiceDAO.findById(invoiceId);
+            // ===== LẤY INVOICE =====
+            Invoice invoice = invoiceService.findById(invoiceId);
 
-            List<InvoiceItem> items = cartDAO.findByInvoiceId(invoiceId, null);
+            if (invoice == null) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn!");
+                return;
+            }
+
+            // ===== CHECK TRẠNG THÁI =====
+//            if (invoice.getStatus() == null ||
+//                !"Đã thanh toán".equalsIgnoreCase(invoice.getStatus().getLabel())) {
+//                JOptionPane.showMessageDialog(this, "Chỉ xuất hóa đơn đã thanh toán!");
+//                return;
+//            }
+
+            // ===== LẤY ROW TABLE =====
+            int selectedRow = tblInvoice.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn!");
+                return;
+            }
+
+            // ===== CUSTOMER (TỪ TABLE) =====
+            String customerName = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 2)));
+            String customerPhone = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 3)));
+            String customerAddress = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 4)));
+
+            if (customerName.isEmpty()) customerName = "Khách lẻ";
+
+            // ===== DISCOUNT (CỘT 6) =====
+            String discountText = String.valueOf(tblInvoice.getValueAt(selectedRow, 6));
+            float discountAmount = 0;
+
+            if (discountText != null && !discountText.isBlank()) {
+                String number = discountText.replaceAll("[^0-9]", "");
+                if (!number.isEmpty()) {
+                    try {
+                        discountAmount = Float.parseFloat(number);
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            // ===== EMPLOYEE =====
+            Employee emp = employeeService.findById(invoice.getEmployeeId());
+            String employeeName = (emp != null) ? emp.getName() : "N/A";
+            String employeeCode = (emp != null) ? emp.getCode() : "N/A";
+
+            // ===== ITEMS =====
+            List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
 
             float total = 0;
+            int totalQuantity = 0;
 
             for (InvoiceItem item : items) {
                 total += item.getPrice() * item.getQuantity();
+                totalQuantity += item.getQuantity();
             }
 
-            float discount = invoice.getDiscountAmount();
-            float finalAmount = total - discount;
+            float finalAmount = total - discountAmount;
+
+            // ===== THÔNG TIN HÓA ĐƠN =====
+            String invoiceCode = invoice.getCode();
+            String paymentType = safe(invoice.getPaymentType());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String createdAt = invoice.getCreatedAt() != null
+                    ? invoice.getCreatedAt().format(formatter)
+                    : "N/A";
 
             // ===== CHỌN FILE =====
-            javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
-            fileChooser.setSelectedFile(new java.io.File("invoice_" + invoice.getCode() + ".pdf"));
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setSelectedFile(new File("invoice_" + invoiceCode + ".pdf"));
 
-            if (fileChooser.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+            if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
             String filePath = fileChooser.getSelectedFile().getAbsolutePath();
 
-            // ===== LOAD FONT =====
-            java.io.InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
-
+            // ===== FONT =====
+            InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
             if (is == null) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
+                JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
                 return;
             }
 
             byte[] fontBytes = is.readAllBytes();
-
-            com.itextpdf.text.pdf.BaseFont bf = com.itextpdf.text.pdf.BaseFont.createFont(
+            BaseFont bf = BaseFont.createFont(
                     "Roboto-Regular.ttf",
-                    com.itextpdf.text.pdf.BaseFont.IDENTITY_H,
-                    com.itextpdf.text.pdf.BaseFont.EMBEDDED,
+                    BaseFont.IDENTITY_H,
+                    BaseFont.EMBEDDED,
                     true,
                     fontBytes,
                     null
             );
 
-            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD);
-            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(bf, 12);
-            com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
+            Font titleFont = new Font(bf, 18, Font.BOLD);
+            Font normalFont = new Font(bf, 12);
+            Font boldFont = new Font(bf, 12, Font.BOLD);
 
-            // ===== TẠO PDF =====
-            com.itextpdf.text.Document document = new com.itextpdf.text.Document();
-            com.itextpdf.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(filePath));
-
+            // ===== PDF =====
+            Document document = new Document(PageSize.A4, 30, 30, 30, 30);
+            PdfWriter.getInstance(document, new FileOutputStream(filePath));
             document.open();
 
             // ===== HEADER =====
-            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
-            title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            Paragraph title = new Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(10);
             document.add(title);
 
-            document.add(new com.itextpdf.text.Paragraph(" "));
-
             // ===== INFO =====
-            document.add(new com.itextpdf.text.Paragraph("Mã HĐ: " + invoice.getCode(), normalFont));
-            document.add(new com.itextpdf.text.Paragraph("Ngày: " +
-                    (invoice.getCreatedAt() != null ? invoice.getCreatedAt().format(dateFormat) : ""), normalFont));
+            document.add(new Paragraph("Mã HĐ: " + invoiceCode, normalFont));
+            document.add(new Paragraph("Ngày: " + createdAt, normalFont));
+            document.add(new Paragraph("Thanh toán: " + paymentType, normalFont));
 
-            document.add(new com.itextpdf.text.Paragraph("Nhân viên: " + invoice.getEmployeeName(), normalFont));
+            document.add(new Paragraph(" "));
 
-            document.add(new com.itextpdf.text.Paragraph("Khách: " + invoice.getCustomerName(), normalFont));
-            document.add(new com.itextpdf.text.Paragraph("SĐT: " + invoice.getCustomerPhone(), normalFont));
-            document.add(new com.itextpdf.text.Paragraph("Địa chỉ: " + invoice.getCustomerAddress(), normalFont));
+            document.add(new Paragraph("Nhân viên: " + employeeCode + " - " + employeeName, normalFont));
 
-            document.add(new com.itextpdf.text.Paragraph(" "));
+            document.add(new Paragraph(" "));
 
-            // ===== ITEMS =====
+            document.add(new Paragraph("Khách: " + customerName, normalFont));
+            document.add(new Paragraph("SĐT: " + customerPhone, normalFont));
+            document.add(new Paragraph("Địa chỉ: " + customerAddress, normalFont));
+
+            document.add(new Paragraph(" "));
+
+            // ===== TABLE =====
+            PdfPTable table = new PdfPTable(8);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+
+            float[] widths = {3f, 1.5f, 1.5f, 1.2f, 1.2f, 1f, 1.8f, 1.8f};
+            table.setWidths(widths);
+
+            addHeader(table, "Sản phẩm", boldFont);
+            addHeader(table, "Danh mục", boldFont);
+            addHeader(table, "Thương hiệu", boldFont);
+            addHeader(table, "Màu sắc", boldFont);
+            addHeader(table, "Kích thước", boldFont);
+            addHeader(table, "SL", boldFont);
+            addHeader(table, "Đơn giá", boldFont);
+            addHeader(table, "Thành tiền", boldFont);
+
             for (InvoiceItem item : items) {
-
-                float lineTotal = item.getPrice() * item.getQuantity();
-
-                String line = item.getProductName()
-                        + " | SL: " + item.getQuantity()
-                        + " | " + moneyFormat.format(item.getPrice())
-                        + " | = " + moneyFormat.format(lineTotal);
-
-                document.add(new com.itextpdf.text.Paragraph(line, normalFont));
+                addCell(table, safe(item.getProductName()), normalFont);
+                addCellCenter(table, safe(item.getCategoryName()), normalFont);
+                addCellCenter(table, safe(item.getBrandName()), normalFont);
+                addCellCenter(table, safe(item.getColorName()), normalFont);
+                addCellCenter(table, safe(item.getSizeName()), normalFont);
+                addCellCenter(table, String.valueOf(item.getQuantity()), normalFont);
+                addCellRight(table, moneyFormat.format(item.getPrice()), normalFont);
+                addCellRight(table, moneyFormat.format(item.getPrice() * item.getQuantity()), normalFont);
             }
 
-            document.add(new com.itextpdf.text.Paragraph(" "));
+            // ===== TỔNG SỐ LƯỢNG =====
+            PdfPCell totalLabel = new PdfPCell(new Phrase("Tổng số lượng", boldFont));
+            totalLabel.setColspan(7);
+            totalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            table.addCell(totalLabel);
+
+            PdfPCell totalValue = new PdfPCell(new Phrase(String.valueOf(totalQuantity), boldFont));
+            totalValue.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(totalValue);
+
+            document.add(table);
 
             // ===== TOTAL =====
-            document.add(new com.itextpdf.text.Paragraph("Tổng tiền: " + moneyFormat.format(total), normalFont));
-            document.add(new com.itextpdf.text.Paragraph("Giảm giá: - " + moneyFormat.format(discount), normalFont));
-            document.add(new com.itextpdf.text.Paragraph("Thanh toán: " + moneyFormat.format(finalAmount), boldFont));
+            PdfPTable totalTable = new PdfPTable(2);
+            totalTable.setWidthPercentage(40);
+            totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            totalTable.setSpacingBefore(10f);
+
+            addCell(totalTable, "Tổng:", boldFont);
+            addCellRight(totalTable, moneyFormat.format(total), normalFont);
+
+            addCell(totalTable, "Giảm giá:", boldFont);
+            addCellRight(totalTable, "- " + moneyFormat.format(discountAmount), normalFont);
+
+            addCell(totalTable, "Thanh toán:", boldFont);
+            addCellRight(totalTable, moneyFormat.format(finalAmount), boldFont);
+
+            document.add(totalTable);
 
             document.close();
 
-            javax.swing.JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
+            JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
 
         } catch (Exception e) {
             e.printStackTrace();
-            javax.swing.JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
+            JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
         }
+    }
+    
+    private void addHeader(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        cell.setPadding(5);
+        table.addCell(cell);
+    }
+    
+    private void addCellCenter(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setPadding(5);
+        table.addCell(cell);
+    }
+    
+    private void addCell(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(5);
+        table.addCell(cell);
+    }
+    
+    private void addCellRight(PdfPTable table, String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(5);
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        table.addCell(cell);
+    }
+    
+    private String safe(String value) {
+        return value != null ? value : "";
     }
     
     @SuppressWarnings("unchecked")

@@ -36,6 +36,27 @@ public class DashboardUI extends javax.swing.JPanel {
         updateDateFormat("MONTH");
         bindDateChooserEvents();
 
+        dcProductFrom.setDateFormatString("dd/MM/yyyy");
+        dcProductTo.setDateFormatString("dd/MM/yyyy");
+        dcProductTo.setEnabled(false); // ban đầu disable dcProductTo
+
+        dcProductFrom.getDateEditor().addPropertyChangeListener(evt -> {
+            if ("date".equals(evt.getPropertyName())) {
+                Date selected = dcProductFrom.getDate();
+                dcProductTo.setEnabled(selected != null);
+                if (selected == null) {
+                    dcProductTo.setDate(null);
+                }
+                toggleBestSellerView();
+            }
+        });
+
+        dcProductTo.getDateEditor().addPropertyChangeListener(evt -> {
+            if ("date".equals(evt.getPropertyName())) {
+                toggleBestSellerView();
+            }
+        });
+
         btnSearch.addActionListener(e -> reloadChart());
         cbbType.addActionListener(e -> {
             String type = getSelectedType();
@@ -46,13 +67,13 @@ public class DashboardUI extends javax.swing.JPanel {
             reloadChart();
         });
         cbbTypeChart.addActionListener(e -> reloadChart());
-        
+
         jComboBox1.addActionListener(e -> toggleBestSellerView());
 
         disablePopupIfNotDay(getSelectedType());
         reloadChart();
         loadBestSellerTable();
-        
+
         toggleBestSellerView();
     }
 
@@ -157,25 +178,42 @@ public class DashboardUI extends javax.swing.JPanel {
     }
 
     private JFreeChart createPieChart(String type, LocalDateTime from, LocalDateTime to) {
-        List<RevenueDTO> data;
-        switch (type) {
-            case "DAY" -> data = dashboardService.getRevenueByDay(from, to);
-            case "MONTH" -> data = dashboardService.getRevenueByMonth(from, to);
-            case "YEAR" -> data = dashboardService.getRevenueByYear(from, to);
-            default -> data = List.of();
-        }
+        List<RevenueDTO> data = dashboardService.getRevenueByPaymentType(from, to);
 
         DefaultPieDataset dataset = new DefaultPieDataset();
+        java.util.Map<String, RevenueDTO> dataMap = new java.util.LinkedHashMap<>();
+
         if (data == null || data.isEmpty()) {
             dataset.setValue("Không có dữ liệu", 1);
         } else {
             for (RevenueDTO r : data) {
-                String label = (r.getLabel() == null || r.getLabel().isBlank()) ? "N/A" : r.getLabel();
-                dataset.setValue(label, r.getTotal());
+                String label = (r.getLabel() == null || r.getLabel().isBlank()) ? "Không xác định" : r.getLabel();
+                String displayLabel = String.format("%s\n(%d Hoá đơn - %,.0f VNĐ)",
+                    label,
+                    r.getCount(),
+                    r.getTotal()
+                ).replace(",", ".");
+                dataset.setValue(displayLabel, r.getTotal());
+                dataMap.put(displayLabel, r);
             }
         }
 
-        return ChartFactory.createPieChart("Tỷ trọng doanh thu", dataset, true, true, false);
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Tỷ trọng doanh thu theo hình thức thanh toán",
+            dataset, true, true, false
+        );
+
+        org.jfree.chart.plot.PiePlot plot = (org.jfree.chart.plot.PiePlot) chart.getPlot();
+        plot.setLabelGenerator(new org.jfree.chart.labels.StandardPieSectionLabelGenerator(
+            "{0}\n{2}", 
+            new java.text.DecimalFormat("#,##0"),
+            new java.text.DecimalFormat("0.0%")
+        ));
+
+        plot.setLabelFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 13));
+        plot.setLabelBackgroundPaint(new java.awt.Color(255, 255, 255, 180));
+
+        return chart;
     }
 
     private LocalDateTime toLocalDateTime(Date date, boolean endOfDay) {
@@ -260,8 +298,23 @@ public class DashboardUI extends javax.swing.JPanel {
         dcTo.getCalendarButton().setEnabled(enablePopup);
     }
     
+    private LocalDateTime[] getBestSellerDateRange() {
+        Date fromDate = dcProductFrom.getDate();
+        Date toDate = dcProductTo.getDate();
+
+        LocalDateTime from = fromDate != null
+            ? fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atStartOfDay()
+            : null;
+        LocalDateTime to = toDate != null
+            ? toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atTime(23, 59, 59)
+            : null;
+
+        return new LocalDateTime[]{from, to};
+    }
+    
     private void loadBestSellerTable() {
-        List<ProductVariant> list = productVariantService.getTop3BestSeller();
+        LocalDateTime[] range = getBestSellerDateRange();
+        List<ProductVariant> list = productVariantService.getTop3BestSeller(range[0], range[1]);
 
         DefaultTableModel model = new DefaultTableModel(
             new Object[][]{},
@@ -348,13 +401,22 @@ public class DashboardUI extends javax.swing.JPanel {
                 }
             }).start();
         }
+        
+        showBestSellerTable();
     }
     
     private void toggleBestSellerView() {
-        String type = jComboBox1.getSelectedItem().toString();
+        Date fromDate = dcProductFrom.getDate();
+        Date toDate = dcProductTo.getDate();
 
+        if (fromDate != null && toDate != null && fromDate.after(toDate)) {
+            JOptionPane.showMessageDialog(this, "'Đến' phải lớn hơn hoặc bằng 'Từ'!", "Lỗi chọn ngày", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String type = jComboBox1.getSelectedItem().toString();
         if ("Bảng".equals(type)) {
-            showBestSellerTable();
+            loadBestSellerTable();
         } else {
             showBestSellerChart();
         }
@@ -362,24 +424,20 @@ public class DashboardUI extends javax.swing.JPanel {
     
     private void showBestSellerTable() {
         pnBestSellerProduct.removeAll();
-
         pnBestSellerProduct.setLayout(new BorderLayout());
-
         pnBestSellerProduct.setPreferredSize(null);
         pnBestSellerProduct.setMinimumSize(null);
         pnBestSellerProduct.setMaximumSize(null);
-
         jScrollPane1.setPreferredSize(new java.awt.Dimension(1038, 723));
         jScrollPane1.setMinimumSize(new java.awt.Dimension(1038, 723));
-
         pnBestSellerProduct.add(jScrollPane1, BorderLayout.CENTER);
-
         pnBestSellerProduct.revalidate();
         pnBestSellerProduct.repaint();
     }
     
     private void showBestSellerChart() {
-        List<ProductVariant> list = productVariantService.getTop3BestSeller();
+        LocalDateTime[] range = getBestSellerDateRange();
+        List<ProductVariant> list = productVariantService.getTop3BestSeller(range[0], range[1]);
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -429,6 +487,8 @@ public class DashboardUI extends javax.swing.JPanel {
         pnBestSellerProduct = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblBestSellerProduct = new javax.swing.JTable();
+        dcProductTo = new com.toedter.calendar.JDateChooser();
+        dcProductFrom = new com.toedter.calendar.JDateChooser();
 
         btnSearch.setText("Tìm kiếm");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -526,13 +586,20 @@ public class DashboardUI extends javax.swing.JPanel {
             .addComponent(pnBestSellerProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(dcProductFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(dcProductTo, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dcProductTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dcProductFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnBestSellerProduct, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -561,6 +628,8 @@ public class DashboardUI extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cbbType;
     private javax.swing.JComboBox<String> cbbTypeChart;
     private com.toedter.calendar.JDateChooser dcFrom;
+    private com.toedter.calendar.JDateChooser dcProductFrom;
+    private com.toedter.calendar.JDateChooser dcProductTo;
     private com.toedter.calendar.JDateChooser dcTo;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JPanel jPanel1;

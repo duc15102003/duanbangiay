@@ -466,10 +466,10 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
         return false;
     }
     
-    public List<ProductVariant> getTop3BestSeller() {
+    public List<ProductVariant> getTop3BestSeller(LocalDateTime from, LocalDateTime to) {
         List<ProductVariant> list = new ArrayList<>();
 
-        String sql = """
+        StringBuilder sql = new StringBuilder("""
             SELECT TOP 5
                 pv.image,
                 p.code AS product_code,
@@ -489,14 +489,31 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
             JOIN size s ON pv.size_id = s.id
             JOIN color cl ON pv.color_id = cl.id
             WHERE i.status = ?
-            GROUP BY pv.image, p.code, p.name, b.name, c.name, s.name, cl.name
-            ORDER BY total_quantity DESC
-        """;
+        """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(OrderStatusEnum.PAID.getValue());
+
+        if (from != null) {
+            sql.append(" AND i.created_at >= ?");
+            params.add(Timestamp.valueOf(from));
+        }
+        if (to != null) {
+            sql.append(" AND i.created_at <= ?");
+            params.add(Timestamp.valueOf(to));
+        }
+
+        sql.append("""
+             GROUP BY pv.image, p.code, p.name, b.name, c.name, s.name, cl.name
+             ORDER BY total_quantity DESC
+        """);
 
         try (Connection conn = DBConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-            ps.setInt(1, OrderStatusEnum.PAID.getValue());
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {

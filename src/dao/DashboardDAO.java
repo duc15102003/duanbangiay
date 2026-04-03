@@ -127,4 +127,54 @@ public class DashboardDAO {
 
         return list;
     }
+    
+    public List<RevenueDTO> getRevenueByPaymentType(LocalDateTime from, LocalDateTime to) {
+        List<RevenueDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT 
+                i.payment_type AS label,
+                SUM(i.total_amount) AS total,
+                COUNT(i.id) AS total_count
+            FROM invoice i
+            WHERE i.status = ?
+        """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(OrderStatusEnum.PAID.getValue());
+
+        if (from != null) {
+            sql.append(" AND i.created_at >= ?");
+            params.add(Timestamp.valueOf(from));
+        }
+        if (to != null) {
+            sql.append(" AND i.created_at <= ?");
+            params.add(Timestamp.valueOf(to));
+        }
+
+        sql.append(" GROUP BY i.payment_type");
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                RevenueDTO dto = new RevenueDTO(
+                    rs.getString("label"),
+                    rs.getFloat("total"),
+                    rs.getInt("total_count")
+                );
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }

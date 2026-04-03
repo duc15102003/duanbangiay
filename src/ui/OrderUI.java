@@ -78,7 +78,6 @@ import java.time.format.DateTimeFormatter;
 
 // ===== Utils =====
 import java.util.List;
-import javax.swing.SwingUtilities;
 import service.CustomerService;
 
 public class OrderUI extends JFrame {
@@ -792,8 +791,7 @@ public class OrderUI extends JFrame {
         lbAddress.setText(address);
     }
     
-    
-        private void initTabListener() {
+    private void initTabListener() {
         jTabbedPane1.addChangeListener(e -> {
             int tabIndex = jTabbedPane1.getSelectedIndex();
             Customer c = cartCustomerMap.get(tabIndex);
@@ -2175,153 +2173,172 @@ public class OrderUI extends JFrame {
     
     //Xuất PDF hoá đơn
     private void exportInvoiceToPDF(int invoiceId) {
-    try {
-        // ===== LẤY DATA =====
-        List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
-        float total = invoiceService.getTotalAmount(invoiceId);
+        try {
+            // ===== LẤY DATA =====
+            List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+            float total = invoiceService.getTotalAmount(invoiceId);
 
-        float discountAmount = 0;
-        String text = lblGiamGia.getText();
+            float discountAmount = 0;
+            String text = lblGiamGia.getText();
 
-        if (text != null && !text.isBlank()) {
-            String number = text.replaceAll("[^0-9]", "");
-            if (!number.isEmpty()) {
-                try {
-                    discountAmount = Float.parseFloat(number);
-                } catch (NumberFormatException ignored) {}
+            if (text != null && !text.isBlank()) {
+                String number = text.replaceAll("[^0-9]", "");
+                if (!number.isEmpty()) {
+                    try {
+                        discountAmount = Float.parseFloat(number);
+                    } catch (NumberFormatException ignored) {}
+                }
             }
+
+            float finalAmount = total - discountAmount;
+
+            Invoice invoice = invoiceService.findById(invoiceId);
+            String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
+            String paymentType = (invoice != null && invoice.getPaymentType() != null)
+                    ? invoice.getPaymentType() : "N/A";
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            String createdAt = (invoice != null && invoice.getCreatedAt() != null)
+                    ? invoice.getCreatedAt().format(formatter) : "N/A";
+
+            Employee emp = employeeService.findById(employeeId);
+            String employeeName = (emp != null) ? emp.getName() : "N/A";
+            String employeeCode = (emp != null) ? emp.getCode() : "N/A";
+
+            // ===== CUSTOMER =====
+            int tabIndex = jTabbedPane1.getSelectedIndex();
+            Customer customer = cartCustomerMap.get(tabIndex);
+
+            String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
+            String customerPhone = (customer != null) ? customer.getPhone() : "";
+            String customerAddress = (customer != null) ? customer.getAddress() : "";
+
+            // ===== CHỌN FILE =====
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setSelectedFile(new File("invoice_" + invoiceCode + ".pdf"));
+
+            if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+            String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+
+            // ===== FONT =====
+            InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
+            if (is == null) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
+                return;
+            }
+
+            byte[] fontBytes = is.readAllBytes();
+            BaseFont bf = BaseFont.createFont(
+                    "Roboto-Regular.ttf",
+                    BaseFont.IDENTITY_H,
+                    BaseFont.EMBEDDED,
+                    true,
+                    fontBytes,
+                    null
+            );
+
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(bf, 18, com.itextpdf.text.Font.BOLD);
+            com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(bf, 12);
+            com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
+
+            // ===== PDF =====
+            Document document = new Document(PageSize.A4, 30, 30, 30, 30);
+            PdfWriter.getInstance(document, new FileOutputStream(filePath));
+            document.open();
+
+            // ===== HEADER =====
+            Paragraph title = new Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(10);
+            document.add(title);
+
+            // ===== INFO =====
+            document.add(new Paragraph("Mã HĐ: " + invoiceCode, normalFont));
+            document.add(new Paragraph("Ngày: " + createdAt, normalFont));
+            document.add(new Paragraph("Thanh toán: " + paymentType, normalFont));
+
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph("Nhân viên: " + employeeCode + " - " + employeeName, normalFont));
+
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph("Khách: " + customerName, normalFont));
+            document.add(new Paragraph("SĐT: " + customerPhone, normalFont));
+            document.add(new Paragraph("Địa chỉ: " + customerAddress, normalFont));
+
+            document.add(new Paragraph(" "));
+
+            // ===== TABLE =====
+            PdfPTable table = new PdfPTable(8);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            
+            int totalQuantity = 0;
+
+            float[] widths = {3f, 1.5f, 1.5f, 1.2f, 1.2f, 1f, 1.8f, 1.8f};
+            table.setWidths(widths);
+
+            addHeader(table, "Sản phẩm", boldFont);
+            addHeader(table, "Danh mục", boldFont);
+            addHeader(table, "Thương hiệu", boldFont);
+            addHeader(table, "Màu sắc", boldFont);
+            addHeader(table, "Kích thước", boldFont);
+            addHeader(table, "SL", boldFont);
+            addHeader(table, "Đơn giá", boldFont);
+            addHeader(table, "Thành tiền", boldFont);
+
+            for (InvoiceItem item : items) {
+                totalQuantity += item.getQuantity();
+
+                addCell(table, item.getProductName(), normalFont);
+                addCellCenter(table, item.getCategoryName() != null ? item.getCategoryName() : "", normalFont);
+                addCellCenter(table, item.getBrandName() != null ? item.getBrandName() : "", normalFont);
+                addCellCenter(table, item.getColorName() != null ? item.getColorName() : "", normalFont);
+                addCellCenter(table, item.getSizeName() != null ? item.getSizeName() : "", normalFont);
+                addCellCenter(table, String.valueOf(item.getQuantity()), normalFont);
+                addCell(table, moneyFormat.format(item.getPrice()), normalFont);
+                addCell(table, moneyFormat.format(item.getPrice() * item.getQuantity()), normalFont);
+            }
+
+            PdfPCell totalLabel = new PdfPCell(new Phrase("Tổng số lượng", boldFont));
+            totalLabel.setColspan(7);
+            totalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            table.addCell(totalLabel);
+
+            PdfPCell totalValue = new PdfPCell(new Phrase(String.valueOf(totalQuantity), boldFont));
+            totalValue.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(totalValue);
+
+            document.add(table);
+
+            // ===== TOTAL =====
+            PdfPTable totalTable = new PdfPTable(2);
+            totalTable.setWidthPercentage(40);
+            totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            totalTable.setSpacingBefore(10f);
+
+            addCell(totalTable, "Tổng:", boldFont);
+            addCell(totalTable, moneyFormat.format(total), normalFont);
+
+            addCell(totalTable, "Giảm giá:", boldFont);
+            addCell(totalTable, "- " + moneyFormat.format(discountAmount), normalFont);
+
+            addCell(totalTable, "Thanh toán:", boldFont);
+            addCell(totalTable, moneyFormat.format(finalAmount), boldFont);
+
+            document.add(totalTable);
+
+            document.close();
+
+            JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
         }
-
-        float finalAmount = total - discountAmount;
-
-        Invoice invoice = invoiceService.findById(invoiceId);
-        String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
-        String paymentType = (invoice != null && invoice.getPaymentType() != null)
-                ? invoice.getPaymentType() : "N/A";
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        String createdAt = (invoice != null && invoice.getCreatedAt() != null)
-                ? invoice.getCreatedAt().format(formatter) : "N/A";
-
-        Employee emp = employeeService.findById(employeeId);
-        String employeeName = (emp != null) ? emp.getName() : "N/A";
-        String employeeCode = (emp != null) ? emp.getCode() : "N/A";
-
-        // ===== CUSTOMER =====
-        int tabIndex = jTabbedPane1.getSelectedIndex();
-        Customer customer = cartCustomerMap.get(tabIndex);
-
-        String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
-        String customerPhone = (customer != null) ? customer.getPhone() : "";
-        String customerAddress = (customer != null) ? customer.getAddress() : "";
-
-        // ===== CHỌN FILE =====
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setSelectedFile(new File("invoice_" + invoiceCode + ".pdf"));
-
-        if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-
-        String filePath = fileChooser.getSelectedFile().getAbsolutePath();
-
-        // ===== FONT =====
-        InputStream is = getClass().getResourceAsStream("/common/fonts/Roboto-Regular.ttf");
-        if (is == null) {
-            JOptionPane.showMessageDialog(this, "Không tìm thấy font!");
-            return;
-        }
-
-        byte[] fontBytes = is.readAllBytes();
-        BaseFont bf = BaseFont.createFont(
-                "Roboto-Regular.ttf",
-                BaseFont.IDENTITY_H,
-                BaseFont.EMBEDDED,
-                true,
-                fontBytes,
-                null
-        );
-
-        com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(bf, 18, com.itextpdf.text.Font.BOLD);
-        com.itextpdf.text.Font normalFont = new com.itextpdf.text.Font(bf, 12);
-        com.itextpdf.text.Font boldFont = new com.itextpdf.text.Font(bf, 12, com.itextpdf.text.Font.BOLD);
-
-        // ===== PDF =====
-        Document document = new Document(PageSize.A4, 30, 30, 30, 30);
-        PdfWriter.getInstance(document, new FileOutputStream(filePath));
-        document.open();
-
-        // ===== HEADER =====
-        Paragraph title = new Paragraph("HÓA ĐƠN THANH TOÁN", titleFont);
-        title.setAlignment(Element.ALIGN_CENTER);
-        title.setSpacingAfter(10);
-        document.add(title);
-
-        // ===== INFO =====
-        document.add(new Paragraph("Mã HĐ: " + invoiceCode, normalFont));
-        document.add(new Paragraph("Ngày: " + createdAt, normalFont));
-        document.add(new Paragraph("Thanh toán: " + paymentType, normalFont));
-
-        document.add(new Paragraph(" "));
-
-        document.add(new Paragraph("Nhân viên: " + employeeCode + " - " + employeeName, normalFont));
-
-        document.add(new Paragraph(" "));
-
-        document.add(new Paragraph("Khách: " + customerName, normalFont));
-        document.add(new Paragraph("SĐT: " + customerPhone, normalFont));
-        document.add(new Paragraph("Địa chỉ: " + customerAddress, normalFont));
-
-        document.add(new Paragraph(" "));
-
-        // ===== TABLE =====
-        PdfPTable table = new PdfPTable(4);
-        table.setWidthPercentage(100);
-        table.setSpacingBefore(10f);
-
-        float[] widths = {4f, 1.5f, 2f, 2f};
-        table.setWidths(widths);
-
-        addHeader(table, "Sản phẩm", boldFont);
-        addHeader(table, "SL", boldFont);
-        addHeader(table, "Đơn giá", boldFont);
-        addHeader(table, "Thành tiền", boldFont);
-
-        for (InvoiceItem item : items) {
-            float lineTotal = item.getPrice() * item.getQuantity();
-
-            addCell(table, item.getProductName(), normalFont);
-            addCellCenter(table, String.valueOf(item.getQuantity()), normalFont);
-            addCell(table, moneyFormat.format(item.getPrice()), normalFont);
-            addCell(table, moneyFormat.format(lineTotal), normalFont);
-        }
-
-        document.add(table);
-
-        // ===== TOTAL =====
-        PdfPTable totalTable = new PdfPTable(2);
-        totalTable.setWidthPercentage(40);
-        totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        totalTable.setSpacingBefore(10f);
-
-        addCell(totalTable, "Tổng:", boldFont);
-        addCell(totalTable, moneyFormat.format(total), normalFont);
-
-        addCell(totalTable, "Giảm giá:", boldFont);
-        addCell(totalTable, "- " + moneyFormat.format(discountAmount), normalFont);
-
-        addCell(totalTable, "Thanh toán:", boldFont);
-        addCell(totalTable, moneyFormat.format(finalAmount), boldFont);
-
-        document.add(totalTable);
-
-        document.close();
-
-        JOptionPane.showMessageDialog(this, "Xuất PDF thành công!");
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(this, "Lỗi xuất PDF!");
     }
-}
 
     private void addHeader(PdfPTable table, String text, com.itextpdf.text.Font font) {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
