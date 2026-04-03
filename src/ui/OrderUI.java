@@ -793,7 +793,7 @@ public class OrderUI extends JFrame {
     }
     
     
-    private void initTabListener() {
+        private void initTabListener() {
         jTabbedPane1.addChangeListener(e -> {
             int tabIndex = jTabbedPane1.getSelectedIndex();
             Customer c = cartCustomerMap.get(tabIndex);
@@ -812,16 +812,13 @@ public class OrderUI extends JFrame {
             loadDiscountCombo();
         });
 
-        this.addWindowFocusListener(new java.awt.event.WindowFocusListener() {
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
-            public void windowGainedFocus(java.awt.event.WindowEvent e) {
+            public void windowActivated(java.awt.event.WindowEvent e) {
                 if (listInvoice != null && !listInvoice.isEmpty()) {
                     loadDiscountCombo();
                 }
             }
-
-            @Override
-            public void windowLostFocus(java.awt.event.WindowEvent e) {}
         });
     }
     
