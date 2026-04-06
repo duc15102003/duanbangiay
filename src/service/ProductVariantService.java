@@ -56,4 +56,8 @@ public class ProductVariantService {
     public List<ProductVariant> getTop3BestSeller(LocalDateTime from, LocalDateTime to) {
         return productVariantDAO.getTop3BestSeller(from, to);
     }
+    
+    public List<ProductVariant> getAllSoldProducts(LocalDateTime from, LocalDateTime to) {
+        return productVariantDAO.getAllSoldProducts(from, to);
+    }
 }

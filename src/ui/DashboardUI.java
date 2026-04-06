@@ -75,6 +75,7 @@ public class DashboardUI extends javax.swing.JPanel {
         loadBestSellerTable();
 
         toggleBestSellerView();
+        btnExportThongKe.addActionListener(e -> exportToExcel());
     }
 
     private void reloadChart() {
@@ -470,6 +471,148 @@ public class DashboardUI extends javax.swing.JPanel {
         pnBestSellerProduct.repaint();
     }
     
+    private void exportToExcel() {
+        String type = getSelectedType();
+        Date fromDate = dcFrom.getDate();
+        Date toDate = dcTo.getDate();
+
+        if (fromDate != null) {
+            LocalDate d = fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            switch (type) {
+                case "MONTH" -> fromDate = Date.from(d.withDayOfMonth(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+                case "YEAR"  -> fromDate = Date.from(d.withDayOfYear(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+            }
+        }
+        if (toDate != null) {
+            LocalDate d = toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            switch (type) {
+                case "MONTH" -> toDate = Date.from(d.withDayOfMonth(d.lengthOfMonth()).atTime(23,59,59).atZone(ZoneId.systemDefault()).toInstant());
+                case "YEAR"  -> toDate = Date.from(d.withDayOfYear(d.lengthOfYear()).atTime(23,59,59).atZone(ZoneId.systemDefault()).toInstant());
+            }
+        }
+
+        LocalDateTime from = toLocalDateTime(fromDate, false);
+        LocalDateTime to   = toLocalDateTime(toDate, true);
+
+        List<RevenueDTO> revenueList;
+        switch (type) {
+            case "DAY"   -> revenueList = dashboardService.getRevenueByDay(from, to);
+            case "MONTH" -> revenueList = dashboardService.getRevenueByMonth(from, to);
+            case "YEAR"  -> revenueList = dashboardService.getRevenueByYear(from, to);
+            default      -> revenueList = List.of();
+        }
+
+        List<ProductVariant> productList = productVariantService.getAllSoldProducts(from, to);
+
+        long totalQty = 0;
+        double totalRev = 0;
+        if (productList != null) {
+            for (ProductVariant pv : productList) {
+                totalQty += pv.getTotalQuantity();
+                totalRev += pv.getTotalRevenue();
+            }
+        }
+
+        javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+        fc.setDialogTitle("Lưu file Excel");
+        fc.setSelectedFile(new java.io.File("ThongKe_"
+            + java.time.LocalDate.now().toString().replace("-", "") + ".xls"));
+        fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Excel (*.xls)", "xls"));
+
+        if (fc.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) return;
+
+        java.io.File file = fc.getSelectedFile();
+        if (!file.getName().endsWith(".xls")) file = new java.io.File(file.getAbsolutePath() + ".xls");
+
+        String timeLabel = switch (type) {
+            case "DAY"   -> "Ngày";
+            case "MONTH" -> "Tháng";
+            default      -> "Năm";
+        };
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html xmlns:o='urn:schemas-microsoft-com:office:office' ")
+          .append("xmlns:x='urn:schemas-microsoft-com:office:excel' ")
+          .append("xmlns='http://www.w3.org/TR/REC-html40'>")
+          .append("<head><meta charset='UTF-8'>")
+          .append("<xml><x:ExcelWorkbook><x:ExcelWorksheets>")
+          .append("<x:ExcelWorksheet><x:Name>Thong ke doanh thu</x:Name>")
+          .append("<x:WorksheetOptions><x:Selected/></x:WorksheetOptions>")
+          .append("</x:ExcelWorksheet>")
+//          .append("<x:ExcelWorksheet><x:Name>San pham ban duoc</x:Name>")
+//          .append("</x:ExcelWorksheet>")
+          .append("</x:ExcelWorksheets></x:ExcelWorkbook></xml>")
+          .append("</head><body>");
+
+        sb.append("<table ss:Sheet='Thong ke doanh thu'>")
+          .append("<tr>")
+          .append("<th style='background:#4682B4;color:white;font-weight:bold;font-family:Arial;font-size:12pt'>").append(timeLabel).append("</th>")
+          .append("<th style='background:#4682B4;color:white;font-weight:bold;font-family:Arial;font-size:12pt'>Số lượng sản phẩm bán</th>")
+          .append("<th style='background:#4682B4;color:white;font-weight:bold;font-family:Arial;font-size:12pt'>Tổng doanh thu (VNĐ)</th>")
+          .append("</tr>");
+
+        if (revenueList != null) {
+            for (RevenueDTO rev : revenueList) {
+                sb.append("<tr>")
+                  .append("<td style='font-family:Arial'>").append(rev.getLabel() != null ? rev.getLabel() : "").append("</td>")
+                  .append("<td style='font-family:Arial;mso-number-format:\"#,##0\"'>").append(rev.getCount()).append("</td>")
+                  .append("<td style='font-family:Arial;mso-number-format:\"#,##0\"'>").append((long) rev.getTotal()).append("</td>")
+                  .append("</tr>");
+            }
+        }
+
+        sb.append("<tr>")
+          .append("<td style='font-weight:bold;font-family:Arial'>Tổng cộng</td>")
+          .append("<td style='font-weight:bold;font-family:Arial;mso-number-format:\"#,##0\"'>").append(totalQty).append("</td>")
+          .append("<td style='font-weight:bold;font-family:Arial;mso-number-format:\"#,##0\"'>").append((long) totalRev).append("</td>")
+          .append("</tr>")
+          .append("</table>");
+
+        sb.append("<br><table ss:Sheet='San pham ban duoc'>")
+          .append("<tr>");
+        for (String h : new String[]{"Mã sản phẩm","Tên sản phẩm","Thương hiệu","Danh mục","Kích thước","Màu sắc","Số lượng bán","Tổng doanh thu (VNĐ)"}) {
+            sb.append("<th style='background:#4682B4;color:white;font-weight:bold;font-family:Arial;font-size:12pt'>").append(h).append("</th>");
+        }
+        sb.append("</tr>");
+
+        if (productList != null) {
+            for (ProductVariant pv : productList) {
+                sb.append("<tr>")
+                  .append("<td style='font-family:Arial'>").append(pv.getProductCode()  != null ? pv.getProductCode()  : "").append("</td>")
+                  .append("<td style='font-family:Arial'>").append(pv.getProductName()  != null ? pv.getProductName()  : "").append("</td>")
+                  .append("<td style='font-family:Arial'>").append(pv.getBrandName()    != null ? pv.getBrandName()    : "").append("</td>")
+                  .append("<td style='font-family:Arial'>").append(pv.getCategoryName() != null ? pv.getCategoryName() : "").append("</td>")
+                  .append("<td style='font-family:Arial'>").append(pv.getSizeName()     != null ? pv.getSizeName()     : "").append("</td>")
+                  .append("<td style='font-family:Arial'>").append(pv.getColorName()    != null ? pv.getColorName()    : "").append("</td>")
+                  .append("<td style='font-family:Arial;mso-number-format:\"#,##0\"'>").append(pv.getTotalQuantity()).append("</td>")
+                  .append("<td style='font-family:Arial;mso-number-format:\"#,##0\"'>").append((long) pv.getTotalRevenue()).append("</td>")
+                  .append("</tr>");
+            }
+        }
+
+        // Dòng tổng cộng dưới table
+        sb.append("<tr>")
+          .append("<td style='font-weight:bold;font-family:Arial' colspan='6'>Tổng cộng</td>")
+          .append("<td style='font-weight:bold;font-family:Arial;mso-number-format:\"#,##0\"'>").append(totalQty).append("</td>")
+          .append("<td style='font-weight:bold;font-family:Arial;mso-number-format:\"#,##0\"'>").append((long) totalRev).append("</td>")
+          .append("</tr>")
+          .append("</table>")
+          .append("</body></html>");
+
+        try (java.io.OutputStreamWriter writer = new java.io.OutputStreamWriter(
+                new java.io.FileOutputStream(file), java.nio.charset.StandardCharsets.UTF_8)) {
+            writer.write(sb.toString());
+            JOptionPane.showMessageDialog(this,
+                "Xuất file thành công!\n" + file.getAbsolutePath(),
+                "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Lỗi khi xuất file: " + ex.getMessage(),
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -482,6 +625,7 @@ public class DashboardUI extends javax.swing.JPanel {
         cbbType = new javax.swing.JComboBox<>();
         cbbTypeChart = new javax.swing.JComboBox<>();
         pnChart = new javax.swing.JPanel();
+        btnExportThongKe = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jComboBox1 = new javax.swing.JComboBox<>();
         pnBestSellerProduct = new javax.swing.JPanel();
@@ -512,12 +656,16 @@ public class DashboardUI extends javax.swing.JPanel {
             .addGap(0, 653, Short.MAX_VALUE)
         );
 
+        btnExportThongKe.setText("Export");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(341, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(btnExportThongKe)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 263, Short.MAX_VALUE)
                 .addComponent(cbbTypeChart, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -537,7 +685,8 @@ public class DashboardUI extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(cbbType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(cbbTypeChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(cbbTypeChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnExportThongKe))
                     .addComponent(dcFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch))
@@ -624,6 +773,7 @@ public class DashboardUI extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExportThongKe;
     private javax.swing.JButton btnSearch;
     private javax.swing.JComboBox<String> cbbType;
     private javax.swing.JComboBox<String> cbbTypeChart;
