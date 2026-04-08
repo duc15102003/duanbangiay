@@ -587,8 +587,8 @@ public class InvoiceUI extends javax.swing.JPanel {
 
             if (customerName.isEmpty()) customerName = "Khách lẻ";
 
-            // ===== DISCOUNT (CỘT 6) =====
-            String discountText = String.valueOf(tblInvoice.getValueAt(selectedRow, 6));
+            // ===== DISCOUNT =====
+            String discountText = String.valueOf(tblInvoice.getValueAt(selectedRow, 7));
             float discountAmount = 0;
 
             if (discountText != null && !discountText.isBlank()) {
@@ -1121,11 +1121,13 @@ public class InvoiceUI extends javax.swing.JPanel {
 
             // ===== TOTAL ROW =====
             sb.append("<tr>")
-              .append("<td colspan='5' class='bold'>Tổng cộng</td>")
-              .append("<td class='bold right'>").append(totalQty).append("</td>")
-              .append("<td></td>")
-              .append("<td class='bold right'>").append((long)total).append("</td>")
-              .append("</tr>");
+                .append("<td colspan='5' class='bold'>Tổng cộng</td>")
+                .append("<td class='bold right'>").append(totalQty).append("</td>")
+                .append("<td></td>")
+                .append("<td class='bold right'>")
+                .append(moneyFormat.format(total))
+                .append("</td>")
+                .append("</tr>");
 
             sb.append("</table>");
 
@@ -1139,7 +1141,7 @@ public class InvoiceUI extends javax.swing.JPanel {
 
             sb.append("<tr>")
               .append("<td class='bold'>Giảm giá</td>")
-              .append("<td class='right'>").append((long)discount).append("</td>")
+              .append("<td class='right'>").append("-"+ "" +(long)discount).append("</td>")
               .append("</tr>");
 
             sb.append("<tr>")
