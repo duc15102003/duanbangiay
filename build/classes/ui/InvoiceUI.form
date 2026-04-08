@@ -36,7 +36,9 @@
                       <Component id="txtSearchInvoiceItem" min="-2" pref="273" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="btnInvoicePrint" min="-2" pref="135" max="-2" attributes="0"/>
+                      <Component id="btnInvoicePrint" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="btnExportExcel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="cbbStatus" min="-2" pref="142" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -74,6 +76,7 @@
                       <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="cbbStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnInvoicePrint" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnExportExcel" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -249,6 +252,14 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInvoicePrintActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnExportExcel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Xu&#x1ea5;t excel"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExportExcelActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

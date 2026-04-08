@@ -657,6 +657,11 @@ public class DashboardUI extends javax.swing.JPanel {
         );
 
         btnExportThongKe.setText("Export");
+        btnExportThongKe.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportThongKeActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -770,6 +775,10 @@ public class DashboardUI extends javax.swing.JPanel {
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnExportThongKeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportThongKeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnExportThongKeActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -139,6 +139,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Export"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExportThongKeActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>

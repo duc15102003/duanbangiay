@@ -148,6 +148,9 @@ public class OrderUI extends JFrame {
         btnApplyDiscount.setVisible(false);
 
         initTabListener();
+        
+        //init can remove
+        loadDiscountCombo();
     }
     
     private void initImagePreview() {

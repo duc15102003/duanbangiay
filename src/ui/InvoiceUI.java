@@ -25,6 +25,7 @@ import java.awt.Image;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 
 import java.text.DecimalFormat;
 
@@ -804,6 +805,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         txtSearchInvoiceItem = new javax.swing.JTextField();
         cbbStatus = new javax.swing.JComboBox<>();
         btnInvoicePrint = new javax.swing.JButton();
+        btnExportExcel = new javax.swing.JButton();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -879,6 +881,13 @@ public class InvoiceUI extends javax.swing.JPanel {
             }
         });
 
+        btnExportExcel.setText("Xuất excel");
+        btnExportExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportExcelActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -902,7 +911,9 @@ public class InvoiceUI extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addComponent(txtSearchInvoiceItem, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(btnInvoicePrint, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnInvoicePrint)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnExportExcel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -933,7 +944,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel3)
                         .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnInvoicePrint)))
+                        .addComponent(btnInvoicePrint)
+                        .addComponent(btnExportExcel)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -990,8 +1002,167 @@ public class InvoiceUI extends javax.swing.JPanel {
         exportInvoiceToPDF(invoice.getId());      
     }//GEN-LAST:event_btnInvoicePrintActionPerformed
 
+    private void btnExportExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportExcelActionPerformed
+        int row = tblInvoice.getSelectedRow();
+
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn!");
+            return;
+        }
+
+        try {
+            int modelRow = tblInvoice.convertRowIndexToModel(row);
+            Invoice invoice = invoices.get(modelRow);
+
+            // ===== CHECK STATUS =====
+            if (invoice.getStatus() == null ||
+                !"Đã thanh toán".equalsIgnoreCase(invoice.getStatus().getLabel())) {
+                JOptionPane.showMessageDialog(this, "Chỉ xuất hóa đơn đã thanh toán!");
+                return;
+            }
+
+            List<InvoiceItem> items = cartService.findByInvoiceId(invoice.getId(), null);
+
+            // ===== FILE =====
+            JFileChooser fc = new JFileChooser();
+            fc.setDialogTitle("Lưu file Excel");
+            fc.setSelectedFile(new File("HoaDon_" + invoice.getCode() + ".xls"));
+
+            if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+            File file = fc.getSelectedFile();
+            if (!file.getName().endsWith(".xls")) {
+                file = new File(file.getAbsolutePath() + ".xls");
+            }
+
+            // ===== CALCULATE =====
+            double total = 0;
+            int totalQty = 0;
+
+            for (InvoiceItem item : items) {
+                total += item.getPrice() * item.getQuantity();
+                totalQty += item.getQuantity();
+            }
+
+            double discount = invoice.getDiscountAmount();
+            double finalAmount = invoice.getTotalAmount();
+
+            // ===== BUILD HTML =====
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("<html xmlns:o='urn:schemas-microsoft-com:office:office' ")
+              .append("xmlns:x='urn:schemas-microsoft-com:office:excel' ")
+              .append("xmlns='http://www.w3.org/TR/REC-html40'>")
+              .append("<head><meta charset='UTF-8'>")
+
+              // ===== STYLE =====
+              .append("<style>")
+              .append("table {border-collapse: collapse; font-family: Arial;}")
+              .append("th {background:#4682B4;color:white;font-weight:bold;font-size:12pt;}")
+              .append("td {border:1px solid #999;padding:5px;}")
+              .append(".right {text-align:right; mso-number-format:\"#,##0\";}")
+              .append(".bold {font-weight:bold;}")
+              .append("</style>")
+
+              .append("</head><body>");
+
+            // ===== HEADER =====
+            sb.append("<h2 style='font-family:Arial'>HÓA ĐƠN THANH TOÁN</h2>");
+
+            sb.append("<p>Mã: ").append(invoice.getCode()).append("</p>");
+            sb.append("<p>Nhân viên: ").append(invoice.getEmployeeName()).append("</p>");
+            sb.append("<p>Khách hàng: ").append(invoice.getCustomerName()).append("</p>");
+            sb.append("<p>SĐT: ").append(invoice.getCustomerPhone()).append("</p>");
+            sb.append("<p>Địa chỉ: ").append(invoice.getCustomerAddress()).append("</p>");
+            sb.append("<p>Ngày: ")
+              .append(invoice.getCreatedAt() != null ? invoice.getCreatedAt().format(dateFormat) : "")
+              .append("</p>");
+
+            sb.append("<p>Thanh toán: ")
+              .append(safe(invoice.getPaymentType()))
+              .append("</p>");
+
+            // ===== TABLE =====
+            sb.append("<br><table>");
+
+            sb.append("<tr>")
+              .append("<th>Sản phẩm</th>")
+              .append("<th>Danh mục</th>")
+              .append("<th>Thương hiệu</th>")
+              .append("<th>Màu</th>")
+              .append("<th>Size</th>")
+              .append("<th>SL</th>")
+              .append("<th>Đơn giá</th>")
+              .append("<th>Thành tiền</th>")
+              .append("</tr>");
+
+            // ===== DATA =====
+            for (InvoiceItem item : items) {
+                double itemTotal = item.getPrice() * item.getQuantity();
+
+                sb.append("<tr>")
+                  .append("<td>").append(safe(item.getProductName())).append("</td>")
+                  .append("<td>").append(safe(item.getCategoryName())).append("</td>")
+                  .append("<td>").append(safe(item.getBrandName())).append("</td>")
+                  .append("<td>").append(safe(item.getColorName())).append("</td>")
+                  .append("<td>").append(safe(item.getSizeName())).append("</td>")
+                  .append("<td class='right'>").append(item.getQuantity()).append("</td>")
+                  .append("<td class='right'>").append((long)item.getPrice()).append("</td>")
+                  .append("<td class='right'>").append((long)itemTotal).append("</td>")
+                  .append("</tr>");
+            }
+
+            // ===== TOTAL ROW =====
+            sb.append("<tr>")
+              .append("<td colspan='5' class='bold'>Tổng cộng</td>")
+              .append("<td class='bold right'>").append(totalQty).append("</td>")
+              .append("<td></td>")
+              .append("<td class='bold right'>").append((long)total).append("</td>")
+              .append("</tr>");
+
+            sb.append("</table>");
+
+            // ===== SUMMARY =====
+            sb.append("<br><table>");
+
+            sb.append("<tr>")
+              .append("<td class='bold'>Tổng tiền</td>")
+              .append("<td class='right'>").append((long)total).append("</td>")
+              .append("</tr>");
+
+            sb.append("<tr>")
+              .append("<td class='bold'>Giảm giá</td>")
+              .append("<td class='right'>").append((long)discount).append("</td>")
+              .append("</tr>");
+
+            sb.append("<tr>")
+              .append("<td class='bold'>Thanh toán</td>")
+              .append("<td class='right'>").append((long)finalAmount).append("</td>")
+              .append("</tr>");
+
+            sb.append("</table>");
+
+            sb.append("</body></html>");
+
+            // ===== WRITE FILE =====
+            try (OutputStreamWriter writer = new OutputStreamWriter(
+                    new FileOutputStream(file), java.nio.charset.StandardCharsets.UTF_8)) {
+
+                writer.write(sb.toString());
+
+                JOptionPane.showMessageDialog(this,
+                    "Xuất Excel thành công!\n" + file.getAbsolutePath());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi xuất Excel!");
+        }
+    }//GEN-LAST:event_btnExportExcelActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExportExcel;
     private javax.swing.JButton btnInvoicePrint;
     private javax.swing.JComboBox<String> cbbBrand;
     private javax.swing.JComboBox<String> cbbCategory;
