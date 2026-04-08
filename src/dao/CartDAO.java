@@ -36,10 +36,13 @@ public class CartDAO {
         if (filter != null) {
 
             if (filter.getSearch() != null && !filter.getSearch().isBlank()) {
-                sql.append(" AND (code LIKE ? OR customer_name LIKE ?)");
+                sql.append(" AND (code LIKE ? OR customer_name LIKE ? OR customer_phone LIKE ?)");
+
                 String keyword = "%" + filter.getSearch().trim() + "%";
-                params.add(keyword);
-                params.add(keyword);
+
+                params.add(keyword); // code
+                params.add(keyword); // customer_name
+                params.add(keyword); // customer_phone
             }
 
             if (filter.getStatus() != null) {
