@@ -1341,6 +1341,32 @@ public class OrderUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật tổng tiền!");
             return;
         }
+        
+        Discount discount = discountMap.get(invoiceId);
+
+        if (discount != null) {
+            try {
+                discountService.checkDiscountValid(
+                        discount.getCode(),
+                        finalAmount
+                );
+
+
+                discountMap.remove(invoiceId);
+                selectedDiscountComboMap.remove(invoiceId);
+                cbbDiscount.setSelectedIndex(0);
+
+            } catch (Exception e) {
+
+                JOptionPane.showMessageDialog(this, e.getMessage());
+
+                discountMap.remove(invoiceId);
+                selectedDiscountComboMap.remove(invoiceId);
+                cbbDiscount.setSelectedIndex(0);
+
+                return;
+            }
+        }
 
         // ===== LẤY THÔNG TIN KHÁCH & NHÂN VIÊN =====
         Customer customer = cartCustomerMap.get(tabIndex);

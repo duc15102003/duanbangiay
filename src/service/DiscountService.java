@@ -98,4 +98,8 @@ public class DiscountService {
     public List<Discount> getValidDiscounts(double orderTotal) {
         return discountDAO.getValidDiscounts(orderTotal);
     }
+    
+    public Discount checkDiscountValid(String code, double orderTotal){
+        return discountDAO.checkDiscountValid(code, orderTotal);
+    }
 }

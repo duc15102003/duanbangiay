@@ -409,4 +409,73 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
         }
         return list;
     }
+    
+    public Discount checkDiscountValid(String code, double orderTotal) {
+
+        if (code == null || code.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng nhập mã giảm giá!");
+        }
+
+        String sql = """
+            SELECT *
+            FROM discount
+            WHERE LOWER(code) = LOWER(?)
+              AND deleted_at IS NULL
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, code.trim());
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                throw new RuntimeException("Mã giảm giá không tồn tại!");
+            }
+
+            Discount discount = mapRow(rs);
+
+            // ===== CHECK TRẠNG THÁI =====
+            if (discount.getStatus() != DiscountStatusEnum.ACTIVE) {
+                throw new RuntimeException("Mã giảm giá không hoạt động!");
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+
+            // ===== CHECK TIME =====
+            if (discount.getStartedAt() != null && discount.getStartedAt().isAfter(now)) {
+                throw new RuntimeException("Mã chưa đến thời gian sử dụng!");
+            }
+
+            if (discount.getEndedAt() != null && discount.getEndedAt().isBefore(now)) {
+                throw new RuntimeException("Mã đã hết hạn!");
+            }
+
+            // ===== CHECK QUANTITY =====
+            if (discount.getQuantity() != null && discount.getQuantity() <= 0) {
+                throw new RuntimeException("Mã đã hết số lượng!");
+            }
+
+            // ===== CHECK ĐIỀU KIỆN ĐƠN =====
+            if (discount.getDiscountCondition() != null) {
+                if (orderTotal < discount.getDiscountCondition()) {
+
+                    String min = String.format("%,.0f", discount.getDiscountCondition())
+                                    .replace(",", ".");
+
+                    throw new RuntimeException(
+                            "Đơn hàng phải từ " + min + " VND để áp dụng mã!"
+                    );
+                }
+            }
+
+            return discount;
+
+        } catch (RuntimeException e) {
+            throw e; // giữ message
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi hệ thống khi kiểm tra mã!");
+        }
+    }
 }
