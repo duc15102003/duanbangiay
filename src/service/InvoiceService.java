@@ -43,7 +43,8 @@ public class InvoiceService {
                                     String customerAddress,
                                     String employeeName,
                                     long discountAmount,
-                                    Integer discountId
+                                    Integer discountId,
+                                    String discountType
    ) {
        try {
            Invoice invoice = invoiceDAO.findById(invoiceId);
@@ -56,6 +57,7 @@ public class InvoiceService {
            invoice.setEmployeeName(employeeName);
            invoice.setDiscountAmount(discountAmount);
            invoice.setDiscountId(discountId);
+           invoice.setDiscountType(discountType);
            return invoiceDAO.updateInvoicePaymentInfo(invoice);
        } catch (Exception e) {
            e.printStackTrace();

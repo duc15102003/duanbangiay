@@ -215,6 +215,7 @@ public class InvoiceUI extends javax.swing.JPanel {
                 i.getCustomerPhone(),
                 i.getCustomerAddress(),
                 moneyFormat.format(totalBeforeDiscount),  
+                i.getDiscountType(),
                 moneyFormat.format(i.getDiscountAmount()),
                 moneyFormat.format(i.getTotalAmount()),
                 createdDate,
@@ -841,17 +842,17 @@ public class InvoiceUI extends javax.swing.JPanel {
 
         tblInvoice.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Giá trị giảm", "Thanh toán", "Ngày tạo", "Loại thanh toán", "Trạng thái"
+                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Loại giảm giá", "Giá trị giảm", "Thanh toán", "Ngày tạo", "Loại thanh toán", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, true, false, false, false, true, false
+                false, false, false, false, false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {

@@ -34,8 +34,28 @@
         private String employeeName;
 
         private long discountAmount;
+        
+        private String discountType;
 
         public Invoice() {
+        }
+
+        public Invoice(int id, String code, int employeeId, int customerId, float totalAmount, OrderStatusEnum status, LocalDateTime createdAt, String paymentType, Integer discountId, String customerPhone, String customerAddress, String customerName, String employeeName, long discountAmount, String discountType) {
+            this.id = id;
+            this.code = code;
+            this.employeeId = employeeId;
+            this.customerId = customerId;
+            this.totalAmount = totalAmount;
+            this.status = status;
+            this.createdAt = createdAt;
+            this.paymentType = paymentType;
+            this.discountId = discountId;
+            this.customerPhone = customerPhone;
+            this.customerAddress = customerAddress;
+            this.customerName = customerName;
+            this.employeeName = employeeName;
+            this.discountAmount = discountAmount;
+            this.discountType = discountType;
         }
 
         public Invoice(int id, String code, int employeeId, int customerId, float totalAmount, OrderStatusEnum status, LocalDateTime createdAt, String paymentType, Integer discountId, String customerPhone, String customerAddress, String customerName, String employeeName, long discountAmount) {
@@ -103,6 +123,14 @@
             this.customerName = customerName;
             this.employeeName = employeeName;
             this.discountAmount = discountAmount;
+        }
+
+        public String getDiscountType() {
+            return discountType;
+        }
+
+        public void setDiscountType(String discountType) {
+            this.discountType = discountType;
         }
 
         public Integer getDiscountId() {

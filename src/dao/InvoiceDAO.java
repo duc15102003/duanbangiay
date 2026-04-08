@@ -291,7 +291,8 @@
                     customer_address = ?, 
                     employee_name = ?,
                     discount_amount = ?,
-                    discount_id = ?
+                    discount_id = ?,
+                    discount_type = ?
                 WHERE id = ?
             """;
             try (Connection conn = dbConfig.getConnection();
@@ -303,14 +304,13 @@
                 ps.setString(5, invoice.getCustomerAddress());
                 ps.setString(6, invoice.getEmployeeName());
                 ps.setLong(7, invoice.getDiscountAmount());
-
                 if (invoice.getDiscountId() != null) {
                     ps.setInt(8, invoice.getDiscountId());
                 } else {
                     ps.setNull(8, Types.INTEGER);
                 }
-
-                ps.setInt(9, invoice.getId());
+                ps.setString(9, invoice.getDiscountType());
+                ps.setInt(10, invoice.getId());
                 return ps.executeUpdate() > 0;
             } catch (Exception e) {
                 e.printStackTrace();

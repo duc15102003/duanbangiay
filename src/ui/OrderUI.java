@@ -669,49 +669,6 @@ public class OrderUI extends JFrame {
             if (success) {
 
                 int tabIndex = jTabbedPane1.getSelectedIndex();
-                Customer customer = cartCustomerMap.get(tabIndex);
-
-                String customerName = "";
-                String customerPhone = "";
-                String customerAddress = "";
-                Integer selectedCustomerId = null;
-
-                if (customer != null) {
-                    selectedCustomerId = customer.getId();
-                    customerName = customer.getName();
-                    customerPhone = customer.getPhone();
-                    customerAddress = customer.getAddress();
-                }
-
-                String employeeName = invoiceService.findNameById(employeeId);
-
-                int discountAmount = 0;
-                String text = lblGiamGia.getText();
-                if (text != null && !text.isBlank()) {
-                    String number = text.replaceAll("[^0-9]", "");
-                    if (!number.isEmpty()) {
-                        try {
-                            discountAmount = Integer.parseInt(number);
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                }
-
-                Discount appliedDiscount = discountMap.get(invoiceId);
-                Integer discountId = (appliedDiscount != null) ? appliedDiscount.getId() : null;
-
-                invoiceService.updatePaymentInfo(
-                    invoiceId,
-                    employeeId,
-                    selectedCustomerId,
-                    customerName,
-                    customerPhone,
-                    customerAddress,
-                    employeeName,
-                    discountAmount,
-                    discountId
-                );
-
                 JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
                 dialog.dispose();
                 showInvoiceDialog(invoiceId);
@@ -1191,12 +1148,15 @@ public class OrderUI extends JFrame {
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel5Layout.createSequentialGroup()
                                         .addGap(15, 15, 15)
-                                        .addComponent(btnSelectCustomer))
-                                    .addGroup(jPanel5Layout.createSequentialGroup()
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(btnPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnSelectCustomer)
+                                        .addGap(11, 11, 11))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                         .addComponent(jLabel1))
                     .addComponent(txtDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
@@ -1327,145 +1287,119 @@ public class OrderUI extends JFrame {
 
         int invoiceId = listInvoice.get(tabIndex).getId();
 
-        // ===== CHECK GIỎ HÀNG =====
         JTable table = getCurrentCartTable();
         if (table == null || table.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Giỏ hàng đang trống!");
             return;
         }
 
-        // ===== LẤY FINAL AMOUNT =====
         float finalAmount = getFinalAmount(invoiceId);
 
         if (!invoiceService.updateTotalAmount(invoiceId, finalAmount)) {
             JOptionPane.showMessageDialog(this, "Lỗi cập nhật tổng tiền!");
             return;
         }
-        
-        Discount discount = discountMap.get(invoiceId);
 
-        if (discount != null) {
+        Discount appliedDiscount = discountMap.get(invoiceId);
+
+        if (appliedDiscount != null) {
             try {
-                discountService.checkDiscountValid(
-                        discount.getCode(),
-                        finalAmount
-                );
-
-
-                discountMap.remove(invoiceId);
-                selectedDiscountComboMap.remove(invoiceId);
-                cbbDiscount.setSelectedIndex(0);
-
+                discountService.checkDiscountValid(appliedDiscount.getCode(), finalAmount);
             } catch (Exception e) {
-
                 JOptionPane.showMessageDialog(this, e.getMessage());
-
                 discountMap.remove(invoiceId);
                 selectedDiscountComboMap.remove(invoiceId);
                 cbbDiscount.setSelectedIndex(0);
-
+                updateTotalAmount();
                 return;
             }
         }
 
-        // ===== LẤY THÔNG TIN KHÁCH & NHÂN VIÊN =====
         Customer customer = cartCustomerMap.get(tabIndex);
-
         if (customer == null) {
             customer = customerService.findById(1);
-            cartCustomerMap.put(tabIndex, customer); 
+            cartCustomerMap.put(tabIndex, customer);
         }
-        
-        String customerName = (customer != null) ? customer.getName() : "Khách lẻ";
-        String customerPhone = (customer != null) ? customer.getPhone() : "";
+
+        String customerName    = (customer != null) ? customer.getName()    : "Khách lẻ";
+        String customerPhone   = (customer != null) ? customer.getPhone()   : "";
         String customerAddress = (customer != null) ? customer.getAddress() : "";
+        String employeeName    = invoiceService.findNameById(employeeId);
 
-        String employeeName = invoiceService.findNameById(employeeId);
+        Integer discountId   = (appliedDiscount != null) ? appliedDiscount.getId() : null;
+        String  discountType = (appliedDiscount != null && appliedDiscount.getDiscountType() != null)
+                                ? appliedDiscount.getDiscountType() : "";
+        float totalRaw       = getTotalFromCart();
+        int   discountAmount = Math.round(totalRaw - finalAmount);
 
-        // ===== CHỌN PHƯƠNG THỨC =====
         Object[] options = {"Tiền mặt", "Chuyển khoản"};
-        int choice = JOptionPane.showOptionDialog(
-                this,
-                "Chọn phương thức thanh toán",
-                "Thanh toán",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                options,
-                options[0]
-        );
+        int choice = JOptionPane.showOptionDialog(this, "Chọn phương thức thanh toán",
+                "Thanh toán", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, options, options[0]);
         if (choice == -1) return;
 
-        if (choice == 0) { // TIỀN MẶT
-            int confirm = JOptionPane.showConfirmDialog(
-                    this,
+        if (choice == 0) {
+            int confirm = JOptionPane.showConfirmDialog(this,
                     "Xác nhận thanh toán tiền mặt?\nSố tiền: " + moneyFormat.format(finalAmount) + " VND",
-                    "Xác nhận",
-                    JOptionPane.YES_NO_OPTION
-            );
+                    "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION) return;
 
-            if (confirm == JOptionPane.YES_OPTION) {
+            if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
+                invoiceService.updatePaymentType(invoiceId, "Tiền mặt");
 
-                if (invoiceService.updateStatus(invoiceId, OrderStatusEnum.PAID)) {
+                invoiceService.updatePaymentInfo(
+                        invoiceId,
+                        employeeId,
+                        (customer != null ? customer.getId() : null),
+                        customerName,
+                        customerPhone,
+                        customerAddress,
+                        employeeName,
+                        discountAmount,
+                        discountId,
+                        discountType
+                );
 
-                    invoiceService.updatePaymentType(invoiceId, "Tiền mặt");
-
-                    // TRỪ SỐ LƯỢNG PHIẾU GIẢM GIÁ
-                    Discount appliedDiscount = discountMap.get(invoiceId);
-                    if (appliedDiscount != null) {
-                        discountService.useDiscount(appliedDiscount.getCode());
-                    }
-
-                    int discountAmount = 0;
-                    String text = lblGiamGia.getText();
-                    if (text != null && !text.isBlank()) {
-                        try {
-                            discountAmount = Integer.parseInt(text.replaceAll("[^0-9]", ""));
-                        } catch (Exception e) {
-                            discountAmount = 0;
-                        }
-                    }
-
-                    Integer discountId = (appliedDiscount != null) ? appliedDiscount.getId() : null;
-
-                    invoiceService.updatePaymentInfo(
-                            invoiceId,
-                            employeeId,
-                            (customer != null ? customer.getId() : null),
-                            customerName,
-                            customerPhone,
-                            customerAddress,
-                            employeeName,
-                            discountAmount,
-                            discountId
-                    );
-
-                    JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
-                    showInvoiceDialog(invoiceId);
-
-                    // Xóa discount của tab sau khi thanh toán
-                    discountMap.remove(invoiceId);
-                    selectedDiscountComboMap.remove(invoiceId);
-
-                    initCart();
-                    initProduct();
-                    txtDiscount.setText("");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
+                if (appliedDiscount != null) {
+                    discountService.useDiscount(appliedDiscount.getCode());
                 }
+
+                discountMap.remove(invoiceId);
+                selectedDiscountComboMap.remove(invoiceId);
+
+                JOptionPane.showMessageDialog(this, "Thanh toán thành công!");
+                showInvoiceDialog(invoiceId);
+                initCart();
+                initProduct();
+                txtDiscount.setText("");
+
+            } else {
+                JOptionPane.showMessageDialog(this, "Thanh toán thất bại!");
             }
 
-        } else if (choice == 1) { // CHUYỂN KHOẢN
+        } else {
             invoiceService.updatePaymentType(invoiceId, "Chuyển khoản");
-            showQRDialog(invoiceId);
 
-            Discount appliedDiscount = discountMap.get(invoiceId);
+            invoiceService.updatePaymentInfo(
+                    invoiceId,
+                    employeeId,
+                    (customer != null ? customer.getId() : null),
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    employeeName,
+                    discountAmount,
+                    discountId,
+                    discountType
+            );
+
             if (appliedDiscount != null) {
                 discountService.useDiscount(appliedDiscount.getCode());
                 discountMap.remove(invoiceId);
                 selectedDiscountComboMap.remove(invoiceId);
             }
 
+            showQRDialog(invoiceId);
             txtDiscount.setText("");
         }
     }//GEN-LAST:event_btnPaymentActionPerformed
