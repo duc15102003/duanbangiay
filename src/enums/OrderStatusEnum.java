@@ -34,4 +34,13 @@ public enum OrderStatusEnum {
     public String toString() {
         return label;
     }
+    
+    public static OrderStatusEnum fromLabel(String label) {
+        for (OrderStatusEnum status : values()) {
+            if (status.getLabel().equalsIgnoreCase(label)) {
+                return status;
+            }
+        }
+        return null;
+    }
 }

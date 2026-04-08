@@ -19,6 +19,7 @@ import entity.Employee;
 import entity.Invoice;
 import entity.InvoiceItem;
 import entity.filter.InvoiceFilter;
+import enums.OrderStatusEnum;
 
 import java.awt.Image;
 
@@ -563,13 +564,12 @@ public class InvoiceUI extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn!");
                 return;
             }
-
+            
             // ===== CHECK TRẠNG THÁI =====
-//            if (invoice.getStatus() == null ||
-//                !"Đã thanh toán".equalsIgnoreCase(invoice.getStatus().getLabel())) {
-//                JOptionPane.showMessageDialog(this, "Chỉ xuất hóa đơn đã thanh toán!");
-//                return;
-//            }
+            if (invoice.getStatus() == null || invoice.getStatus() != OrderStatusEnum.PAID) {
+                JOptionPane.showMessageDialog(this, "Chỉ xuất hóa đơn đã thanh toán!");
+                return;
+            }
 
             // ===== LẤY ROW TABLE =====
             int selectedRow = tblInvoice.getSelectedRow();
@@ -713,13 +713,19 @@ public class InvoiceUI extends javax.swing.JPanel {
 
             // ===== TỔNG SỐ LƯỢNG =====
             PdfPCell totalLabel = new PdfPCell(new Phrase("Tổng số lượng", boldFont));
-            totalLabel.setColspan(7);
-            totalLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            totalLabel.setColspan(5);
+            totalLabel.setHorizontalAlignment(Element.ALIGN_LEFT);
             table.addCell(totalLabel);
 
             PdfPCell totalValue = new PdfPCell(new Phrase(String.valueOf(totalQuantity), boldFont));
             totalValue.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(totalValue);
+
+            PdfPCell empty1 = new PdfPCell(new Phrase(""));
+            PdfPCell empty2 = new PdfPCell(new Phrase(""));
+
+            table.addCell(empty1);
+            table.addCell(empty2);
 
             document.add(table);
 
@@ -841,7 +847,7 @@ public class InvoiceUI extends javax.swing.JPanel {
                 {null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Giảm giá", "Thanh toán", "Ngày tạo", "Loại thanh toán", "Trạng thái"
+                "Mã hoá đơn", "Nhân viên bán", "Tên khách hàng", "Số điện thoại khách hàng", "Địa chỉ khách hàng", "Tổng tiền", "Giá trị giảm", "Thanh toán", "Ngày tạo", "Loại thanh toán", "Trạng thái"
             }
         ) {
             boolean[] canEdit = new boolean [] {

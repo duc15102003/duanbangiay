@@ -43,7 +43,7 @@
                     }
                     invoice.setEmployeeName(rs.getString("employee_name"));
                     invoice.setEmployeeId(rs.getInt("employee_id"));
-                    invoice.setPaymentType(rs.getString("payment_type"));
+                    invoice.setStatus(OrderStatusEnum.fromValue(rs.getInt("status")));
 
                     return invoice;
                 }
