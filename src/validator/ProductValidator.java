@@ -7,11 +7,6 @@ public class ProductValidator {
 
     public static boolean validateCreate(Product product) {
 
-        if (product.getCode() == null || product.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã không được để trống");
-            return false;
-        }
-
         if (product.getName() == null || product.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên không được để trống");
             return false;

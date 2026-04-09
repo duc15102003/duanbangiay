@@ -24,6 +24,10 @@ public class ProductService {
         if (!ProductValidator.validateCreate(product)) {
             return false;
         }
+        
+        String nextCode = generateNextCode();
+        product.setCode(nextCode);
+        
         return productDAO.insert(product);
     }
 
@@ -40,5 +44,18 @@ public class ProductService {
     
     public int countVariants(int productId) {
         return productVariantDAO.countByProductId(productId);
+    }
+    
+    private String generateNextCode() {
+        String lastCode = productDAO.getLastProductCode();
+
+        if (lastCode == null) {
+            return "SP001";
+        }
+
+        int number = Integer.parseInt(lastCode.substring(2));
+        number++;
+
+        return String.format("SP%03d", number);
     }
 }
