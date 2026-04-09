@@ -32,22 +32,27 @@ public class BrandValidator {
         return true;
     }
 
-    public static boolean validateUpdate(Brand brand) {
-
-        if (brand.getId() <= 0) {
-            JOptionPane.showMessageDialog(null, "ID thương hiệu không hợp lệ: " + brand.getId());
+    public static boolean validateUpdate(Brand color) {
+        if (color.getId() <= 0) {
+            JOptionPane.showMessageDialog(null, "ID thương hiệu không hợp lệ: " + color.getId());
             return false;
         }
-        
-        if (brandDAO.existsByCode(brand.getCode(), brand.getId())) {
+        if (color.getCode() == null || color.getCode().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Mã thương hiệu không được để trống");
+            return false;
+        }
+        if (color.getName() == null || color.getName().isBlank()) {
+            JOptionPane.showMessageDialog(null, "Tên thương hiệu không được để trống");
+            return false;
+        }
+        if (brandDAO.existsByCode(color.getCode(), color.getId())) {
             JOptionPane.showMessageDialog(null, "Mã thương hiệu đã tồn tại");
             return false;
         }
-        if (brandDAO.existsByName(brand.getName(), brand.getId())) {
+        if (brandDAO.existsByName(color.getName(), color.getId())) {
             JOptionPane.showMessageDialog(null, "Tên thương hiệu đã tồn tại");
             return false;
         }
-
-        return validateCreate(brand);
+        return true;
     }
 }

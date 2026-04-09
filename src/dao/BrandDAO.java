@@ -191,27 +191,18 @@ public class BrandDAO implements GenericDAO<Brand, BrandFilter> {
             WHERE LOWER(code) = LOWER(?)
             AND deleted_at IS NULL
         """);
-
-        if (excludeId != null) {
-            sql.append(" AND id != ?");
-        }
+        if (excludeId != null) sql.append(" AND id != ?");
 
         try (
             Connection conn = dbConfig.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql.toString());
         ) {
             ps.setString(1, code.trim());
-            if (excludeId != null) {
-                ps.setInt(2, excludeId);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            return rs.next();
-
+            if (excludeId != null) ps.setInt(2, excludeId);
+            return ps.executeQuery().next();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
