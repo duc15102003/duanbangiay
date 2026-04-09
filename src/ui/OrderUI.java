@@ -1557,6 +1557,7 @@ public class OrderUI extends JFrame {
             }
 
             initCart();
+            initProduct();
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Số lượng không hợp lệ");
@@ -1600,6 +1601,7 @@ public class OrderUI extends JFrame {
         txtDiscount.setText("");
 
         updateTotalAmount();
+        initCart();
     }//GEN-LAST:event_btnApplyDiscountActionPerformed
 
     private void jLabel7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseClicked

@@ -295,7 +295,15 @@ public class DiscountUI extends javax.swing.JPanel {
             new String [] {
                 "Mã", "Loại giảm giá", "Giá trị giảm", "Giá trị giảm tối đa", "Từ ngày", "Đến ngày", "Số lượng", "Điều kiện giảm", "Trạng thái"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         tblDiscount.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tblDiscountMouseClicked(evt);
