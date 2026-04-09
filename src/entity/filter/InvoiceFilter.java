@@ -1,7 +1,6 @@
 package entity.filter;
 
 import enums.OrderStatusEnum;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class InvoiceFilter {
@@ -13,6 +12,16 @@ public class InvoiceFilter {
     private LocalDateTime toCreatedDate;
     
     private OrderStatusEnum status;
+    
+    private String paymentType;
+
+    public String getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(String paymentType) {
+        this.paymentType = paymentType;
+    }
 
     public String getSearch() {
         return search;

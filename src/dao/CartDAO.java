@@ -49,6 +49,11 @@ public class CartDAO {
                 sql.append(" AND status = ?");
                 params.add(filter.getStatus().getValue());
             }
+            
+            if (filter.getPaymentType()!= null) {
+                sql.append(" AND payment_type = ?");
+                params.add(filter.getPaymentType());
+            }
 
             if (filter.getFromCreatedDate() != null) {
                 sql.append(" AND created_at >= ?");

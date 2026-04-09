@@ -134,6 +134,8 @@ public class InvoiceUI extends javax.swing.JPanel {
         cbbSize.addActionListener(e -> reloadInvoiceItems());
         cbbColor.addActionListener(e -> reloadInvoiceItems());
         initStatusComboBox();
+        
+        cbbPaymentType.addActionListener(e -> loadInvoiceTable());
     }
 
     public void resetForm(){
@@ -182,6 +184,8 @@ public class InvoiceUI extends javax.swing.JPanel {
         List<Invoice> list = cartDAO.findAll(filter, null);
 
         String selectedStatus = (String) cbbStatus.getSelectedItem();
+        
+        String selectedPayment = (String) cbbPaymentType.getSelectedItem();
 
         invoices = list.stream()
             //.filter(i -> i.getStatus() != enums.OrderStatusEnum.PENDING_PAYMENT)
@@ -193,6 +197,14 @@ public class InvoiceUI extends javax.swing.JPanel {
                 }
                 return i.getStatus().getLabel().equals(selectedStatus);
             })
+                
+            .filter(i -> {
+                if (selectedPayment == null || selectedPayment.equals("-")) {
+                    return true;
+                }
+                return selectedPayment.equalsIgnoreCase(i.getPaymentType());
+            })
+                
             .toList();
 
         DefaultTableModel model = (DefaultTableModel) tblInvoice.getModel();
@@ -813,6 +825,7 @@ public class InvoiceUI extends javax.swing.JPanel {
         cbbStatus = new javax.swing.JComboBox<>();
         btnInvoicePrint = new javax.swing.JButton();
         btnExportExcel = new javax.swing.JButton();
+        cbbPaymentType = new javax.swing.JComboBox<>();
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -895,6 +908,8 @@ public class InvoiceUI extends javax.swing.JPanel {
             }
         });
 
+        cbbPaymentType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "-", "Chuyển khoản", "Tiền mặt" }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -921,7 +936,9 @@ public class InvoiceUI extends javax.swing.JPanel {
                         .addComponent(btnInvoicePrint)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnExportExcel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(cbbPaymentType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel3)
@@ -952,7 +969,8 @@ public class InvoiceUI extends javax.swing.JPanel {
                         .addComponent(jLabel3)
                         .addComponent(cbbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnInvoicePrint)
-                        .addComponent(btnExportExcel)))
+                        .addComponent(btnExportExcel)
+                        .addComponent(cbbPaymentType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1176,6 +1194,7 @@ public class InvoiceUI extends javax.swing.JPanel {
     private javax.swing.JComboBox<String> cbbBrand;
     private javax.swing.JComboBox<String> cbbCategory;
     private javax.swing.JComboBox<String> cbbColor;
+    private javax.swing.JComboBox<String> cbbPaymentType;
     private javax.swing.JComboBox<String> cbbSize;
     private javax.swing.JComboBox<String> cbbStatus;
     private com.toedter.calendar.JDateChooser dcFrom;
