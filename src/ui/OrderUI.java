@@ -997,6 +997,12 @@ public class OrderUI extends JFrame {
             }
         });
 
+        cbbDiscount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbDiscountActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -1619,6 +1625,10 @@ public class OrderUI extends JFrame {
             }
         }
     }//GEN-LAST:event_jLabel7MouseClicked
+
+    private void cbbDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbbDiscountActionPerformed
+       loadDiscountCombo();
+    }//GEN-LAST:event_cbbDiscountActionPerformed
 
     /**
      * @param args the command line arguments
