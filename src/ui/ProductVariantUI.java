@@ -80,6 +80,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
         cbbSearchCategory.addActionListener(e -> searchTable());
         cbbSearchColor.addActionListener(e -> searchTable());
         cbbSearchSize.addActionListener(e -> searchTable());
+        cbbProduct.addActionListener(e -> searchTable());
     }
     
     public ProductVariantUI(DataChangeListener listener) {
@@ -105,6 +106,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
         filter.setColorId(getSelectedId(cbbSearchColor));
         filter.setBrandId(getSelectedId(cbbSearchBrand));
         filter.setCategoryId(getSelectedId(cbbSearchCategory));
+        filter.setProductId(getSelectedId(cbbProduct));
 
         return filter;
     }
@@ -490,6 +492,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
                 break;
             }
         }
+        
+        ProductVariantFilter filter = new ProductVariantFilter();
+        filter.setProductId(targetId);
+
+        loadTable(filter);
     }
     
     public void reloadAllData() {

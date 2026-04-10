@@ -115,7 +115,7 @@ public class DiscountUI extends javax.swing.JPanel {
                 d.getStartedAt() != null ? d.getStartedAt().format(f) : "",
                 d.getEndedAt() != null ? d.getEndedAt().format(f) : "",     
                 d.getQuantity(),                                
-                d.getDiscountCondition(),                       
+                moneyFormat.format(d.getDiscountCondition()),                       
                 status.getLabel()                    
             });
         }
