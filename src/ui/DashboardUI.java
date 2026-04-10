@@ -32,8 +32,8 @@ public class DashboardUI extends javax.swing.JPanel {
     public DashboardUI() {
         initComponents();
 
-        cbbType.setSelectedIndex(1);
-        updateDateFormat("MONTH");
+        cbbType.setSelectedIndex(0);
+        updateDateFormat("DAY");
         bindDateChooserEvents();
 
         dcProductFrom.setDateFormatString("dd/MM/yyyy");
