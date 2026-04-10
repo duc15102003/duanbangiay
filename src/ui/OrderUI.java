@@ -78,6 +78,7 @@ import java.time.format.DateTimeFormatter;
 
 // ===== Utils =====
 import java.util.List;
+import schedule.DiscountStatusSchedule;
 import service.CustomerService;
 
 public class OrderUI extends JFrame {
@@ -997,6 +998,16 @@ public class OrderUI extends JFrame {
             }
         });
 
+        cbbDiscount.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                cbbDiscountFocusGained(evt);
+            }
+        });
+        cbbDiscount.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cbbDiscountMouseClicked(evt);
+            }
+        });
         cbbDiscount.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbbDiscountActionPerformed(evt);
@@ -1629,8 +1640,28 @@ public class OrderUI extends JFrame {
     }//GEN-LAST:event_jLabel7MouseClicked
 
     private void cbbDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbbDiscountActionPerformed
-       loadDiscountCombo();
+        DiscountStatusSchedule schedule = new DiscountStatusSchedule();
+
+        schedule.updateDiscountStatus();
+        schedule.start();
+        loadDiscountCombo();
     }//GEN-LAST:event_cbbDiscountActionPerformed
+
+    private void cbbDiscountMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cbbDiscountMouseClicked
+        DiscountStatusSchedule schedule = new DiscountStatusSchedule();
+
+        schedule.updateDiscountStatus();
+        schedule.start();
+        loadDiscountCombo();
+    }//GEN-LAST:event_cbbDiscountMouseClicked
+
+    private void cbbDiscountFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_cbbDiscountFocusGained
+        DiscountStatusSchedule schedule = new DiscountStatusSchedule();
+
+        schedule.updateDiscountStatus();
+        schedule.start();
+        loadDiscountCombo();
+    }//GEN-LAST:event_cbbDiscountFocusGained
 
     /**
      * @param args the command line arguments

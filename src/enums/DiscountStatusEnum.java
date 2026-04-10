@@ -4,7 +4,7 @@ public enum DiscountStatusEnum {
 
     UPCOMING(1, "Chưa tới ngày"),
     ACTIVE(2, "Đang hoạt động"),
-    EXPIRED(3, "Quá ngày");
+    EXPIRED(3, "Kết thúc");
 
     private final int value;
     private final String label;
