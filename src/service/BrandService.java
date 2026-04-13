@@ -8,7 +8,8 @@ import validator.BrandValidator;
 
 public class BrandService {
     
-    private BrandDAO brandDAO = new BrandDAO();    
+    private BrandDAO brandDAO= new BrandDAO();
+    
     public List<Brand> findAll(BrandFilter filter) {
         return brandDAO.findAll(filter);
     }  

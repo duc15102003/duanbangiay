@@ -34,21 +34,20 @@ public class EmployeeService {
     }
 
     public boolean delete(int id, int currentUserId) {
-        if(id == currentUserId){
+        if (id == currentUserId) {
             throw new RuntimeException("Không thể xoá chính mình");
         }
 
         Employee target = employeeDAO.findById(id);
-        Employee current = employeeDAO.findById(currentUserId);
 
-        if(target == null){
+        if (target == null) {
             throw new RuntimeException("Nhân viên không tồn tại");
         }
 
-        if(current.getRole() == RoleEnum.MANAGER && 
-            target.getRole() == RoleEnum.ADMIN){
-             throw new RuntimeException("Không thể xoá ADMIN");
-         }
+        if (target.getRole() == RoleEnum.ADMIN 
+                || target.getRole() == RoleEnum.MANAGER) {
+            throw new RuntimeException("Không thể xoá ADMIN hoặc MANAGER");
+        }
 
         return employeeDAO.delete(id);
     }
