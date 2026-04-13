@@ -450,7 +450,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     private void refreshForm(){
 
-        cbbProduct.setSelectedIndex(0);
+        //cbbProduct.setSelectedIndex(0);
         cbbColor.setSelectedIndex(0);
         cbbSize.setSelectedIndex(0);
 
