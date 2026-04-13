@@ -57,6 +57,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
     
     private DataChangeListener listener;
     private javax.swing.Timer searchTimer;
+    
+    private boolean isFilling = false;
 
     private final java.util.concurrent.ExecutorService imageLoader 
         = java.util.concurrent.Executors.newFixedThreadPool(4);
@@ -76,25 +78,18 @@ public class ProductVariantUI extends javax.swing.JPanel {
         loadCombobox();
         reloadData();
 
-        cbbSearchBrand.addActionListener(e -> searchTable());
-        cbbSearchCategory.addActionListener(e -> searchTable());
-        cbbSearchColor.addActionListener(e -> searchTable());
-        cbbSearchSize.addActionListener(e -> searchTable());
-        cbbProduct.addActionListener(e -> searchTable());
+        initSearchListeners();
     }
     
     public ProductVariantUI(DataChangeListener listener) {
         this.listener = listener;
         initComponents();
         initTable();
-        initImagePreview(); 
+        initImagePreview();
         loadCombobox();
         reloadData();
 
-        cbbSearchBrand.addActionListener(e -> searchTable());
-        cbbSearchCategory.addActionListener(e -> searchTable());
-        cbbSearchColor.addActionListener(e -> searchTable());
-        cbbSearchSize.addActionListener(e -> searchTable());
+        initSearchListeners();
     }
     
     private ProductVariantFilter buildProductFilter(){
@@ -211,6 +206,21 @@ public class ProductVariantUI extends javax.swing.JPanel {
         loadCombo(cbbSearchSize,     listSize,     "-- Chọn kích thước --");
     }
     
+    private void initSearchListeners() {
+
+        java.awt.event.ActionListener searchListener = e -> {
+            if (!isFilling) {
+                searchTable();
+            }
+        };
+
+        cbbSearchBrand.addActionListener(searchListener);
+        cbbSearchCategory.addActionListener(searchListener);
+        cbbSearchColor.addActionListener(searchListener);
+        cbbSearchSize.addActionListener(searchListener);
+        cbbProduct.addActionListener(searchListener);
+    }
+    
     private void loadTable(ProductVariantFilter filter){
 
         listProductVariant = productVariantService.findAll(filter);
@@ -298,11 +308,10 @@ public class ProductVariantUI extends javax.swing.JPanel {
     }
     
     private void fillForm(ProductVariant pv){
+        isFilling = true;
 
         txtPrice.setText(moneyFormat.format(pv.getPrice()));
-
         spnQuantity.setValue(pv.getQuantity());
-
         txtImage.setText(pv.getImage());
 
         showPreview();
@@ -310,6 +319,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
         selectComboItem(cbbProduct,pv.getProductId());
         selectComboItem(cbbColor,pv.getColorId());
         selectComboItem(cbbSize,pv.getSizeId());
+
+        isFilling = false;
     }
     
     private ProductVariant getFormData(){
