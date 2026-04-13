@@ -38,6 +38,7 @@
                     invoice.setCode(rs.getString("code"));
                     Timestamp ts = rs.getTimestamp("created_at");
                     invoice.setDiscountAmount(rs.getInt("discount_amount"));
+                    invoice.setTotalAmount(rs.getInt("total_amount"));
                     if (ts != null) {
                         invoice.setCreatedAt(ts.toLocalDateTime());
                     }

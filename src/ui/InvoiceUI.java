@@ -577,40 +577,19 @@ public class InvoiceUI extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "Không tìm thấy hóa đơn!");
                 return;
             }
-            
+
             // ===== CHECK TRẠNG THÁI =====
             if (invoice.getStatus() == null || invoice.getStatus() != OrderStatusEnum.PAID) {
                 JOptionPane.showMessageDialog(this, "Chỉ xuất hóa đơn đã thanh toán!");
                 return;
             }
 
-            // ===== LẤY ROW TABLE =====
-            int selectedRow = tblInvoice.getSelectedRow();
-
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn hóa đơn!");
-                return;
-            }
-
-            // ===== CUSTOMER (TỪ TABLE) =====
-            String customerName = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 2)));
-            String customerPhone = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 3)));
-            String customerAddress = safe(String.valueOf(tblInvoice.getValueAt(selectedRow, 4)));
+            // ===== CUSTOMER =====
+            String customerName = safe(invoice.getCustomerName());
+            String customerPhone = safe(invoice.getCustomerPhone());
+            String customerAddress = safe(invoice.getCustomerAddress());
 
             if (customerName.isEmpty()) customerName = "Khách lẻ";
-
-            // ===== DISCOUNT =====
-            String discountText = String.valueOf(tblInvoice.getValueAt(selectedRow, 7));
-            float discountAmount = 0;
-
-            if (discountText != null && !discountText.isBlank()) {
-                String number = discountText.replaceAll("[^0-9]", "");
-                if (!number.isEmpty()) {
-                    try {
-                        discountAmount = Float.parseFloat(number);
-                    } catch (Exception ignored) {}
-                }
-            }
 
             // ===== EMPLOYEE =====
             Employee emp = employeeService.findById(invoice.getEmployeeId());
@@ -620,17 +599,16 @@ public class InvoiceUI extends javax.swing.JPanel {
             // ===== ITEMS =====
             List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
 
-            float total = 0;
-            int totalQuantity = 0;
+            int totalQuantity = items.stream()
+                    .mapToInt(InvoiceItem::getQuantity)
+                    .sum();
 
-            for (InvoiceItem item : items) {
-                total += item.getPrice() * item.getQuantity();
-                totalQuantity += item.getQuantity();
-            }
+            // ===== TIỀN (FIX CHUẨN LOGIC) =====
+            float finalAmount = invoice.getTotalAmount(); // tiền sau giảm
+            float discountAmount = (float) invoice.getDiscountAmount();
+            float total = finalAmount + discountAmount;   // tổng trước giảm
 
-            float finalAmount = total - discountAmount;
-
-            // ===== THÔNG TIN HÓA ĐƠN =====
+            // ===== INFO =====
             String invoiceCode = invoice.getCode();
             String paymentType = safe(invoice.getPaymentType());
 
@@ -685,11 +663,9 @@ public class InvoiceUI extends javax.swing.JPanel {
             document.add(new Paragraph("Thanh toán: " + paymentType, normalFont));
 
             document.add(new Paragraph(" "));
-
             document.add(new Paragraph("Nhân viên: " + employeeCode + " - " + employeeName, normalFont));
 
             document.add(new Paragraph(" "));
-
             document.add(new Paragraph("Khách: " + customerName, normalFont));
             document.add(new Paragraph("SĐT: " + customerPhone, normalFont));
             document.add(new Paragraph("Địa chỉ: " + customerAddress, normalFont));
@@ -714,6 +690,8 @@ public class InvoiceUI extends javax.swing.JPanel {
             addHeader(table, "Thành tiền", boldFont);
 
             for (InvoiceItem item : items) {
+                float lineTotal = item.getPrice() * item.getQuantity();
+
                 addCell(table, safe(item.getProductName()), normalFont);
                 addCellCenter(table, safe(item.getCategoryName()), normalFont);
                 addCellCenter(table, safe(item.getBrandName()), normalFont);
@@ -721,7 +699,7 @@ public class InvoiceUI extends javax.swing.JPanel {
                 addCellCenter(table, safe(item.getSizeName()), normalFont);
                 addCellCenter(table, String.valueOf(item.getQuantity()), normalFont);
                 addCellRight(table, moneyFormat.format(item.getPrice()), normalFont);
-                addCellRight(table, moneyFormat.format(item.getPrice() * item.getQuantity()), normalFont);
+                addCellRight(table, moneyFormat.format(lineTotal), normalFont);
             }
 
             // ===== TỔNG SỐ LƯỢNG =====
@@ -734,11 +712,8 @@ public class InvoiceUI extends javax.swing.JPanel {
             totalValue.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(totalValue);
 
-            PdfPCell empty1 = new PdfPCell(new Phrase(""));
-            PdfPCell empty2 = new PdfPCell(new Phrase(""));
-
-            table.addCell(empty1);
-            table.addCell(empty2);
+            table.addCell(new PdfPCell(new Phrase("")));
+            table.addCell(new PdfPCell(new Phrase("")));
 
             document.add(table);
 
