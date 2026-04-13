@@ -59,8 +59,8 @@ public class MainUI extends javax.swing.JFrame {
 
         dashboardUI = new DashboardUI();
         productManagerUI = new ProductManagerUI();
-        customerUI = new CustomerUI();
-        employeeUI = new EmployeeUI();
+        customerUI = new CustomerUI(customerId);
+        employeeUI = new EmployeeUI(customerId);
         invoiceUI = new InvoiceUI();
         discountUI = new DiscountUI();
         attributeUI = new AttributeUI();

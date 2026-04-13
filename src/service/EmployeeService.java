@@ -3,6 +3,7 @@ package service;
 import dao.EmployeeDAO;
 import entity.Employee;
 import entity.filter.EmployeeFilter;
+import enums.RoleEnum;
 import java.util.List;
 import validator.EmployeeValidator;
 
@@ -32,7 +33,23 @@ public class EmployeeService {
         return employeeDAO.update(request);
     }
 
-    public boolean delete(int id) {
+    public boolean delete(int id, int currentUserId) {
+        if(id == currentUserId){
+            throw new RuntimeException("Không thể xoá chính mình");
+        }
+
+        Employee target = employeeDAO.findById(id);
+        Employee current = employeeDAO.findById(currentUserId);
+
+        if(target == null){
+            throw new RuntimeException("Nhân viên không tồn tại");
+        }
+
+        if(current.getRole() == RoleEnum.MANAGER && 
+            target.getRole() == RoleEnum.ADMIN){
+             throw new RuntimeException("Không thể xoá ADMIN");
+         }
+
         return employeeDAO.delete(id);
     }
 }

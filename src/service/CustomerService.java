@@ -32,7 +32,7 @@ public class CustomerService {
         return customerDAO.update(request);
     }
 
-    public boolean delete(int id) {
-        return customerDAO.delete(id);
+    public boolean delete(int id, int currentUserId) {
+        return customerDAO.delete(id, currentUserId);
     }
 }

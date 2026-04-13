@@ -13,11 +13,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
+public class EmployeeDAO {
 
     private DBConfig dbConfig = new DBConfig();
 
-    @Override
     public List<Employee> findAll(EmployeeFilter filter) {
 
         List<Employee> list = new ArrayList<>();
@@ -26,7 +25,7 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
             SELECT *
             FROM employee
             WHERE deleted_at IS NULL
-              AND role != 3                        
+                                    
         """);
 
         List<Object> params = new ArrayList<>();
@@ -60,7 +59,6 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         return list;
     }
 
-    @Override
     public Employee findById(int id) {
 
         String sql = """
@@ -87,7 +85,6 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         return null;
     }
 
-    @Override
     public boolean insert(Employee request) {
 
         String sql = """
@@ -124,7 +121,6 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         return false;
     }
 
-    @Override
     public boolean update(Employee request) {
 
         String sql = """
@@ -168,7 +164,6 @@ public class EmployeeDAO implements GenericDAO<Employee, EmployeeFilter> {
         return false;
     }
 
-    @Override
     public boolean delete(int id) {
 
         String sql = """

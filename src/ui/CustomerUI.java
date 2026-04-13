@@ -23,12 +23,25 @@ public class CustomerUI extends javax.swing.JPanel {
 
     // ================= DATA =================
     private List<Customer> listCustomer = new ArrayList<>();
+    
+    private int currentUserId;
 
     public CustomerUI() {
         initComponents();
         
         rdoMale.setSelected(true);
         
+        btnSelectCustomer.setVisible(false);
+        initCustomer();
+    }
+    
+    public CustomerUI(int currentUserId) {
+        initComponents();
+
+        this.currentUserId = currentUserId;
+
+        rdoMale.setSelected(true);
+
         btnSelectCustomer.setVisible(false);
         initCustomer();
     }
@@ -617,7 +630,7 @@ public class CustomerUI extends javax.swing.JPanel {
 
         int id = listCustomer.get(modelRow).getId();
 
-        boolean result = customerService.delete(id);
+        boolean result = customerService.delete(id, currentUserId);
 
         if(result){
             JOptionPane.showMessageDialog(this,"Xoá thành công");

@@ -13,11 +13,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
+public class CustomerDAO {
     
     private DBConfig dbConfig = new DBConfig();
 
-    @Override
     public List<Customer> findAll(CustomerFilter filter) {
 
         List<Customer> list = new ArrayList<>();
@@ -65,7 +64,6 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         return list;
     }
 
-    @Override
     public Customer findById(int id) {
 
         String sql = """
@@ -92,7 +90,6 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         return null;
     }
 
-    @Override
     public boolean insert(Customer request) {
 
         String sql = """
@@ -123,7 +120,6 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         return false;
     }
 
-    @Override
     public boolean update(Customer request) {
 
         String sql = """
@@ -163,8 +159,50 @@ public class CustomerDAO implements GenericDAO<Customer, CustomerFilter> {
         return false;
     }
 
-    @Override
-    public boolean delete(int id) {
+    public boolean delete(int id, int currentUserId) {
+
+        if (id == currentUserId) {
+            throw new RuntimeException("Không thể xoá chính bạn!");
+        }
+
+        String sqlCheck = "SELECT role FROM user WHERE id = ?";
+        String targetRole = null;
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlCheck)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                targetRole = rs.getString("role");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String sqlCurrent = "SELECT role FROM user WHERE id = ?";
+        String currentRole = null;
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlCurrent)) {
+
+            ps.setInt(1, currentUserId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                currentRole = rs.getString("role");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if ("MANAGER".equalsIgnoreCase(currentRole)
+                && "ADMIN".equalsIgnoreCase(targetRole)) {
+            throw new RuntimeException("Manager không được xoá ADMIN!");
+        }
 
         String sql = """
             UPDATE customer

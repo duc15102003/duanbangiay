@@ -21,11 +21,23 @@ public class EmployeeUI extends javax.swing.JPanel {
     // ================= DATA =================
     private List<Employee> listEmployee = new ArrayList<>();
     
+    private int currentUserId;
+    
     public EmployeeUI() {
         initComponents();
         initEmployee();
         loadRole();
         
+        rdoMale.setSelected(true);
+    }
+    
+    public EmployeeUI(int currentUserId) {
+        initComponents();
+        this.currentUserId = currentUserId;
+
+        initEmployee();
+        loadRole();
+
         rdoMale.setSelected(true);
     }
     
@@ -512,7 +524,7 @@ public class EmployeeUI extends javax.swing.JPanel {
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-       int row = tblEmployee.getSelectedRow();
+        int row = tblEmployee.getSelectedRow();
 
         if(row == -1){
             JOptionPane.showMessageDialog(this,"Vui lòng chọn nhân viên cần xoá");
@@ -529,17 +541,21 @@ public class EmployeeUI extends javax.swing.JPanel {
         if(confirm != JOptionPane.YES_OPTION) return;
 
         int modelRow = tblEmployee.convertRowIndexToModel(row);
-
         int id = listEmployee.get(modelRow).getId();
 
-        boolean result = employeeService.delete(id);
+        try {
+            boolean result = employeeService.delete(id, currentUserId);
 
-        if(result){
-            JOptionPane.showMessageDialog(this,"Xoá thành công");
-            initEmployee();
-            resetForm();
-        }else{
-            JOptionPane.showMessageDialog(this,"Xoá thất bại");
+            if(result){
+                JOptionPane.showMessageDialog(this,"Xoá thành công");
+                initEmployee();
+                resetForm();
+            }else{
+                JOptionPane.showMessageDialog(this,"Xoá thất bại");
+            }
+
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
