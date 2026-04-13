@@ -1,6 +1,7 @@
 package service;
 
 import dao.DashboardDAO;
+import entity.DashboardSummaryDTO;
 import entity.RevenueDTO;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,5 +24,9 @@ public class DashboardService {
     
     public List<RevenueDTO> getRevenueByPaymentType(LocalDateTime from, LocalDateTime to) {
         return dao.getRevenueByPaymentType(from, to);
+    }
+    
+    public DashboardSummaryDTO getDashboardSummary(){
+        return dao.getDashboardSummary();
     }
 }

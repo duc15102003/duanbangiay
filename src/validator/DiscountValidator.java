@@ -59,6 +59,11 @@ public class DiscountValidator {
             JOptionPane.showMessageDialog(null, "Ngày bắt đầu và kết thúc không được để trống");
             return false;
         }
+        
+        if (d.getStartedAt().toLocalDate().isBefore(java.time.LocalDate.now())) {
+            JOptionPane.showMessageDialog(null, "Ngày bắt đầu phải từ hôm nay trở đi");
+            return false;
+        }
 
         if (d.getStartedAt().isAfter(d.getEndedAt())) {
             JOptionPane.showMessageDialog(null, "Ngày bắt đầu phải trước ngày kết thúc");
@@ -119,6 +124,11 @@ public class DiscountValidator {
 
         if (d.getStartedAt() == null || d.getEndedAt() == null) {
             JOptionPane.showMessageDialog(null, "Ngày bắt đầu và kết thúc không được để trống");
+            return false;
+        }
+        
+        if (d.getStartedAt().toLocalDate().isBefore(java.time.LocalDate.now())) {
+            JOptionPane.showMessageDialog(null, "Ngày bắt đầu phải từ hôm nay trở đi");
             return false;
         }
 

@@ -1,6 +1,7 @@
 package dao;
 
 import config.DBConfig;
+import entity.DashboardSummaryDTO;
 import entity.RevenueDTO;
 import enums.OrderStatusEnum;
 
@@ -176,5 +177,47 @@ public class DashboardDAO {
         }
 
         return list;
+    }
+    
+    public DashboardSummaryDTO getDashboardSummary() {
+
+        String sql = """
+            SELECT 
+                SUM(CASE 
+                    WHEN CAST(created_at AS DATE) = CAST(GETDATE() AS DATE) 
+                    THEN 1 ELSE 0 END) AS today_invoice_count,
+
+                SUM(CASE 
+                    WHEN CAST(created_at AS DATE) = CAST(GETDATE() AS DATE) 
+                    THEN total_amount ELSE 0 END) AS today_revenue,
+
+                SUM(CASE 
+                    WHEN CAST(created_at AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE) 
+                    THEN 1 ELSE 0 END) AS yesterday_invoice_count
+
+            FROM invoice
+            WHERE status = ?
+        """;
+
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, OrderStatusEnum.PAID.getValue());
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new DashboardSummaryDTO(
+                    rs.getInt("today_invoice_count"),
+                    rs.getDouble("today_revenue"),
+                    rs.getInt("yesterday_invoice_count")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new DashboardSummaryDTO(0, 0, 0);
     }
 }

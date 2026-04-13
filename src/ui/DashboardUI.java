@@ -1,5 +1,6 @@
 package ui;
 
+import entity.DashboardSummaryDTO;
 import entity.ProductVariant;
 import entity.RevenueDTO;
 import java.awt.BorderLayout;
@@ -76,6 +77,8 @@ public class DashboardUI extends javax.swing.JPanel {
 
         toggleBestSellerView();
         btnExportThongKe.addActionListener(e -> exportToExcel());
+        
+        loadDashboardSummary();
     }
 
     private void reloadChart() {
@@ -120,7 +123,7 @@ public class DashboardUI extends javax.swing.JPanel {
         JFreeChart chart = createBarChart(type, from, to);
         ChartPanel chartPanel = new ChartPanel(chart);
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 635));
+        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 500));
 
         pnChart.removeAll();
         pnChart.setLayout(new BorderLayout());
@@ -135,7 +138,7 @@ public class DashboardUI extends javax.swing.JPanel {
         JFreeChart chart = createPieChart(type, from, to);
         ChartPanel chartPanel = new ChartPanel(chart);
 
-        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 635));
+        chartPanel.setPreferredSize(new java.awt.Dimension(1038, 500));
 
         pnChart.removeAll();
         pnChart.setLayout(new BorderLayout());
@@ -613,6 +616,26 @@ public class DashboardUI extends javax.swing.JPanel {
         }
     }
     
+    private void loadDashboardSummary() {
+        DashboardSummaryDTO summary = dashboardService.getDashboardSummary();
+
+        if (summary == null) {
+            lbTodayInvoice.setText("0");
+            lbYesterdayInvoice.setText("0");
+            lbTodayRevenue.setText("0 VNĐ");
+            return;
+        }
+
+        lbTodayInvoice.setText(String.valueOf(summary.getTodayInvoiceCount()));
+
+        lbYesterdayInvoice.setText(String.valueOf(summary.getYesterdayInvoiceCount()));
+
+        lbTodayRevenue.setText(
+            String.format("%,.0f", summary.getTodayRevenue())
+                .replace(",", ".") + " VNĐ"
+        );
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -626,6 +649,13 @@ public class DashboardUI extends javax.swing.JPanel {
         cbbTypeChart = new javax.swing.JComboBox<>();
         pnChart = new javax.swing.JPanel();
         btnExportThongKe = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        lbTodayInvoice = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        lbYesterdayInvoice = new javax.swing.JLabel();
+        lbTodayRevenue = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jComboBox1 = new javax.swing.JComboBox<>();
         pnBestSellerProduct = new javax.swing.JPanel();
@@ -653,7 +683,7 @@ public class DashboardUI extends javax.swing.JPanel {
         );
         pnChartLayout.setVerticalGroup(
             pnChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 653, Short.MAX_VALUE)
+            .addGap(0, 510, Short.MAX_VALUE)
         );
 
         btnExportThongKe.setText("Export");
@@ -662,6 +692,65 @@ public class DashboardUI extends javax.swing.JPanel {
                 btnExportThongKeActionPerformed(evt);
             }
         });
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Thống kê hôm nay"));
+
+        lbTodayInvoice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbTodayInvoice.setText("0");
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel4.setText("Hoá đơn hôm qua");
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel5.setText("Hoá đơn hôm nay");
+
+        lbYesterdayInvoice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbYesterdayInvoice.setText("0");
+
+        lbTodayRevenue.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lbTodayRevenue.setText("0");
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel7.setText("Tổng tiền hôm nay");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbTodayInvoice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbTodayRevenue, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(272, 272, 272)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lbYesterdayInvoice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbYesterdayInvoice))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbTodayRevenue))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lbTodayInvoice)))
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -682,6 +771,7 @@ public class DashboardUI extends javax.swing.JPanel {
                 .addComponent(btnSearch)
                 .addContainerGap())
             .addComponent(pnChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -696,7 +786,10 @@ public class DashboardUI extends javax.swing.JPanel {
                     .addComponent(dcTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(pnChart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Thống kê doanh thu", jPanel1);
@@ -791,10 +884,17 @@ public class DashboardUI extends javax.swing.JPanel {
     private com.toedter.calendar.JDateChooser dcProductTo;
     private com.toedter.calendar.JDateChooser dcTo;
     private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JLabel lbTodayInvoice;
+    private javax.swing.JLabel lbTodayRevenue;
+    private javax.swing.JLabel lbYesterdayInvoice;
     private javax.swing.JPanel pnBestSellerProduct;
     private javax.swing.JPanel pnChart;
     private javax.swing.JTable tblBestSellerProduct;
