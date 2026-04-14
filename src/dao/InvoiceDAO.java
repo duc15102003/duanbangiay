@@ -39,6 +39,7 @@
                     Timestamp ts = rs.getTimestamp("created_at");
                     invoice.setDiscountAmount(rs.getInt("discount_amount"));
                     invoice.setTotalAmount(rs.getInt("total_amount"));
+                    invoice.setPaymentType(rs.getString("payment_type"));
                     if (ts != null) {
                         invoice.setCreatedAt(ts.toLocalDateTime());
                     }

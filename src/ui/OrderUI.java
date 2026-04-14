@@ -2196,7 +2196,8 @@ public class OrderUI extends JFrame {
                 }
             }
 
-            float finalAmount = total - discountAmount;
+            float finalAmount = total;
+            float originalTotal = finalAmount + discountAmount;
 
             Invoice invoice = invoiceService.findById(invoiceId);
             String invoiceCode = (invoice != null) ? invoice.getCode() : "N/A";
@@ -2326,7 +2327,7 @@ public class OrderUI extends JFrame {
             totalTable.setSpacingBefore(10f);
 
             addCell(totalTable, "Tổng:", boldFont);
-            addCell(totalTable, moneyFormat.format(total), normalFont);
+            addCell(totalTable, moneyFormat.format(originalTotal), normalFont);
 
             addCell(totalTable, "Giảm giá:", boldFont);
             addCell(totalTable, "- " + moneyFormat.format(discountAmount), normalFont);

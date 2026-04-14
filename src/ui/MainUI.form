@@ -25,18 +25,13 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <Component id="pnMenu" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="pnContent" pref="1172" max="32767" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Component id="pnMenu" alignment="1" max="32767" attributes="0"/>
-          <Group type="102" alignment="0" attributes="0">
-              <Component id="pnContent" min="-2" pref="703" max="-2" attributes="0"/>
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-          </Group>
       </Group>
     </DimensionLayout>
   </Layout>
@@ -54,23 +49,30 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="lbName" alignment="0" max="32767" attributes="0"/>
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="100" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="ldProduct" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbDashboard" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbEmployee" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbCustomer" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbInvoice" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jLabel1" max="32767" attributes="0"/>
-                      <Component id="lbInvoice1" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbDashboard1" alignment="0" max="32767" attributes="0"/>
-                      <Component id="lbDashboard2" alignment="0" max="32767" attributes="0"/>
+              <Group type="102" attributes="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lbName" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace min="-2" pref="100" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="ldProduct" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbDashboard" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbEmployee" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbCustomer" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbInvoice" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel1" max="32767" attributes="0"/>
+                              <Component id="lbInvoice1" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbDashboard1" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lbDashboard2" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" pref="106" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="lbLogout" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="100" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="pnContent" pref="1172" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
-              <Component id="lbLogout" alignment="0" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -99,6 +101,10 @@
                   <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
                   <Component id="lbLogout" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
+              </Group>
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  <Component id="pnContent" min="-2" pref="703" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -301,11 +307,11 @@
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lbDashboard2MouseClicked"/>
           </Events>
         </Component>
-      </SubComponents>
-    </Container>
-    <Container class="javax.swing.JPanel" name="pnContent">
+        <Container class="javax.swing.JPanel" name="pnContent">
 
-      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignCardLayout"/>
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignCardLayout"/>
+        </Container>
+      </SubComponents>
     </Container>
   </SubComponents>
 </Form>
