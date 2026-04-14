@@ -616,7 +616,7 @@ public class DashboardUI extends javax.swing.JPanel {
         }
     }
     
-    private void loadDashboardSummary() {
+    public void loadDashboardSummary() {
         DashboardSummaryDTO summary = dashboardService.getDashboardSummary();
 
         if (summary == null) {

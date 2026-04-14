@@ -78,9 +78,9 @@ public class MainUI extends javax.swing.JFrame {
     }
 
     private void showDashboard() {
-        //dashboardUI.reloadData();
         CardLayout card = (CardLayout) pnContent.getLayout();
         card.show(pnContent, "dashboard");
+        dashboardUI.loadDashboardSummary();
     }
 
     private void showProduct() {
