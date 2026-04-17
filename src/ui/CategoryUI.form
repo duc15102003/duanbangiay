@@ -177,6 +177,9 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtCode">
+      <Properties>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtCode1">
     </Component>

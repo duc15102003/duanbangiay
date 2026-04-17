@@ -1266,6 +1266,11 @@ public class OrderUI extends JFrame {
     }//GEN-LAST:event_tblProductMouseClicked
 
     private void btnInsertCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertCartActionPerformed
+        if (jTabbedPane1.getTabCount() >= 5) {
+            JOptionPane.showMessageDialog(this, "Chỉ được tạo tối đa 5 giỏ hàng tại 1 thời điểm!");
+            return;
+        }
+        
         Invoice invoice = new Invoice();
 
         invoice.setEmployeeId(employeeId);
@@ -1295,6 +1300,7 @@ public class OrderUI extends JFrame {
     }//GEN-LAST:event_btnInsertCartActionPerformed
 
     private void btnPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentActionPerformed
+        
         int tabIndex = jTabbedPane1.getSelectedIndex();
 
         if (tabIndex < 0 || tabIndex >= listInvoice.size()) {
@@ -1303,6 +1309,21 @@ public class OrderUI extends JFrame {
         }
 
         int invoiceId = listInvoice.get(tabIndex).getId();
+        
+        List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+
+        List<ProductVariant> productList = new java.util.ArrayList<>();
+
+        for (InvoiceItem item : items) {
+            ProductVariant pv = new ProductVariant();
+            pv.setId(item.getProductVariantId());
+            pv.setProductName(item.getProductName());
+            productList.add(pv);
+        }
+
+        if (!cartService.validateProductStatus(productList)) {
+            return; 
+        }
 
         JTable table = getCurrentCartTable();
         if (table == null || table.getRowCount() == 0) {
@@ -1438,50 +1459,50 @@ public class OrderUI extends JFrame {
     private void btnDeleteCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteCartActionPerformed
         int index = jTabbedPane1.getSelectedIndex();
 
-    if (index == -1) {
-        JOptionPane.showMessageDialog(this, "Vui lòng chọn giỏ hàng cần xoá");
-        return;
-    }
+        if (index == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn giỏ hàng cần xoá");
+            return;
+        }
 
-    int confirm = JOptionPane.showConfirmDialog(
-        this,
-        "Bạn có chắc muốn xoá giỏ hàng này?",
-        "Xác nhận",
-        JOptionPane.YES_NO_OPTION
-    );
+        int confirm = JOptionPane.showConfirmDialog(
+            this,
+            "Bạn có chắc muốn xoá giỏ hàng này?",
+            "Xác nhận",
+            JOptionPane.YES_NO_OPTION
+        );
 
-    if (confirm != JOptionPane.YES_OPTION) return;
+        if (confirm != JOptionPane.YES_OPTION) return;
 
-    Invoice invoice = listInvoice.get(index);
-    int invoiceId = invoice.getId();
+        Invoice invoice = listInvoice.get(index);
+        int invoiceId = invoice.getId();
 
-    // Hoàn stock tất cả sản phẩm trong giỏ
-    List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
-    if (items != null) {
-        for (InvoiceItem item : items) {
-            boolean ok = productVariantService.increaseStock(item.getProductVariantId(), item.getQuantity());
-            if (!ok) {
-                System.err.println("Không thể hoàn stock cho productVariantId=" + item.getProductVariantId());
+        // Hoàn stock tất cả sản phẩm trong giỏ
+        List<InvoiceItem> items = cartService.findByInvoiceId(invoiceId, null);
+        if (items != null) {
+            for (InvoiceItem item : items) {
+                boolean ok = productVariantService.increaseStock(item.getProductVariantId(), item.getQuantity());
+                if (!ok) {
+                    System.err.println("Không thể hoàn stock cho productVariantId=" + item.getProductVariantId());
+                }
             }
         }
-    }
 
-    // Xoá giỏ
-    boolean result = invoiceService.delete(invoiceId);
-    if (!result) {
-        JOptionPane.showMessageDialog(this, "Chỉ xoá được giỏ hàng ở trạng thái nháp");
-        return;
-    }
+        // Xoá giỏ
+        boolean result = invoiceService.delete(invoiceId);
+        if (!result) {
+            JOptionPane.showMessageDialog(this, "Chỉ xoá được giỏ hàng ở trạng thái nháp");
+            return;
+        }
 
-    listInvoice.remove(index);
-    jTabbedPane1.remove(index);
+        listInvoice.remove(index);
+        jTabbedPane1.remove(index);
 
-    JOptionPane.showMessageDialog(this, "Xoá giỏ hàng thành công");
+        JOptionPane.showMessageDialog(this, "Xoá giỏ hàng thành công");
 
-    // Refresh
-    initCart();
-    initProduct();
-    updateTotalAmount();
+        // Refresh
+        initCart();
+        initProduct();
+        updateTotalAmount();
     }//GEN-LAST:event_btnDeleteCartActionPerformed
 
     private void btnDeleteRowCartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteRowCartActionPerformed

@@ -79,4 +79,8 @@ public class CartService {
 
         return true;
     }
+    
+    public boolean validateProductStatus(List<ProductVariant> list){
+        return cartDAO.validateProductStatus(list);
+    }
 }

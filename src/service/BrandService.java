@@ -22,6 +22,7 @@ public class BrandService {
         if (!BrandValidator.validateCreate(request)) {
             return false;
         }
+        request.setCode(generateCode());
         return brandDAO.insert(request);
     }
 
@@ -34,5 +35,19 @@ public class BrandService {
 
     public boolean delete(int id) {
         return brandDAO.delete(id);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = brandDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "BR001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("BR", ""));
+        number++;
+
+        return "BR" + String.format("%03d", number);
     }
 }

@@ -8,10 +8,7 @@ public class SizeValidator {
     private static final SizeDAO sizeDAO = new SizeDAO();
 
     public static boolean validateCreate(Size size) {
-        if (size.getCode() == null || size.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã kích thước không được để trống");
-            return false;
-        }
+
         if (size.getName() == null || size.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên kích thước không được để trống");
             return false;
@@ -32,10 +29,7 @@ public class SizeValidator {
             JOptionPane.showMessageDialog(null, "ID không hợp lệ: " + size.getId());
             return false;
         }
-        if (size.getCode() == null || size.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã kích thước không được để trống");
-            return false;
-        }
+
         if (size.getName() == null || size.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên kích thước không được để trống");
             return false;

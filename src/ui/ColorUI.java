@@ -151,6 +151,7 @@ public class ColorUI extends javax.swing.JPanel {
 
         jLabel3.setText("Tên màu sắc");
 
+        txtCode.setEnabled(false);
         txtCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtCodeActionPerformed(evt);
@@ -220,7 +221,6 @@ public class ColorUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblColorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblColorMouseClicked
-        txtCode.enable(false);
         int row = tblColor.getSelectedRow();
 
         if(row < 0) return;
@@ -233,11 +233,6 @@ public class ColorUI extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Color c = getFormData();
-
-        if(c.getCode().isEmpty() || c.getName().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
 
         int confirm = JOptionPane.showConfirmDialog(
             this, 
@@ -318,7 +313,6 @@ public class ColorUI extends javax.swing.JPanel {
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         clearForm();
         loadColor();
-        txtCode.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased

@@ -124,9 +124,13 @@ public class DiscountUI extends javax.swing.JPanel {
     private DiscountStatusEnum calculateStatus(LocalDateTime start, LocalDateTime end) {
         LocalDateTime now = LocalDateTime.now();
 
-        if (now.isBefore(start)) {
+        if (end != null) {
+            end = end.withHour(23).withMinute(59).withSecond(59);
+        }
+
+        if (start != null && now.isBefore(start)) {
             return DiscountStatusEnum.UPCOMING;
-        } else if (now.isAfter(end)) {
+        } else if (end != null && now.isAfter(end)) {
             return DiscountStatusEnum.EXPIRED;
         } else {
             return DiscountStatusEnum.ACTIVE;
@@ -212,7 +216,6 @@ public class DiscountUI extends javax.swing.JPanel {
         dcEndedAt.setDate(null);
 
         selectedId = -1;
-        txtCode.enable(true);
         txtDiscountCondition.setValue(0);
         cbbStatus.setSelectedIndex(0);
 
@@ -270,6 +273,8 @@ public class DiscountUI extends javax.swing.JPanel {
         jLabel1.setText("Phiếu giảm giá");
 
         jLabel2.setText("Mã");
+
+        txtCode.setEnabled(false);
 
         jLabel4.setText("Loại giảm giá");
 
@@ -506,7 +511,6 @@ public class DiscountUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblDiscountMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblDiscountMouseClicked
-        txtCode.enable(false);
         int row = tblDiscount.getSelectedRow();
         if (row < 0) return;
 

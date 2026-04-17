@@ -23,6 +23,8 @@ public class EmployeeService {
         if (!EmployeeValidator.validateCreate(request)) {
             return false;
         }
+        
+        request.setCode(generateCode());
         return employeeDAO.insert(request);
     }
 
@@ -50,5 +52,19 @@ public class EmployeeService {
         }
 
         return employeeDAO.delete(id);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = employeeDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "EM001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("EM", ""));
+        number++;
+
+        return "EM" + String.format("%03d", number);
     }
 }

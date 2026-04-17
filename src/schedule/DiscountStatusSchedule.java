@@ -55,9 +55,13 @@ public class DiscountStatusSchedule {
     public DiscountStatusEnum calculateStatus(LocalDateTime start, LocalDateTime end) {
         LocalDateTime now = LocalDateTime.now();
 
-        if (now.isBefore(start)) {
+        if (end != null) {
+            end = end.withHour(23).withMinute(59).withSecond(59);
+        }
+
+        if (start != null && now.isBefore(start)) {
             return DiscountStatusEnum.UPCOMING;
-        } else if (now.isAfter(end)) {
+        } else if (end != null && now.isAfter(end)) {
             return DiscountStatusEnum.EXPIRED;
         } else {
             return DiscountStatusEnum.ACTIVE;

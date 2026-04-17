@@ -298,9 +298,10 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 JOptionPane.showMessageDialog(null, "Mã giảm giá chưa đến thời gian sử dụng!");
                 return null;
             }
-            if (discount.getEndedAt() != null && discount.getEndedAt().isBefore(now)) {
-                JOptionPane.showMessageDialog(null, "Mã giảm giá đã hết hạn!");
-                return null;
+            if (discount.getEndedAt() != null &&
+                discount.getEndedAt().toLocalDate().isBefore(now.toLocalDate())) {
+
+                throw new RuntimeException("Mã đã hết hạn!");
             }
 
             if (discount.getQuantity() <= 0) {
@@ -354,9 +355,10 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 JOptionPane.showMessageDialog(null, "Mã giảm giá chưa đến thời gian sử dụng!");
                 return false;
             }
-            if (discount.getEndedAt() != null && discount.getEndedAt().isBefore(now)) {
-                JOptionPane.showMessageDialog(null, "Mã giảm giá đã hết hạn!");
-                return false;
+            if (discount.getEndedAt() != null &&
+                discount.getEndedAt().toLocalDate().isBefore(now.toLocalDate())) {
+
+                throw new RuntimeException("Mã đã hết hạn!");
             }
 
             return true;
@@ -447,7 +449,9 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
                 throw new RuntimeException("Mã chưa đến thời gian sử dụng!");
             }
 
-            if (discount.getEndedAt() != null && discount.getEndedAt().isBefore(now)) {
+            if (discount.getEndedAt() != null &&
+                discount.getEndedAt().toLocalDate().isBefore(now.toLocalDate())) {
+
                 throw new RuntimeException("Mã đã hết hạn!");
             }
 
@@ -477,5 +481,23 @@ public class DiscountDAO implements GenericDAO<Discount, DiscountFilter> {
             e.printStackTrace();
             throw new RuntimeException("Lỗi hệ thống khi kiểm tra mã!");
         }
+    }
+    
+    public String getMaxCode() {
+        String sql = "SELECT TOP 1 code FROM discount ORDER BY code DESC";
+
+        try (
+            Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+        ) {
+            if (rs.next()) {
+                return rs.getString("code");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

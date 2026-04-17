@@ -27,6 +27,7 @@ public class DiscountService {
             return false;
         }
 
+        request.setCode(generateCode());
         return discountDAO.insert(request);
     }
 
@@ -101,5 +102,19 @@ public class DiscountService {
     
     public Discount checkDiscountValid(String code, double orderTotal){
         return discountDAO.checkDiscountValid(code, orderTotal);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = discountDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "DC001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("DC", ""));
+        number++;
+
+        return "DC" + String.format("%03d", number);
     }
 }

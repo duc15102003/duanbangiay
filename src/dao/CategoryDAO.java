@@ -230,4 +230,22 @@ public class CategoryDAO implements GenericDAO<Category, CategoryFilter> {
         }
         return false;
     }
+    
+    public String getMaxCode() {
+        String sql = "SELECT TOP 1 code FROM category ORDER BY code DESC";
+
+        try (
+            Connection conn = dbConfig.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+        ) {
+            if (rs.next()) {
+                return rs.getString("code");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

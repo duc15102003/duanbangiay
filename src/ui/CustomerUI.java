@@ -383,6 +383,8 @@ public class CustomerUI extends javax.swing.JPanel {
             }
         });
 
+        txtCode.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -530,7 +532,6 @@ public class CustomerUI extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void tblCustomerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCustomerMouseClicked
-        txtCode.enable(false);
         int row = tblCustomer.getSelectedRow();
 
         if(row != -1){
@@ -643,7 +644,6 @@ public class CustomerUI extends javax.swing.JPanel {
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         resetForm();
-        txtCode.enable(true);
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

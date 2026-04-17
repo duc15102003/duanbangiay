@@ -14,11 +14,6 @@ public class DiscountValidator {
             JOptionPane.showMessageDialog(null, "Dữ liệu không hợp lệ");
             return false;
         }
-
-        if (d.getCode() == null || d.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã giảm giá không được để trống");
-            return false;
-        }
         
         if(discountDAO.existsByCode(d.getCode(), null)){
             JOptionPane.showMessageDialog(null, "Mã giảm giá đã tồn tại!");
@@ -75,6 +70,13 @@ public class DiscountValidator {
             JOptionPane.showMessageDialog(null, "Điều kiện giảm giá phải là số >= 0");
             return false;
         }
+        
+        if ("Tiền mặt".equalsIgnoreCase(d.getDiscountType())) {
+            if (d.getDiscountCondition() <= d.getDiscountValue()) {
+                JOptionPane.showMessageDialog(null, "Điều kiện giảm phải lớn hơn giá trị giảm");
+                return false;
+            }
+        }
 
         return true;
     }
@@ -83,11 +85,6 @@ public class DiscountValidator {
 
         if (d.getId() <= 0) {
             JOptionPane.showMessageDialog(null, "ID giảm giá không hợp lệ: " + d.getId());
-            return false;
-        }
-
-        if (d.getCode() == null || d.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã giảm giá không được để trống");
             return false;
         }
 
@@ -142,6 +139,13 @@ public class DiscountValidator {
             return false;
         }
 
+       if ("Tiền mặt".equalsIgnoreCase(d.getDiscountType())) {
+            if (d.getDiscountCondition() <= d.getDiscountValue()) {
+                JOptionPane.showMessageDialog(null, "Điều kiện giảm phải lớn hơn giá trị giảm");
+                return false;
+            }
+        }
+        
         return true;
     }
 }

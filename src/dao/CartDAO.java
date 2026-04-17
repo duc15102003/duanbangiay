@@ -1,6 +1,7 @@
 package dao;
 
 import config.DBConfig;
+import entity.ProductVariant;
 import entity.Invoice;
 import entity.InvoiceItem;
 import entity.filter.InvoiceFilter;
@@ -410,5 +411,58 @@ public class CartDAO {
         }
 
         return null;
+    }
+    
+    public boolean validateProductStatus(List<ProductVariant> list) {
+
+        if (list == null || list.isEmpty()) return true;
+
+        String sql = """
+            SELECT pv.id, p.status
+            FROM product_variant pv
+                     join product p on p.id = pv.product_id
+            WHERE pv.id = ?
+        """;
+
+        try (Connection conn = dbConfig.getConnection()) {
+
+            for (ProductVariant pv : list) {
+
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, pv.getId());
+
+                    ResultSet rs = ps.executeQuery();
+
+                    if (rs.next()) {
+                        int status = rs.getInt("status");
+
+                        if (status != 1) {
+                            JOptionPane.showMessageDialog(
+                                null,
+                                "Sản phẩm \"" + pv.getProductName() + "\" đã ngừng bán!",
+                                "Thông báo",
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            return false;
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(
+                            null,
+                            "Sản phẩm \"" + pv.getProductName() + "\" không tồn tại!",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                        return false;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi hệ thống!");
+            return false;
+        }
+
+        return true;
     }
 }

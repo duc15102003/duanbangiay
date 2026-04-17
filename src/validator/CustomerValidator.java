@@ -14,11 +14,6 @@ public class CustomerValidator {
             return false;
         }
 
-        // ===== CODE =====
-        if (c.getCode() == null || c.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã khách hàng không được để trống");
-            return false;
-        }
         if (customerDAO.existsByCode(c.getCode())) {
             JOptionPane.showMessageDialog(null, "Mã khách hàng đã tồn tại");
             return false;
@@ -92,11 +87,6 @@ public class CustomerValidator {
             return false;
         }
 
-        // ===== CODE =====
-        if (c.getCode() == null || c.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã khách hàng không được để trống");
-            return false;
-        }
         if (customerDAO.existsByCodeExcludeId(c.getCode(), c.getId())) {
             JOptionPane.showMessageDialog(null, "Mã khách hàng đã tồn tại");
             return false;

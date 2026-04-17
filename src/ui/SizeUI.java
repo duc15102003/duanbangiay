@@ -152,6 +152,8 @@ public class SizeUI extends javax.swing.JPanel {
 
         jLabel3.setText("Tên kích thước");
 
+        txtCode.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -217,7 +219,6 @@ public class SizeUI extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblSizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblSizeMouseClicked
-        txtCode.enable(false);
         int row = tblSize.getSelectedRow();
 
         if(row < 0) return;
@@ -282,7 +283,6 @@ public class SizeUI extends javax.swing.JPanel {
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         clearForm();
         loadSize();
-        txtCode.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed

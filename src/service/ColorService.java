@@ -23,6 +23,7 @@ public class ColorService {
         if (!ColorValidator.validateCreate(request)) {
             return false;
         }
+        request.setCode(generateCode());
         return colorDAO.insert(request);
     }
 
@@ -35,5 +36,19 @@ public class ColorService {
 
     public boolean delete(int id) {
         return colorDAO.delete(id);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = colorDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "CL001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("CL", ""));
+        number++;
+
+        return "CL" + String.format("%03d", number);
     }
 }

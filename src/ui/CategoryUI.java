@@ -148,6 +148,8 @@ public class CategoryUI extends javax.swing.JPanel {
 
         jLabel2.setText("Tên danh mục");
 
+        txtCode.setEnabled(false);
+
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setText("Danh mục");
@@ -242,7 +244,7 @@ public class CategoryUI extends javax.swing.JPanel {
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
-        clearForm();txtCode.enable(true);
+        clearForm();
         loadCategory();
     }//GEN-LAST:event_btnRefrActionPerformed
 
@@ -288,11 +290,6 @@ public class CategoryUI extends javax.swing.JPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Category c = getFormData();
 
-        if(c.getCode().isEmpty() || c.getName().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
         int confirm = JOptionPane.showConfirmDialog(
             this, 
             "Bạn có chắc muốn thêm danh mục này?", 
@@ -315,7 +312,6 @@ public class CategoryUI extends javax.swing.JPanel {
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
-        txtCode.enable(false);
         int row = jTable2.getSelectedRow();
 
         if(row < 0) return;

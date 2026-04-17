@@ -14,11 +14,6 @@ public class EmployeeValidator {
             return false;
         }
 
-        // ===== CODE =====
-        if (e.getCode() == null || e.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã nhân viên không được để trống");
-            return false;
-        }
         if (employeeDAO.existsByCode(e.getCode())) {
             JOptionPane.showMessageDialog(null, "Mã nhân viên đã tồn tại");
             return false;
@@ -115,11 +110,7 @@ public class EmployeeValidator {
             return false;
         }
 
-        // ===== CODE =====
-        if (e.getCode() == null || e.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã nhân viên không được để trống");
-            return false;
-        }
+
         if (employeeDAO.existsByCodeExcludeId(e.getCode(), e.getId())) {
             JOptionPane.showMessageDialog(null, "Mã nhân viên đã tồn tại");
             return false;

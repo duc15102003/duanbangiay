@@ -10,11 +10,6 @@ public class BrandValidator {
     
     public static boolean validateCreate(Brand brand) {
         
-        if (brand.getCode() == null || brand.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã thương hiệu không được để trống");
-            return false;
-        }
-        
         if (brand.getName() == null || brand.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên thương hiệu không được để trống");
             return false;
@@ -35,10 +30,6 @@ public class BrandValidator {
     public static boolean validateUpdate(Brand color) {
         if (color.getId() <= 0) {
             JOptionPane.showMessageDialog(null, "ID thương hiệu không hợp lệ: " + color.getId());
-            return false;
-        }
-        if (color.getCode() == null || color.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã thương hiệu không được để trống");
             return false;
         }
         if (color.getName() == null || color.getName().isBlank()) {

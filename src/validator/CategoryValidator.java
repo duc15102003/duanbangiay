@@ -8,10 +8,6 @@ public class CategoryValidator {
     private static final CategoryDAO categoryDAO = new CategoryDAO();
 
     public static boolean validateCreate(Category category) {
-        if (category.getCode() == null || category.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã danh mục không được để trống");
-            return false;
-        }
         if (category.getName() == null || category.getName().isBlank()) {
             JOptionPane.showMessageDialog(null, "Tên danh mục không được để trống");
             return false;
@@ -30,10 +26,6 @@ public class CategoryValidator {
     public static boolean validateUpdate(Category category) {
         if (category.getId() <= 0) {
             JOptionPane.showMessageDialog(null, "ID danh mục không hợp lệ: " + category.getId());
-            return false;
-        }
-        if (category.getCode() == null || category.getCode().isBlank()) {
-            JOptionPane.showMessageDialog(null, "Mã danh mục không được để trống");
             return false;
         }
         if (category.getName() == null || category.getName().isBlank()) {

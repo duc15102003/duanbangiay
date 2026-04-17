@@ -22,6 +22,7 @@ public class SizeService {
         if (!SizeValidator.validateCreate(request)) {
             return false;
         }
+        request.setCode(generateCode());
         return sizeDAO.insert(request);
     }
 
@@ -34,5 +35,19 @@ public class SizeService {
 
     public boolean delete(int id) {
         return sizeDAO.delete(id);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = sizeDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "SZ001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("SZ", ""));
+        number++;
+
+        return "SZ" + String.format("%03d", number);
     }
 }

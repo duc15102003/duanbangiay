@@ -23,6 +23,7 @@ public class CategoryService {
         if (!CategoryValidator.validateCreate(request)) {
             return false;
         }
+        request.setCode(generateCode());
         return categoryDAO.insert(request);
     }
 
@@ -35,5 +36,19 @@ public class CategoryService {
 
     public boolean delete(int id) {
         return categoryDAO.delete(id);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = categoryDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "CG001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("CG", ""));
+        number++;
+
+        return "CG" + String.format("%03d", number);
     }
 }

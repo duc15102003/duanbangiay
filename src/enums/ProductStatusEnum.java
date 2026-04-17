@@ -3,8 +3,7 @@ package enums;
 public enum ProductStatusEnum {
 
     ACTIVE(1, "Hoạt động"),
-    INACTIVE(2, "Ngừng bán"),
-    OUT_OF_STOCK(3, "Hết hàng");
+    INACTIVE(2, "Ngừng bán");
 
     private final int value;
     private final String label;

@@ -92,6 +92,8 @@ public class BrandUI extends javax.swing.JPanel {
 
         jLabel3.setText("Tên thương hiệu");
 
+        txtCode.setEnabled(false);
+
         btnAdd.setText("Thêm");
         btnAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -234,7 +236,6 @@ public class BrandUI extends javax.swing.JPanel {
     }//GEN-LAST:event_txtSearchKeyReleased
 
     private void tblBrandMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblBrandMouseClicked
-        txtCode.enable(false);
         int row = tblBrand.getSelectedRow();
 
         if(row < 0) return;
@@ -247,11 +248,6 @@ public class BrandUI extends javax.swing.JPanel {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Brand b = getFormData();
-
-        if(b.getCode().isEmpty() || b.getName().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin!", "Lỗi", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
 
         int confirm = JOptionPane.showConfirmDialog(
             this, 
@@ -332,7 +328,6 @@ public class BrandUI extends javax.swing.JPanel {
     private void btnRefrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefrActionPerformed
         clearForm();
         loadBrand();
-        txtCode.enable(true);
     }//GEN-LAST:event_btnRefrActionPerformed
 
 

@@ -22,6 +22,7 @@ public class CustomerService {
         if (!CustomerValidator.validateCreate(request)) {
             return false;
         }
+        request.setCode(generateCode());
         return customerDAO.insert(request);
     }
 
@@ -34,5 +35,19 @@ public class CustomerService {
 
     public boolean delete(int id, int currentUserId) {
         return customerDAO.delete(id, currentUserId);
+    }
+    
+    public String generateCode() {
+
+        String maxCode = customerDAO.getMaxCode();
+
+        if (maxCode == null) {
+            return "CTM001";
+        }
+
+        int number = Integer.parseInt(maxCode.replace("CTM", ""));
+        number++;
+
+        return "CTM" + String.format("%03d", number);
     }
 }
