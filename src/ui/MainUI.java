@@ -19,6 +19,8 @@ public class MainUI extends javax.swing.JFrame {
     private InvoiceUI invoiceUI;
     private DiscountUI discountUI;
     private AttributeUI attributeUI;
+    private ProductUI productUI;
+    private ProductVariantUI productVariantUI;
     private OrderUI orderUI;
     
     private BrandService brandService = new BrandService();
@@ -65,6 +67,8 @@ public class MainUI extends javax.swing.JFrame {
         discountUI = new DiscountUI();
         attributeUI = new AttributeUI();
         orderUI = new OrderUI(customerId);
+        productUI = new ProductUI();
+        productVariantUI = new ProductVariantUI();
 
         pnContent.add(dashboardUI, "dashboard");
         pnContent.add(productManagerUI, "product_manager");
@@ -344,6 +348,7 @@ public class MainUI extends javax.swing.JFrame {
 
     private void ldProductMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ldProductMouseClicked
         showProduct();
+        productManagerUI.reloadData();
     }//GEN-LAST:event_ldProductMouseClicked
 
     private void lbEmployeeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbEmployeeMouseClicked

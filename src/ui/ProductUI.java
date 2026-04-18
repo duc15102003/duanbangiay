@@ -61,7 +61,7 @@ public class ProductUI extends javax.swing.JPanel  {
         initFilterEvent();
     }
 
-    private void initData() {
+    public void initData() {
 
         loadStatus(cbbStatus, false);
         loadStatus(cbbSearchStatus, true);

@@ -186,7 +186,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
         combo.setSelectedIndex(0);
     }
     
-    private void loadCombobox(){
+    public void loadCombobox(){
 
         listProduct  = productService.findAll(null);
         listColor    = colorService.findAll(null);

@@ -71,6 +71,11 @@ public class ProductManagerUI extends javax.swing.JPanel {
     });
     }
     
+    public void reloadData() {
+        productUI.initData();
+        productVariantUI.loadCombobox();
+    }
+    
     private void loadProductUI() {
         pnProduct.removeAll();
         if (productUI == null) {

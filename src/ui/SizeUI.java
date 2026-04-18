@@ -22,6 +22,17 @@ public class SizeUI extends javax.swing.JPanel {
         this.listener = listener;
         initComponents();
         loadSize();
+        
+        txtName.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                char c = evt.getKeyChar();
+
+                if (!Character.isDigit(c)) {
+                    evt.consume();
+                }
+            }
+        });
     }
 
     //Load data vào table
