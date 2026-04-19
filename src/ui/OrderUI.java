@@ -2157,7 +2157,7 @@ public class OrderUI extends JFrame {
                     if ("%".equals(d.getDiscountType())) {
                         label += d.getDiscountValue() + "%";
                         if (d.getMaximumDiscount() != null) {
-                            label += " (tối đa " + moneyFormat.format(d.getMaximumDiscount()) + ")";
+                            label += " (tối đa " + moneyFormat.format(d.getMaximumDiscount()) + ") VNĐ";
                         }
                     } else {
                         label += moneyFormat.format(d.getDiscountValue()) + " VND";

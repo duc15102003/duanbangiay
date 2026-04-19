@@ -803,7 +803,10 @@ public class ProductVariantUI extends javax.swing.JPanel {
 
     private void tblProductVariantMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProductVariantMouseClicked
         int row = tblProductVariant.getSelectedRow();
-        if(row < 0) return;
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn sản phẩm!");
+            return;
+        }
 
         int id = (int) tblProductVariant.getValueAt(row, 11);
         ProductVariant pv = productVariantMap.get(id);
