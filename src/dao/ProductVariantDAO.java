@@ -36,12 +36,12 @@ public class ProductVariantDAO implements GenericDAO<ProductVariant, ProductVari
                 s.name AS size_name,
                 c.name AS color_name
             FROM product_variant pv
-            LEFT JOIN product p ON pv.product_id = p.id
+            INNER JOIN product p ON pv.product_id = p.id
             LEFT JOIN category cg ON p.category_id = cg.id
             LEFT JOIN brand b ON p.brand_id = b.id
             LEFT JOIN size s ON pv.size_id = s.id
             LEFT JOIN color c ON pv.color_id = c.id
-            WHERE pv.deleted_at IS NULL AND pv.quantity > 0 AND p.status = 1
+            WHERE pv.deleted_at IS NULL AND p.deleted_at IS NULL AND pv.quantity > 0 AND p.status = 1
         """);
 
         List<Object> params = new ArrayList<>();

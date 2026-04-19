@@ -270,37 +270,43 @@ public class ProductVariantUI extends javax.swing.JPanel {
         loadTable(buildProductFilter());
     }
     
-    private ImageIcon loadImage(String url){
-
-        if(url == null || url.isBlank()) return null;
+    private ImageIcon loadImage(String url) {
+        if (url == null || url.isBlank()) return null;
 
         ImageIcon cached = imageCache.get(url);
-        if(cached != null){
-            return cached;
+        if (cached != null) return cached;
+
+        if (url.startsWith("data:")) {
+            try {
+                String base64Data = url.substring(url.indexOf(",") + 1);
+                byte[] bytes = java.util.Base64.getDecoder().decode(base64Data);
+                Image img = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+                if (img != null) {
+                    ImageIcon icon = new ImageIcon(scaleImage(img, 90, 90));
+                    imageCache.put(url, icon);
+                    return icon;
+                }
+            } catch (Exception e) {
+            }
+            return null;
         }
 
         imageLoader.submit(() -> {
-            try{
-
-                ImageIcon icon = new ImageIcon(new URL(url));
+            try {
+                ImageIcon icon = new ImageIcon(new java.net.URL(url));
                 Image scaled = scaleImage(icon.getImage(), 90, 90);
                 ImageIcon finalIcon = new ImageIcon(scaled);
-
                 imageCache.put(url, finalIcon);
 
                 javax.swing.SwingUtilities.invokeLater(() -> {
-
                     List<Integer> rows = imageRowMap.get(url);
-
-                    if(rows != null){
-                        for(int row : rows){
+                    if (rows != null) {
+                        for (int row : rows) {
                             tblProductVariant.setValueAt(finalIcon, row, 0);
                         }
                     }
-
                 });
-
-            }catch(Exception e){
+            } catch (Exception e) {
             }
         });
 
@@ -421,41 +427,44 @@ public class ProductVariantUI extends javax.swing.JPanel {
         return buffered;
     }
     
-    private void showPreview(){
-
+    private void showPreview() {
         String url = txtImage.getText().trim();
-
         txtImage.setToolTipText(url);
 
-        if(url.isEmpty()){
+        if (url.isEmpty()) {
             originalImage = null;
             lbImagePreview.setIcon(null);
             lbImagePreview.setText("");
             return;
         }
 
-        try{
+        try {
+            Image img;
 
-            ImageIcon icon = imageCache.get(url);
-
-            if(icon == null){
-                icon = new ImageIcon(new URL(url));
-                imageCache.put(url, icon);
+            if (url.startsWith("data:")) {
+                String base64Data = url.substring(url.indexOf(",") + 1);
+                byte[] bytes = java.util.Base64.getDecoder().decode(base64Data);
+                img = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(bytes));
+            } else {
+                ImageIcon icon = imageCache.get(url);
+                if (icon == null) {
+                    icon = new ImageIcon(new java.net.URL(url));
+                    imageCache.put(url, icon);
+                }
+                img = icon.getImage();
             }
 
-            originalImage = icon.getImage();
+            if (img == null) throw new Exception("Không đọc được ảnh");
 
-            Image preview = scaleImage(originalImage,90,90);
-
+            originalImage = img;
+            Image preview = scaleImage(originalImage, 90, 90);
             lbImagePreview.setText("");
             lbImagePreview.setIcon(new ImageIcon(preview));
 
-        }
-        catch(Exception e){
-
+        } catch (Exception e) {
             originalImage = null;
             lbImagePreview.setIcon(null);
-            lbImagePreview.setText("Sai URL");
+            lbImagePreview.setText("Lỗi ảnh");
         }
     }
     
@@ -570,6 +579,7 @@ public class ProductVariantUI extends javax.swing.JPanel {
         cbbSearchSize = new javax.swing.JComboBox<>();
         cbbSearchCategory = new javax.swing.JComboBox<>();
         cbbSearchBrand = new javax.swing.JComboBox<>();
+        btnChooseImage = new javax.swing.JButton();
 
         jLabel3.setFont(new java.awt.Font("Segoe UI Black", 1, 24)); // NOI18N
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -658,6 +668,13 @@ public class ProductVariantUI extends javax.swing.JPanel {
             }
         });
 
+        btnChooseImage.setText("Chọn ảnh");
+        btnChooseImage.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnChooseImageActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -715,7 +732,11 @@ public class ProductVariantUI extends javax.swing.JPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPrice)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(btnChooseImage)
+                                        .addGap(0, 0, Short.MAX_VALUE)))
                                 .addGap(18, 18, 18)
                                 .addComponent(lbImagePreview, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(spnQuantity))))
@@ -729,30 +750,34 @@ public class ProductVariantUI extends javax.swing.JPanel {
                 .addGap(52, 52, 52)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(cbbProduct, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cbbColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
-                        .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cbbSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel7)
-                            .addComponent(txtImage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(spnQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(84, 84, 84)
-                        .addComponent(lbImagePreview, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lbImagePreview, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel1)
+                                    .addComponent(cbbProduct, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(cbbColor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2))
+                                .addGap(21, 21, 21)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(cbbSize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel7)
+                                    .addComponent(txtImage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel5)
+                                    .addComponent(spnQuantity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel6)
+                                    .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(18, 18, 18)
+                        .addComponent(btnChooseImage)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnInsert)
@@ -912,20 +937,54 @@ public class ProductVariantUI extends javax.swing.JPanel {
     private void txtPriceKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPriceKeyReleased
         formatMoneyField();
     }//GEN-LAST:event_txtPriceKeyReleased
+
+    private void btnChooseImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseImageActionPerformed
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Image files", "jpg", "jpeg", "png", "gif", "bmp", "webp"
+        ));
+
+        int result = chooser.showOpenDialog(this);
+        if (result != javax.swing.JFileChooser.APPROVE_OPTION) return;
+
+        java.io.File file = chooser.getSelectedFile();
+
+        try {
+            byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+            String base64 = java.util.Base64.getEncoder().encodeToString(bytes);
+
+            String name = file.getName().toLowerCase();
+            String mime = "image/jpeg";
+            if (name.endsWith(".png"))       mime = "image/png";
+            else if (name.endsWith(".gif"))  mime = "image/gif";
+            else if (name.endsWith(".bmp"))  mime = "image/bmp";
+            else if (name.endsWith(".webp")) mime = "image/webp";
+
+            String dataUrl = "data:" + mime + ";base64," + base64;
+
+            txtImage.setText(dataUrl);
+            showPreview();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi đọc file: " + e.getMessage());
+        }
+    }//GEN-LAST:event_btnChooseImageActionPerformed
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnChooseImage;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnUpdate;
-    private javax.swing.JComboBox<Object> cbbColor;
-    private javax.swing.JComboBox<Object> cbbProduct;
-    private javax.swing.JComboBox<Object> cbbSearchBrand;
-    private javax.swing.JComboBox<Object> cbbSearchCategory;
-    private javax.swing.JComboBox<Object> cbbSearchColor;
-    private javax.swing.JComboBox<Object> cbbSearchSize;
-    private javax.swing.JComboBox<Object> cbbSize;
+    private javax.swing.JComboBox<String> cbbColor;
+    private javax.swing.JComboBox<String> cbbProduct;
+    private javax.swing.JComboBox<String> cbbSearchBrand;
+    private javax.swing.JComboBox<String> cbbSearchCategory;
+    private javax.swing.JComboBox<String> cbbSearchColor;
+    private javax.swing.JComboBox<String> cbbSearchSize;
+    private javax.swing.JComboBox<String> cbbSize;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
