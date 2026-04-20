@@ -79,6 +79,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
         reloadData();
 
         initSearchListeners();
+        
+        btnChooseImage.setVisible(false);
     }
     
     public ProductVariantUI(DataChangeListener listener) {
@@ -90,6 +92,8 @@ public class ProductVariantUI extends javax.swing.JPanel {
         reloadData();
 
         initSearchListeners();
+        
+        btnChooseImage.setVisible(false);
     }
     
     private ProductVariantFilter buildProductFilter(){
